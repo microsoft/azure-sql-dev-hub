@@ -1,0 +1,84 @@
+title: Azure SQL Hub
+description: >-
+  One front door for developers and AI agents to start building on Azure SQL.
+  Run the engine locally in a container, create a free database in the cloud, or
+  install the agent skills and build straight from your AI coding agent.
+
+# These two are local-preview defaults only. The deploy workflow overwrites both
+# from the Pages API at build time, because where this site actually publishes
+# depends on repository visibility: while the repo is private, Pages serves it
+# from a generated *.pages.github.io domain at the root, and if the repo is made
+# public it moves to microsoft.github.io/azure-sql-dev-hub. Editing these values
+# does not change where the site deploys. See .github/workflows/pages.yml.
+baseurl: ""
+url: "http://localhost:4000"
+repo: "https://github.com/microsoft/azure-sql-dev-hub"
+
+# Sites this hub points at. Kept here so a link change is one edit, not twelve.
+container_repo: "https://github.com/microsoft/azure-sql-database-container"
+container_site: "https://microsoft.github.io/azure-sql-database-container"
+skills_catalog: "https://github.com/microsoft/azure-sql-database-container/tree/main/skills"
+container_signup: "https://aka.ms/sqldbcontainerpreview-signup"
+azure_free_offer: "https://learn.microsoft.com/azure/azure-sql/database/free-offer"
+azure_portal_hub: "https://aka.ms/azuresqlhub"
+
+# The container image ships from a private registry during its Private Preview.
+# Setting this to false removes the sign-up line above the quickstart command
+# and nothing else. That is the only edit public preview requires here.
+container_private_preview: true
+
+# Web analytics (client-side). Loads only when `enabled` is true and a provider
+# is configured. An Application Insights connection string is browser-embeddable
+# and is not a secret, so it belongs in this file rather than in a repo secret.
+#
+# TODO: this hub has no Application Insights resource yet. The container site
+# uses its own resource, and pointing this site at that same one would mix two
+# properties' page views and events into a single resource with no clean way to
+# separate them afterward. Create a resource for the hub, paste its connection
+# string below, and set enabled to true. Everything else is already wired: the
+# loader in _includes/analytics/app-insights.html and the track() helper in
+# assets/js/main.js both no-op until this is filled in.
+analytics:
+  enabled: false
+  app_insights_connection_string: ""
+
+# The permanent anchor ids for the home page, in page order. These ids are a
+# one-time choice and are never renamed: they are what external links, docs, and
+# agents point at. `live: false` means the section is not built yet, so the nav
+# does not offer a link that would scroll nowhere. PR 2 adds the section and
+# flips the flag. It never changes an id.
+nav_anchors:
+  - { id: start,    label: Start,    live: true  }
+  - { id: connect,  label: Connect,  live: false }
+  - { id: build,    label: Build,    live: false }
+  - { id: skills,   label: Skills,   live: true  }
+  - { id: samples,  label: Samples,  live: false }
+
+markdown: kramdown
+kramdown:
+  input: GFM
+  syntax_highlighter: rouge
+sass:
+  style: compressed
+
+plugins:
+  - jekyll-sitemap
+
+defaults:
+  - scope:
+      path: ""
+    values:
+      layout: page
+
+# Everything that is repository plumbing rather than a page of the site.
+exclude:
+  - README.md
+  - CONTRIBUTING.md
+  - docs
+  - scripts
+  - node_modules
+  - package.json
+  - package-lock.json
+  - Gemfile
+  - Gemfile.lock
+  - vendor

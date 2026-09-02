@@ -1,0 +1,13 @@
+{
+  "name": "azure-sql-dev-hub",
+  "private": true,
+  "description": "Build and check scripts for the Azure SQL Hub site.",
+  "type": "module",
+  "scripts": {
+    "test": "node scripts/check-house-rules.mjs",
+    "build:agent-files": "node scripts/build-agent-files.mjs"
+  },
+  "dependencies": {
+    "js-yaml": "^4.1.0"
+  }
+}

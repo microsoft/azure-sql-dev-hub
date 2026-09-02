@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+{% include head.html %}
+<body>
+  {% include nav.html %}
+
+  <main id="main">
+    <header class="hero">
+      <div class="hero-grid-bg" aria-hidden="true"></div>
+      <div class="hero-glow" aria-hidden="true"></div>
+      <div class="container hero-inner">
+        <h1>{{ page.hero.headline }}</h1>
+        <p class="hero-sub">{{ page.hero.subline }}</p>
+
+        {%- comment -%}
+          One filled button per section. "Get started" is the filled one here;
+          "Install skills" is the quiet companion, not a second primary.
+        {%- endcomment -%}
+        <div class="hero-cta">
+          <a class="btn btn-primary" href="#start">Get started</a>
+          <a class="btn btn-ghost-light" href="#skills">Install skills</a>
+        </div>
+
+        <div class="hero-cmd">
+          {%- if site.container_private_preview %}
+          <p class="hero-cmd-pre">
+            The container image ships from a private registry.
+            <a href="{{ site.container_signup }}" rel="noopener">Sign up for the Private Preview</a>, then:
+          </p>
+          {%- endif %}
+          <div class="cmd">
+            <code id="quickstart-cmd">{{ page.hero.command }}</code>
+            <button class="copy-btn" type="button" data-copy="#quickstart-cmd"
+                    data-copy-kind="quickstart" aria-label="Copy the quickstart command">
+              <span class="copy-label">Copy</span>
+            </button>
+          </div>
+        </div>
+
+        <p class="hero-trust">{{ page.hero.trust }}</p>
+      </div>
+    </header>
+
+    <section class="paths" aria-label="Ways to start">
+      <div class="container paths-grid">
+        {%- for card in page.paths %}
+        <article class="path-card{% if card.accent %} path-card-accent{% endif %}">
+          {%- if card.badge %}<span class="badge">{{ card.badge }}</span>{% endif %}
+          <h2 class="path-title">{{ card.title }}</h2>
+          <p class="path-what">{{ card.what }}</p>
+          <ul class="path-facts">
+            {%- for f in card.facts %}<li>{{ f }}</li>{% endfor %}
+          </ul>
+          <a class="path-link" href="#{{ card.anchor }}">{{ card.cta }}</a>
+        </article>
+        {%- endfor %}
+      </div>
+    </section>
+
+    <div class="container prose">
+      {{ content }}
+    </div>
+  </main>
+
+  {% include footer.html %}
+  <script src="{{ '/assets/js/main.js' | relative_url }}" defer></script>
+</body>
+</html>
