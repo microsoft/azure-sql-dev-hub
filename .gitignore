@@ -434,3 +434,4 @@ _site/
 .jekyll-metadata
 node_modules/
 Gemfile.lock
+_config_pages.yml

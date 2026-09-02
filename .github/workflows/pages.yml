@@ -33,8 +33,22 @@ jobs:
         with:
           node-version: "22"
       - run: npm ci
+      # Take the real published host and path from the Pages API rather than the
+      # placeholders in _config.yml. This repository is private, so Pages serves
+      # it from a generated *.pages.github.io domain at the root, not from
+      # microsoft.github.io/azure-sql-dev-hub. Passing only --baseurl would fix
+      # relative_url and leave absolute_url pointing at the wrong host, which is
+      # exactly what llms.txt and the og:url tag are built from. Deriving both
+      # here means going public, or adding a custom domain later, needs no edit.
+      - name: Resolve the published URL
+        run: |
+          base='${{ steps.pages.outputs.base_path }}'
+          if [ "$base" = "/" ]; then base=""; fi
+          printf 'url: "%s"\nbaseurl: "%s"\n' '${{ steps.pages.outputs.origin }}' "$base" > _config_pages.yml
+          echo "Building for ${{ steps.pages.outputs.origin }}$base"
+          cat _config_pages.yml
       - name: Build with Jekyll
-        run: bundle exec jekyll build --baseurl "${{ steps.pages.outputs.base_path }}"
+        run: bundle exec jekyll build --config _config.yml,_config_pages.yml
         env:
           JEKYLL_ENV: production
       # Writes the .md twin of every page and llms-full.txt into _site. Runs

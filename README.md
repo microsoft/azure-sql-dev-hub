@@ -7,10 +7,15 @@ the agent skills that let an AI coding agent do the setup for you.
 
 ## Live site
 
-Not deployed yet. Once GitHub Pages is enabled for this repository the site will
-be at `https://microsoft.github.io/azure-sql-dev-hub/`. Enabling it is a one-time
-setting: **Settings > Pages > Source > GitHub Actions**. The deploy workflow is
-already in this repository and runs on every push to `main`.
+<https://didactic-adventure-jgqz4oz.pages.github.io/>
+
+The site is private, matching this repository: viewers have to be signed in to
+GitHub with access here, and the generated domain is what GitHub assigns to a
+private Pages site. If this repository is ever made public the site moves to
+`https://microsoft.github.io/azure-sql-dev-hub/`, and the deploy workflow picks
+that up on its own without a config edit.
+
+Deploys run on every push to `main`.
 
 ## How it works
 

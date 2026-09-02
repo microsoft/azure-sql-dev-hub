@@ -4,10 +4,14 @@ description: >-
   Run the engine locally in a container, create a free database in the cloud, or
   install the agent skills and build straight from your AI coding agent.
 
-# Project Pages site is served from the repository root on the default branch.
-# baseurl is the production path; the local preview overrides it with --baseurl "".
-baseurl: "/azure-sql-dev-hub"
-url: "https://microsoft.github.io"
+# These two are local-preview defaults only. The deploy workflow overwrites both
+# from the Pages API at build time, because where this site actually publishes
+# depends on repository visibility: while the repo is private, Pages serves it
+# from a generated *.pages.github.io domain at the root, and if the repo is made
+# public it moves to microsoft.github.io/azure-sql-dev-hub. Editing these values
+# does not change where the site deploys. See .github/workflows/pages.yml.
+baseurl: ""
+url: "http://localhost:4000"
 repo: "https://github.com/microsoft/azure-sql-dev-hub"
 
 # Sites this hub points at. Kept here so a link change is one edit, not twelve.
