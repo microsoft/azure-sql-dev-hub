@@ -1,0 +1,46 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  house-rules:
+    name: House rules
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      # The same command a contributor runs locally with `npm test`. One
+      # definition of clean, checked in one place.
+      - run: node scripts/check-house-rules.mjs
+
+  build:
+    name: Build site
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.3"
+          bundler-cache: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - run: npm ci
+      - run: bundle exec jekyll build
+      - run: node scripts/build-agent-files.mjs
+      # A PR that breaks the markdown twin or llms-full.txt should fail here
+      # rather than ship a site whose agent-facing half is missing.
+      - name: Check agent-facing files exist
+        run: |
+          test -s _site/index.md
+          test -s _site/llms.txt
+          test -s _site/llms-full.txt
+          grep -q 'rel="alternate" type="text/markdown"' _site/index.html

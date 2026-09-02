@@ -1,0 +1,29 @@
+{%- comment -%}
+  The markdown twin. Every page here is authored as a .md file, and the build
+  copies that source into the published site next to the .html. This link tells
+  an agent (or a reader with curl) where the source is without having to guess.
+{%- endcomment -%}
+{%- if page.url == '/' -%}
+  {%- assign md_path = '/index.md' -%}
+{%- else -%}
+  {%- assign md_path = page.url | replace: '.html', '.md' -%}
+{%- endif -%}
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% if page.title and page.layout != 'home' %}{{ page.title }} · {{ site.title }}{% else %}{{ site.title }}{% endif %}</title>
+  <meta name="description" content="{{ page.description | default: site.description }}">
+  <meta property="og:title" content="{{ page.title | default: site.title }}">
+  <meta property="og:description" content="{{ page.description | default: site.description }}">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="{{ page.url | absolute_url }}">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="{{ page.title | default: site.title }}">
+  <meta name="twitter:description" content="{{ page.description | default: site.description }}">
+  <link rel="alternate" type="text/markdown" href="{{ md_path | relative_url }}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ '/assets/css/main.css' | relative_url }}">
+  {% include analytics.html %}
+</head>

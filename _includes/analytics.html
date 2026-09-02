@@ -1,0 +1,9 @@
+{%- comment -%}
+  Analytics fan-out. Nothing loads unless site.analytics.enabled is true and the
+  provider below is configured, so a fork or a local preview sends no telemetry.
+{%- endcomment -%}
+{%- if site.analytics.enabled -%}
+  {%- if site.analytics.app_insights_connection_string != "" -%}
+    {% include analytics/app-insights.html %}
+  {%- endif -%}
+{%- endif -%}

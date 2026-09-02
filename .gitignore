@@ -427,3 +427,10 @@ FodyWeavers.xsd
 *.msix
 *.msm
 *.msp
+
+# Jekyll build output and Node dependencies
+_site/
+.jekyll-cache/
+.jekyll-metadata
+node_modules/
+Gemfile.lock
