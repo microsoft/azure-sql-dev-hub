@@ -9,11 +9,11 @@ machine-readable context behind it, generated from the same content.
 
 <https://didactic-adventure-jgqz4oz.pages.github.io/>
 
-The site is private, matching this repository: viewers have to be signed in to
-GitHub with access here, and the generated domain is what GitHub assigns to a
-private Pages site. If this repository is ever made public the site moves to
-`https://microsoft.github.io/azure-sql-dev-hub/`, and the deploy workflow picks
-that up on its own without a config edit.
+The repository is internal, so anyone in the Microsoft enterprise can view the
+site after signing in to GitHub; the generated domain is what GitHub assigns to
+a privately published Pages site. If this repository is ever made public the
+site moves to `https://microsoft.github.io/azure-sql-dev-hub/`, and the deploy
+workflow picks that up on its own without a config edit.
 
 Deploys run on every push to `main`.
 
