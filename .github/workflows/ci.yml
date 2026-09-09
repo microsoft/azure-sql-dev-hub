@@ -36,6 +36,7 @@ jobs:
       - run: npm ci
       - run: bundle exec jekyll build
       - run: node scripts/build-agent-files.mjs
+      - run: node scripts/check-links.mjs
       # A PR that breaks the markdown twin or llms-full.txt should fail here
       # rather than ship a site whose agent-facing half is missing.
       - name: Check agent-facing files exist
@@ -43,4 +44,7 @@ jobs:
           test -s _site/index.md
           test -s _site/llms.txt
           test -s _site/llms-full.txt
+          test -s _site/build/rag.md
+          test -s _site/for-agents.md
           grep -q 'rel="alternate" type="text/markdown"' _site/index.html
+          grep -q 'rel="alternate" type="text/markdown"' _site/build/rag.html

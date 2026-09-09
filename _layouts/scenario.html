@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+{% include head.html %}
+<body>
+{% include nav.html %}
+
+<main id="main">
+  <div class="scenarioPage">
+    <div class="wrap">
+      <div class="scenarioHead">
+        <div class="crumbs"><a href="{{ '/' | relative_url }}#build">Build</a> / {{ page.title }}</div>
+        <div class="sectionLabel">Scenario</div>
+        <h1>{{ page.title }}</h1>
+        <p class="intro">{{ page.intro }}</p>
+      </div>
+
+      <div class="scenarioGrid2">
+        <div class="scenarioMain">
+          <div class="blockCard">
+            <div class="blockHead">Copy prompt</div>
+            <div class="blockBody">
+              <div class="promptSurface">
+                <span id="scenario-prompt">{{ page.prompt }}</span>
+                <button class="promptCopy" type="button" data-copy="#scenario-prompt"
+                        data-copy-kind="prompt" data-copy-source="scenario"
+                        aria-label="Copy the scenario prompt">Copy prompt</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="blockCard">
+            <div class="blockHead">Starter</div>
+            <div class="blockBody">
+              <div class="codeBox">
+                <pre id="scenario-code">{{ page.starter.code }}</pre>
+                <button class="copyBtn" type="button" data-copy="#scenario-code"
+                        data-copy-event="copy_code" data-copy-source="scenario"
+                        aria-label="Copy the starter code">Copy</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <aside class="scenarioAside">
+          <div class="asideCard">
+            <h4>Skill</h4>
+            <p>{{ page.skill.note }}</p>
+            {%- if page.skill.install %}
+            <div class="codeBox">
+              <pre id="scenario-skill">{{ page.skill.install }}</pre>
+              <button class="copyBtn" type="button" data-copy="#scenario-skill"
+                      data-copy-event="install_cmd_copy" data-copy-source="scenario"
+                      aria-label="Copy the skill install command">Copy</button>
+            </div>
+            {%- else %}
+            <div class="asideActions">
+              <a class="actionLink" href="{{ site.skills_catalog }}" rel="noopener"
+                 data-event="install_cmd_copy" data-event-source="scenario-catalog">Browse the skill catalog <span aria-hidden="true">→</span></a>
+            </div>
+            {%- endif %}
+          </div>
+
+          <div class="asideCard">
+            <h4>Go deeper</h4>
+            <div class="asideActions">
+              <a class="actionLink primary" href="{{ page.docs.href }}" rel="noopener"
+                 data-event="docs_deep_read" data-event-source="scenario">{{ page.docs.label }} <span aria-hidden="true">→</span></a>
+              <span class="slot">Walkthrough video <span class="hint">coming soon</span></span>
+              <a class="actionLink" href="{{ page.url | replace: '.html', '.md' | relative_url }}"
+                 data-event="md_fetch" data-event-source="scenario">View as Markdown <span class="hint">.md</span></a>
+            </div>
+          </div>
+        </aside>
+      </div>
+
+      <div class="scenarioProse prose">
+        {{ content }}
+      </div>
+    </div>
+  </div>
+</main>
+
+{% include footer.html %}
+<script src="{{ '/assets/js/main.js' | relative_url }}" defer></script>
+</body>
+</html>

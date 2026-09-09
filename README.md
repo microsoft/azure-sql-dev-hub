@@ -1,9 +1,9 @@
-# Azure SQL Hub
+# Azure SQL Developer Hub
 
 The Azure SQL Dev Hub is one front door for developers and AI agents to start
-building on Azure SQL. It points at three ways in: the Azure SQL Database engine
-running locally in a container, a free database in the Microsoft Azure cloud, and
-the agent skills that let an AI coding agent do the setup for you.
+building on Azure SQL. It gives a person the shortest useful action (a
+quickstart command, a scenario page, a prompt) and gives an agent the current
+machine-readable context behind it, generated from the same content.
 
 ## Live site
 
@@ -20,64 +20,59 @@ Deploys run on every push to `main`.
 ## How it works
 
 Static markdown and Jekyll, built and deployed by GitHub Actions. There is no
-JavaScript framework, and no content on this site needs JavaScript to be read.
+JavaScript framework, and no content on this site needs JavaScript to be read:
+tabs render stacked and copy buttons disappear, but every command stays on the
+page.
 
-Every page is authored as a `.md` file, and the build publishes each one twice:
-once as the HTML page and once as its markdown source at the same path with `.md`
-appended. So `/index.html` has a twin at `/index.md`, and every page links to its
-own source with `<link rel="alternate" type="text/markdown">`. Two more files
-serve agents specifically: `/llms.txt` is a short description with a linked index
-of the site, and `/llms-full.txt` is every page concatenated, generated at build
-time by `scripts/build-agent-files.mjs`.
+Every page is authored as a `.md` file and published twice: once as HTML and
+once as its own source at the same path with `.md` appended. So `/build/rag.html`
+has a twin at `/build/rag.md`, and every page links to its source with
+`<link rel="alternate" type="text/markdown">`. Two more files serve agents:
+`/llms.txt` indexes the site, and `/llms-full.txt` concatenates it, both
+generated at build time by `scripts/build-agent-files.mjs`. The `/for-agents`
+page documents all of it.
 
-The tabs and copy buttons are progressive enhancement. With JavaScript blocked,
-tab panels render as ordinary stacked headings and every command is still there
-to select and copy by hand.
+Telemetry goes through one `track()` function in `assets/js/main.js`. For the
+demo it logs to the console; it fans out to Application Insights the moment
+`_config.yml` carries a connection string.
 
 ## How to contribute
 
-Edit the `.md` file for the page, open a pull request, and let CI check it. House
-rules run on every pull request and are the same command you can run locally:
+Edit the `.md` file for the page, open a pull request, and let CI check it:
 
 ```bash
 npm install
 npm test
 ```
 
-To preview the site:
+To preview the site: `bundle install && bundle exec jekyll serve --baseurl ""`.
 
-```bash
-bundle install
-bundle exec jekyll serve --baseurl ""
-```
-
-The house rules cover things a reviewer should not have to catch by eye: no
-em-dashes, no absolute claims about what an AI agent will do, and no wording that
-overstates a preview product's release status. See
-`scripts/check-house-rules.mjs` for the current list and the reasoning.
-
-Anchor ids on the home page (`start`, `connect`, `build`, `skills`, `samples`)
-are permanent. Add sections, never rename these.
+House rules run on every pull request and locally as `npm test`: no em-dashes,
+no absolute claims about what an AI agent will do, and no wording that
+overstates a preview product's release status. CI also builds the site, checks
+every internal link, and fails if the agent-facing files went missing.
 
 ## Repo map
 
 | Path | What it is |
 | --- | --- |
-| `index.md` | The home page. Hero and path-card copy live in its front matter; the rest is the body. |
-| `llms.txt` | Short site description and linked index of every page, for agents. |
-| `_config.yml` | Jekyll config, shared links, the permanent nav anchors, and the analytics switch. |
-| `_layouts/` | `home.html` for the front page, `page.html` for everything else. |
+| `index.md` | The home page. Section copy lives in its front matter as structured data. |
+| `build/*.md` | The six scenario pages: prompt, starter, skill, docs, walkthrough slot. |
+| `prompts.md` | The prompt library. |
+| `for-agents.md` | Documents every machine-readable surface. |
+| `llms.txt` | Site description and linked index of every page, for agents. |
+| `_config.yml` | Jekyll config, shared links, and the analytics switch. |
+| `_layouts/` | `home`, `scenario`, and `page` layouts. |
 | `_includes/` | Head, nav, footer, and the analytics loader. |
-| `assets/css/main.scss` | Design tokens and all styling. Tokens are carried over from the container site. |
-| `assets/js/main.js` | Copy buttons, tabs, and the analytics event helper. All optional to the reader. |
-| `scripts/check-house-rules.mjs` | The CI house-rules check. Also `npm test`. |
-| `scripts/build-agent-files.mjs` | Writes the `.md` twins and `llms-full.txt` into the built site. |
+| `assets/` | Stylesheet (V8 design system) and the JS for tabs, copy, telemetry. |
+| `scripts/` | House rules, agent-files generator, internal link check. |
 | `docs/DECISIONS.md` | One dated line per irreversible or debatable choice. |
 | `.github/workflows/` | `ci.yml` checks pull requests, `pages.yml` builds and deploys. |
 
 ## Who owns it
 
-The Azure SQL team. For anything about this site, including a broken link, wrong
-copy, or a page you expected to find: [open an issue](https://github.com/microsoft/azure-sql-dev-hub/issues).
-For the container itself, use the
+The Azure SQL team. For anything about this site, including a broken link,
+wrong copy, or a page you expected to find:
+[open an issue](https://github.com/microsoft/azure-sql-dev-hub/issues). For the
+container itself, use the
 [container repository](https://github.com/microsoft/azure-sql-database-container).

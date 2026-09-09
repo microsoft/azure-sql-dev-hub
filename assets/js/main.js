@@ -1,42 +1,74 @@
-// Progressive enhancement only. Every piece of content on this site is readable
-// with this file blocked or failing to load: the tab panels below start life as
-// plain stacked headings, and the copy buttons are conveniences layered on top of
-// code blocks you can already select by hand.
+// Progressive enhancement only. Every piece of content is readable with this
+// file blocked: tab panels start stacked with visible labels, and every command
+// is selectable by hand. The script layers tabs, copy buttons, and telemetry.
 (function () {
   "use strict";
 
-  // ---- analytics: fan a custom event out to whatever provider loaded ----
-  // No-ops until a provider is configured (see _includes/analytics.html).
+  document.documentElement.classList.add("js");
+
+  // ---- telemetry ----
+  // Telemetry contract for engineering. One track() fans out to every provider.
+  // The console line is the demo implementation; App Insights joins the fan-out
+  // automatically once _config.yml carries a connection string. Event taxonomy:
+  //   quickstart_start, agent_start_clicked, install_cmd_copy, copy_command,
+  //   copy_prompt, copy_code, gallery_card_open, docs_deep_read, docs_outbound,
+  //   azure_outbound, md_fetch, existing_data_clicked, walkthrough_open
   function track(name, props) {
+    var p = props || {};
+    p.path = location.pathname;
+    try { console.log("[telemetry]", name, p); } catch (e) {}
     try {
       if (window.appInsights && typeof window.appInsights.trackEvent === "function") {
-        window.appInsights.trackEvent({ name: name }, props || {});
+        window.appInsights.trackEvent({ name: name }, p);
       }
     } catch (e) {}
   }
 
-  // ---- copy to clipboard ----
+  // Declarative events: any element with data-event fires it on click, with
+  // optional data-event-* props (data-event-scenario-id becomes scenario_id).
+  document.querySelectorAll("[data-event]").forEach(function (el) {
+    el.addEventListener("click", function () {
+      var props = {};
+      Array.prototype.forEach.call(el.attributes, function (a) {
+        if (a.name.indexOf("data-event-") === 0) {
+          props[a.name.slice(11).replace(/-/g, "_")] = a.value;
+        }
+      });
+      track(el.getAttribute("data-event"), props);
+    });
+  });
+
+  // Outbound tracking for links no one annotated by hand.
+  document.querySelectorAll('a[href^="http"]').forEach(function (a) {
+    if (a.hasAttribute("data-event")) return;
+    var toDocs = /learn\.microsoft\.com/.test(a.href);
+    var toAzure = /portal\.azure\.com|aka\.ms/.test(a.href);
+    if (!toDocs && !toAzure) return;
+    a.addEventListener("click", function () {
+      track(toDocs ? "docs_outbound" : "azure_outbound", { href: a.href });
+    });
+  });
+
+  // ---- copy ----
   function flash(btn) {
-    var label = btn.querySelector(".copy-label");
-    var prev = label ? label.textContent : btn.textContent;
-    if (label) { label.textContent = "Copied"; } else { btn.textContent = "Copied"; }
+    var prev = btn.textContent;
+    btn.textContent = "Copied";
     btn.classList.add("is-copied");
     setTimeout(function () {
-      if (label) { label.textContent = prev; } else { btn.textContent = prev; }
+      btn.textContent = prev;
       btn.classList.remove("is-copied");
-    }, 1600);
+    }, 1200);
   }
 
-  // Make a copied command paste-safe on every shell. The page keeps the readable
-  // multi-line form with a trailing backslash, but bash and zsh use "\" for line
-  // continuation while PowerShell uses a backtick and cmd uses "^", so a copied
-  // multi-line block breaks on Windows. Joining the continuations into one line
-  // produces a command that runs verbatim in bash, PowerShell, and cmd.
+  // A copied command must paste cleanly on every shell. The page shows the
+  // readable multi-line form with a trailing backslash, but PowerShell and cmd
+  // use different continuation characters, so joining the continuations into
+  // one line produces a command that runs verbatim everywhere.
   function normalizeCommand(text) {
     if (!text) return "";
     return text
-      .replace(/\\\s*\n\s*/g, " ")   // join backslash continuations
-      .replace(/[ \t]+\n/g, "\n")    // drop trailing whitespace
+      .replace(/\\\s*\n\s*/g, " ")
+      .replace(/[ \t]+\n/g, "\n")
       .trim();
   }
 
@@ -51,146 +83,100 @@
     }
   }
 
-  // Classify what was copied so the event is useful without recording the
-  // command text itself.
-  function commandKind(text, declared) {
+  function commandEvent(text, declared) {
     if (declared) return declared;
-    if (/npx skills add|plugin marketplace add|plugin add/.test(text)) return "install";
-    if (/docker login/.test(text)) return "registry-login";
-    if (/docker run/.test(text)) return "container-start";
-    if (/sqlcmd/.test(text)) return "verify";
-    return "command";
+    if (/npx skills add|plugin marketplace add|plugin (?:install|add)/.test(text)) return "install_cmd_copy";
+    return "copy_command";
   }
 
-  // explicit copy controls (the hero command block)
-  document.querySelectorAll("[data-copy], [data-copy-text]").forEach(function (btn) {
+  // Buttons that name their source: data-copy points at the element to copy,
+  // data-copy-event names the telemetry event, data-copy-source labels where.
+  document.querySelectorAll("[data-copy]").forEach(function (btn) {
     btn.addEventListener("click", function () {
-      var text = btn.getAttribute("data-copy-text");
-      if (!text) {
-        var target = document.querySelector(btn.getAttribute("data-copy"));
-        text = target ? target.innerText : "";
-      }
-      var normalized = normalizeCommand(text);
-      copyText(normalized, btn);
-      track("copy_command", {
-        kind: commandKind(normalized, btn.getAttribute("data-copy-kind")),
-        location: "hero"
-      });
+      var target = document.querySelector(btn.getAttribute("data-copy"));
+      var raw = target ? target.innerText : "";
+      var isPrompt = btn.getAttribute("data-copy-kind") === "prompt";
+      var text = isPrompt ? raw.trim() : normalizeCommand(raw);
+      copyText(text, btn);
+      track(
+        btn.getAttribute("data-copy-event") || (isPrompt ? "copy_prompt" : commandEvent(text, null)),
+        { source: btn.getAttribute("data-copy-source") || "page" }
+      );
     });
   });
 
-  // a copy button on every code block in the prose
-  document.querySelectorAll(".prose pre").forEach(function (pre) {
+  // Every bare code block in prose gets a copy button.
+  document.querySelectorAll(".prose pre, .scenarioProse pre").forEach(function (pre) {
+    if (pre.querySelector(".copyBtn")) return;
     var btn = document.createElement("button");
-    btn.className = "copy-btn";
+    btn.className = "copyBtn";
     btn.type = "button";
     btn.setAttribute("aria-label", "Copy code");
-    btn.innerHTML = '<span class="copy-label">Copy</span>';
+    btn.textContent = "Copy";
     btn.addEventListener("click", function () {
       var code = pre.querySelector("code") || pre;
-      var normalized = normalizeCommand(code.innerText);
-      copyText(normalized, btn);
-      var panel = pre.closest(".tab-panel");
-      track("copy_command", {
-        kind: commandKind(normalized, null),
-        location: panel ? panel.getAttribute("data-tab-name") : "prose"
-      });
+      var text = normalizeCommand(code.innerText);
+      copyText(text, btn);
+      track(commandEvent(text, /npx |plugin /.test(text) ? null : "copy_code"), { source: "prose" });
     });
     pre.appendChild(btn);
   });
 
   // ---- tabs ----
-  // An h2 marked .tab-group owns every following sibling until the next h2 or an
-  // element marked .tab-end. Within that run, each h3 marked .tab opens a panel.
-  function buildTabs(h2) {
-    var groups = [];
-    var current = null;
-    var node = h2.nextElementSibling;
+  // A [data-tabgroup] holds [data-tab] buttons and [data-panel] panels keyed by
+  // the same name. Without the script every panel is visible and labeled.
+  document.querySelectorAll("[data-tabgroup]").forEach(function (group) {
+    var name = group.getAttribute("data-tabgroup");
+    var tabs = Array.prototype.slice.call(group.querySelectorAll("[data-tab]"));
+    var panels = Array.prototype.slice.call(group.querySelectorAll("[data-panel]"));
+    if (tabs.length < 2 || panels.length < 2) return;
 
-    while (node && node.tagName !== "H2" && !node.classList.contains("tab-end")) {
-      var next = node.nextElementSibling;
-      if (node.tagName === "H3" && node.classList.contains("tab")) {
-        current = { heading: node, nodes: [node] };
-        groups.push(current);
-      } else if (current) {
-        current.nodes.push(node);
-      }
-      node = next;
-    }
-    if (groups.length < 2) return;   // one panel is not a tab set
-
-    var list = document.createElement("div");
-    list.className = "tablist";
-    list.setAttribute("role", "tablist");
-    h2.parentNode.insertBefore(list, groups[0].heading);
-
-    var tabs = [];
-    var panels = [];
-
-    groups.forEach(function (g, i) {
-      var name = g.heading.textContent.trim();
-      var slug = (g.heading.id || name.toLowerCase().replace(/[^a-z0-9]+/g, "-")).replace(/^-|-$/g, "");
-      var panelId = "panel-" + slug;
-      var tabId = "tab-" + slug;
-
-      var panel = document.createElement("div");
-      panel.className = "tab-panel";
-      panel.id = panelId;
-      panel.setAttribute("role", "tabpanel");
-      panel.setAttribute("aria-labelledby", tabId);
-      panel.setAttribute("data-tab-name", slug);
-      panel.hidden = i !== 0;
-      g.nodes[0].parentNode.insertBefore(panel, g.nodes[0]);
-      g.nodes.forEach(function (n) { panel.appendChild(n); });
-
-      var tab = document.createElement("button");
-      tab.type = "button";
-      tab.id = tabId;
-      tab.textContent = name;
-      tab.setAttribute("role", "tab");
-      tab.setAttribute("aria-controls", panelId);
-      tab.setAttribute("aria-selected", i === 0 ? "true" : "false");
-      tab.tabIndex = i === 0 ? 0 : -1;
-      list.appendChild(tab);
-
-      tabs.push(tab);
-      panels.push(panel);
-    });
-
-    function select(i, focus) {
-      tabs.forEach(function (t, j) {
-        t.setAttribute("aria-selected", j === i ? "true" : "false");
-        t.tabIndex = j === i ? 0 : -1;
-        panels[j].hidden = j !== i;
+    function select(key, opts) {
+      tabs.forEach(function (t) {
+        var on = t.getAttribute("data-tab") === key;
+        t.setAttribute("aria-selected", on ? "true" : "false");
+        t.tabIndex = on ? 0 : -1;
+        if (on && opts && opts.focus) t.focus();
       });
-      if (focus) tabs[i].focus();
-      track("tab_select", { group: h2.id || "", tab: panels[i].getAttribute("data-tab-name") });
+      panels.forEach(function (p) {
+        p.hidden = p.getAttribute("data-panel") !== key;
+      });
+      var status = group.querySelector("[data-tab-status]");
+      if (status) {
+        var active = panels.filter(function (p) { return !p.hidden; })[0];
+        if (active && active.getAttribute("data-status")) {
+          status.textContent = active.getAttribute("data-status");
+        }
+      }
+      if (opts && opts.user && name === "quickstart") {
+        track("quickstart_start", { mode: key });
+      }
     }
 
     tabs.forEach(function (tab, i) {
-      tab.addEventListener("click", function () { select(i, false); });
+      tab.setAttribute("role", "tab");
+      tab.addEventListener("click", function () { select(tab.getAttribute("data-tab"), { user: true }); });
       tab.addEventListener("keydown", function (e) {
-        var delta = e.key === "ArrowRight" ? 1 : e.key === "ArrowLeft" ? -1 : 0;
-        if (delta) {
-          e.preventDefault();
-          select((i + delta + tabs.length) % tabs.length, true);
-        } else if (e.key === "Home") {
-          e.preventDefault(); select(0, true);
-        } else if (e.key === "End") {
-          e.preventDefault(); select(tabs.length - 1, true);
-        }
+        var d = e.key === "ArrowRight" ? 1 : e.key === "ArrowLeft" ? -1 : 0;
+        if (!d) return;
+        e.preventDefault();
+        var next = tabs[(i + d + tabs.length) % tabs.length];
+        select(next.getAttribute("data-tab"), { user: true, focus: true });
       });
     });
 
-    // Deep link: /#start-cloud opens the Cloud tab inside the #start group.
-    var hash = location.hash.replace("#", "");
-    if (hash.indexOf(h2.id + "-") === 0) {
-      var want = hash.slice(h2.id.length + 1);
-      panels.forEach(function (p, i) {
-        if (p.getAttribute("data-tab-name") === want) select(i, false);
-      });
-    }
-  }
+    // Default to the first tab. Unlike the mockup, the initial render fires no
+    // telemetry: quickstart_start means a person chose a path, not a page load.
+    select(tabs[0].getAttribute("data-tab"), {});
+    group.setAttribute("data-tabs-ready", "true");
 
-  document.querySelectorAll("h2.tab-group").forEach(buildTabs);
+    // Buttons elsewhere can jump a group to a mode (the hero secondary CTA).
+    document.querySelectorAll("[data-mode-link]").forEach(function (el) {
+      el.addEventListener("click", function () {
+        if (group.getAttribute("data-tabgroup") === "quickstart") {
+          select(el.getAttribute("data-mode-link"), { user: true });
+        }
+      });
+    });
+  });
 })();

@@ -1,13 +1,22 @@
-<footer class="footer">
-  <div class="container footer-inner">
-    <div class="footer-brand">
-      <span class="brand-name">Azure SQL <em>Hub</em></span>
-      <p class="footer-note">Built and maintained by the Azure SQL team.</p>
+<footer id="for-agents-footer">
+  <div class="wrap">
+    <div class="footTop">
+      <div class="footBrand">
+        Azure SQL Developer Hub
+        <p>One human front door. Machine-readable on the same content.</p>
+      </div>
+      <div class="footLinks">
+        <a href="{{ '/llms.txt' | relative_url }}">llms.txt</a>
+        <a href="{{ '/llms-full.txt' | relative_url }}">llms-full.txt</a>
+        <a href="{{ '/index.md' | relative_url }}" data-event="md_fetch">Markdown</a>
+        <a href="{{ '/' | relative_url }}#skills">Skills</a>
+        <a href="{{ '/for-agents.html' | relative_url }}#mcp">SQL MCP</a>
+        <a href="{{ '/for-agents.html' | relative_url }}">For agents</a>
+      </div>
     </div>
-    <div class="footer-links">
-      <a href="{{ site.repo }}/issues/new" rel="noopener">Feedback</a>
-      <a href="{{ site.repo }}" rel="noopener">Star on GitHub</a>
-      <a class="footer-quiet" href="{{ '/llms.txt' | relative_url }}">/llms.txt</a>
+    <div class="footBottom">
+      <span>Azure SQL</span>
+      <span><a href="{{ site.repo }}/issues/new" rel="noopener">Feedback</a> · <a href="{{ site.repo }}" rel="noopener">GitHub</a> · Quickstarts · Prompts · Skills · Docs</span>
     </div>
   </div>
 </footer>
