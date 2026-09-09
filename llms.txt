@@ -2,28 +2,38 @@
 # Front matter tells Jekyll to resolve the links below against the site config,
 # so a baseurl change cannot leave this file pointing at the wrong host.
 ---
-# Azure SQL Hub
+# Azure SQL Developer Hub
 
-> One front door for developers and AI agents to start building on Azure SQL. Three ways in: run the Azure SQL Database engine locally in a container, create a free database in the Microsoft Azure cloud, or install the agent skills and let an AI coding agent do the setup. The container is in Private Preview. The Azure SQL Database free offer works with any Azure subscription type.
+> The front door for building with Azure SQL Database in the age of AI-assisted development. Three ways in: run the Azure SQL Database engine locally in a container (Private Preview), create a database in the Microsoft Azure cloud on the free offer, or install the agent skills and let an AI coding agent do the setup. Every page is authored as markdown and published twice: append `.md` to any page URL for the source.
 
-Every page on this site is authored as markdown. Append `.md` to any page URL to
-fetch that source, or read {{ '/llms-full.txt' | absolute_url }} for the whole
-site as a single document.
+For the whole site as one document, read {{ '/llms-full.txt' | absolute_url }}.
+For the machine-readable surface guide, read {{ '/for-agents.md' | absolute_url }}.
 
 ## Pages
-- [Azure SQL Hub]({{ '/index.md' | absolute_url }}): the home page. Quickstart command for the local container, the three starting paths (local, cloud, agent), step-by-step setup for each, and the agent skill install commands for Claude Code, GitHub Copilot, Codex, and Cursor.
+- [Home]({{ '/index.md' | absolute_url }}): quickstart commands for the agent, local container, and Azure CLI paths; the six build scenarios; featured prompts; per-agent skill install commands.
+- [Start a database]({{ '/build/start-database.md' | absolute_url }}): container verification with sqlcmd, plus the Azure free offer portal path.
+- [Connect your app]({{ '/build/connect-app.md' | absolute_url }}): connection-string configuration and a parameterized query with the current driver.
+- [Wire up RAG]({{ '/build/rag.md' | absolute_url }}): vector column schema and cosine similarity search with VECTOR_DISTANCE.
+- [Multi-tenant setup]({{ '/build/multi-tenant.md' | absolute_url }}): Row-Level Security with a SESSION_CONTEXT predicate and security policy.
+- [Fix a slow query]({{ '/build/query-performance.md' | absolute_url }}): capture IO and timing statistics, then tune from evidence.
+- [Ship local to cloud]({{ '/build/local-to-cloud.md' | absolute_url }}): move the app from the local engine to Azure SQL Database through configuration.
+- [Prompt library]({{ '/prompts.md' | absolute_url }}): copyable build prompts, plus the container repository's prompt catalog.
+- [For agents]({{ '/for-agents.md' | absolute_url }}): every machine-readable surface of this site.
 
 ## Key facts
 - Local: the Azure SQL Database container image is `sqldbpreview-dpgaeqhmgphzd4bk.azurecr.io/azure-sql/db-dev`, x64 (linux/amd64). On a host that is not x64, add `--platform linux/amd64`. The registry is private during the Private Preview; credentials come from signing up at https://aka.ms/sqldbcontainerpreview-signup.
-- Cloud: the Azure SQL Database free offer gives 100,000 vCore seconds of serverless compute, 32 GB of data, and 32 GB of backup storage per database per month, for up to 10 databases per Azure subscription. It needs an Azure account and subscription, and is created from the Azure portal.
+- Cloud: the Azure SQL Database free offer gives 100,000 vCore seconds of serverless compute, 32 GB of data, and 32 GB of backup storage per database per month, for up to 10 databases per Azure subscription. It needs an Azure account and subscription. The CLI path is `az sql db create ... --use-free-limit --free-limit-exhaustion-behavior AutoPause`.
 - Agent: 17 agent skills install with `npx skills add microsoft/azure-sql-database-container` in Claude Code, Codex, Cursor, and VS Code with GitHub Copilot. Claude Code and Codex can also install them as a native plugin with `/plugin marketplace add microsoft/azure-sql-database-container`.
+- AI-native: native vector data type, VECTOR_DISTANCE similarity search, and in-database embeddings. Exact top-k search is recommended up to roughly 50,000 candidate vectors; DiskANN vector indexes for approximate search are in preview.
 - Connection: TCP port 1433, SQL login (sa) locally, Microsoft Entra in the cloud. Moving from the local container to Azure SQL Database in the cloud is a connection-string change, not a code change.
+- MCP: an Azure SQL MCP endpoint is not published yet. The skills optionally use the public Microsoft Learn MCP (https://learn.microsoft.com/api/mcp) as a live documentation layer.
 
 ## Related sites
-- [Azure SQL Database container]({{ site.container_site }}): the container documentation, including prerequisites, getting started, agent skills, and known limitations.
-- [Container repository]({{ site.container_repo }}): source, skills, and issues.
+- [Azure SQL Database container]({{ site.container_site }}): container documentation, prerequisites, getting started, agent skills, known limitations.
+- [Container repository]({{ site.container_repo }}): source, skills, build prompts, and issues.
 - [Azure SQL Database free offer]({{ site.azure_free_offer }}): current limits, behavior at the monthly cap, and exclusions.
+- [Azure SQL documentation]({{ site.azure_sql_docs }}): the full product documentation.
 
 ## Status
 - The Azure SQL Database container is in Private Preview.
-- This site is in active development. Sections for connect, build, and samples are not published yet.
+- This site is in active development.

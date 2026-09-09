@@ -46,7 +46,8 @@ const GA_CLAIMS = [
 // vendored tree added later does not silently start being linted, and an
 // exclusion list cannot go stale without anyone noticing.
 const ROOTS = [
-  'index.md', 'llms.txt', 'README.md', '_config.yml',
+  'index.md', 'llms.txt', 'prompts.md', 'for-agents.md', 'build',
+  'README.md', '_config.yml',
   '_includes', '_layouts', 'assets', 'scripts', 'docs',
   '.github/workflows',
 ];
