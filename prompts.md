@@ -19,6 +19,7 @@ Build a Python HTTP API for a task list backed by Azure SQL Database.
 [View and copy the prompt](build/python-api.html) · [Markdown](build/python-api.md)
 
 ## Build a RAG workflow
+{: #rag }
 
 Build a small Python RAG application using Azure SQL Database for source text and embeddings. Ask which embedding and generation services I can access before choosing them.
 
