@@ -406,3 +406,6 @@ footer{margin-top:34px;border-top:1px solid var(--line);padding:34px 0 42px;back
   *{transition-duration:.01ms!important}
   .scenario:hover{transform:none}
 }
+
+/* Draft prompt cards reuse the existing light design. */
+.scenarioFoot button { background: transparent; color: var(--blue, #0067b8); border: 1px solid currentColor; border-radius: 6px; padding: 8px 12px; cursor: pointer; font: inherit; }

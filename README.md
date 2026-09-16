@@ -9,11 +9,9 @@ machine-readable context behind it, generated from the same content.
 
 <https://didactic-adventure-jgqz4oz.pages.github.io/>
 
-The repository is internal, so anyone in the Microsoft enterprise can view the
-site after signing in to GitHub; the generated domain is what GitHub assigns to
-a privately published Pages site. If this repository is ever made public the
-site moves to `https://microsoft.github.io/azure-sql-dev-hub/`, and the deploy
-workflow picks that up on its own without a config edit.
+The current Pages URL requires authorized GitHub access. Verify access with an
+intended reader before circulating it. Public launch needs a publicly accessible
+URL; the deployment workflow reads the configured Pages URL at build time.
 
 Deploys run on every push to `main`.
 
@@ -32,9 +30,9 @@ has a twin at `/build/rag.md`, and every page links to its source with
 generated at build time by `scripts/build-agent-files.mjs`. The `/for-agents`
 page documents all of it.
 
-Telemetry goes through one `track()` function in `assets/js/main.js`. For the
-demo it logs to the console; it fans out to Application Insights the moment
-`_config.yml` carries a connection string.
+Telemetry hooks go through one `track()` function in `assets/js/main.js` and
+currently log to the console. Engineering owns Clarity implementation and
+prompt validation. Analytics remains disabled. See `docs/ENGINEERING-HANDOFF.md`.
 
 ## How to contribute
 
@@ -57,7 +55,7 @@ every internal link, and fails if the agent-facing files went missing.
 | Path | What it is |
 | --- | --- |
 | `index.md` | The home page. Section copy lives in its front matter as structured data. |
-| `build/*.md` | The six scenario pages: prompt, starter, skill, docs, walkthrough slot. |
+| `build/*.md` | Three featured draft examples plus earlier pages retained at their URLs. |
 | `prompts.md` | The prompt library. |
 | `for-agents.md` | Documents every machine-readable surface. |
 | `llms.txt` | Site description and linked index of every page, for agents. |
@@ -66,7 +64,7 @@ every internal link, and fails if the agent-facing files went missing.
 | `_includes/` | Head, nav, footer, and the analytics loader. |
 | `assets/` | Stylesheet (V8 design system) and the JS for tabs, copy, telemetry. |
 | `scripts/` | House rules, agent-files generator, internal link check. |
-| `docs/DECISIONS.md` | One dated line per irreversible or debatable choice. |
+| `docs/` | Dated decisions and the engineering handoff for validation and Clarity. |
 | `.github/workflows/` | `ci.yml` checks pull requests, `pages.yml` builds and deploys. |
 
 ## Who owns it

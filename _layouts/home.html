@@ -9,14 +9,14 @@
     <div class="wrap">
       <div class="heroCopy">
         <div class="eyebrow">{{ page.hero.eyebrow }}</div>
-        <h1>{{ page.hero.headline }} <span class="accent">{{ page.hero.headline_accent }}</span></h1>
+        <h1>{{ page.hero.headline }} <span>{{ page.hero.headline_accent }}</span></h1>
         <p class="heroSub">{{ page.hero.subline }}</p>
         <div class="heroActions">
-          <a class="btn primary" href="#get-running" data-event="quickstart_start" data-event-source="hero">Start building</a>
-          <a class="btn secondary" href="#get-running" data-mode-link="agent" data-event="agent_start_clicked">Give your agent Azure SQL skills</a>
+          <a class="btn primary" href="#build" data-event="quickstart_start" data-event-source="hero">Choose a build prompt</a>
+          <a class="btn secondary" href="#get-running" data-event="quickstart_start">Set up your database</a>
         </div>
         <div class="heroAgents">
-          <span class="label">Works with</span>
+          <span class="label">Use your coding agent:</span>
           {%- for a in page.hero.agents %}<span>{{ a }}</span>{% endfor %}
         </div>
       </div>
@@ -24,12 +24,12 @@
   </header>
 
   <section class="getRunning" id="get-running">
-    <span class="alias-anchor" id="start" aria-hidden="true"></span>
+    <span class="alias-anchor" id="start" aria-hidden="true"></span><span class="alias-anchor" id="connect" aria-hidden="true"></span>
     <div class="wrap">
       <div class="sectionHead">
         <div class="sectionLabel">Get running</div>
-        <h2>Copy. Paste. Start building.</h2>
-        <p>Choose the path that matches your workflow. The first action is on the page, not hidden behind another documentation hop.</p>
+        <h2>Connect to your development database.</h2>
+        <p>Follow the setup guide, verify your connection, then choose a prompt.</p>
       </div>
 
       <div class="runShell" data-tabgroup="quickstart">
@@ -91,53 +91,25 @@
     </div>
   </section>
 
-  <section class="continuity" id="continuity">
-    <div class="wrap">
-      <div class="contGrid">
-        <div class="contText">
-          <div class="sectionLabel">Local to cloud</div>
-          <h2>{{ page.continuity.heading }}</h2>
-          <p>{{ page.continuity.text }}</p>
-        </div>
-        <div class="endpointShell">
-          <div class="endpointRow">
-            <div class="endpoint">
-              <div class="endpointLabel">Local environment</div>
-              <h4>.env</h4>
-              <code>{{ page.continuity.local_env }}</code>
-            </div>
-            <div class="arrowCell" aria-hidden="true">→</div>
-            <div class="endpoint">
-              <div class="endpointLabel">In Azure</div>
-              <h4>.env</h4>
-              <code>{{ page.continuity.azure_env }}</code>
-            </div>
-          </div>
-          <div class="identical">
-            <span>Same application code</span><span aria-hidden="true">·</span><strong>only the connection target changes</strong>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <section id="build">
+  <section id="build"><span class="alias-anchor" id="samples" aria-hidden="true"></span>
     <div class="wrap">
       <div class="sectionHead">
         <div class="sectionLabel">Build</div>
         <h2>Start with the job you need done.</h2>
-        <p>The homepage stays simple. Each scenario opens into a focused page with a validated prompt, runnable starter, walkthrough, docs, and the relevant skill.</p>
+        <p>Three draft examples for JavaScript and Python. Copy a task or open its requirements and expected result. End-to-end engineering validation is pending.</p>
       </div>
       <div class="scenarioGrid">
         {%- for s in page.scenarios %}
         <article class="scenario">
-          <div class="scenarioNum">{{ s.num }}</div>
+          <div class="scenarioNum">{{ s.num }} · {{ s.tag }}</div>
           <h3>{{ s.title }}</h3>
           <p>{{ s.blurb }}</p>
+          <pre id="build-prompt-{{ s.slug }}" hidden>{{ s.prompt | escape }}</pre>
           <div class="scenarioFoot">
+            <button type="button" data-copy="#build-prompt-{{ s.slug }}" data-copy-kind="prompt" data-copy-source="build-{{ s.slug }}">Copy prompt</button>
             <a href="{{ '/build/' | append: s.slug | append: '.html' | relative_url }}"
                data-event="gallery_card_open" data-event-scenario-id="{{ s.slug }}">Open scenario →</a>
-            <span>prompt + code</span>
+            <span>Draft</span>
           </div>
         </article>
         {%- endfor %}
@@ -145,32 +117,7 @@
     </div>
   </section>
 
-  <section class="prompts" id="prompts">
-    <div class="wrap">
-      <div class="sectionHead">
-        <div class="sectionLabel">Prompt library</div>
-        <h2>Give your agent a better starting point.</h2>
-        <p>Validated build prompts turn common Azure SQL jobs into one-click starting points. Copy one, paste it into your agent, and keep building.</p>
-      </div>
-      <div class="promptGrid">
-        {%- for p in page.prompts_featured %}
-        <article class="promptCard">
-          <div class="promptTag">{{ p.tag }}</div>
-          <h3>{{ p.title }}</h3>
-          <p>{{ p.blurb }}</p>
-          <div class="promptText" id="prompt-{{ p.id }}">{{ p.prompt }}</div>
-          <div class="promptActions">
-            <button type="button" data-copy="#prompt-{{ p.id }}" data-copy-kind="prompt"
-                    data-copy-source="prompt_gallery" aria-label="Copy the {{ p.title }} prompt">Copy prompt</button>
-            <a href="{{ '/prompts.html' | relative_url }}#{{ p.id }}">View prompt →</a>
-          </div>
-        </article>
-        {%- endfor %}
-      </div>
-      <a class="inlineLink" href="{{ '/prompts.html' | relative_url }}">Browse all validated prompts →</a>
-    </div>
-  </section>
-
+  <section class="prompts" id="prompts"><div class="wrap"><div class="sectionHead"><div class="sectionLabel">Prompt library</div><h2>Know what a working result looks like.</h2><p>Each example includes a complete draft prompt, prerequisites, and acceptance criteria. Test results will be added after engineering validation.</p></div><a class="inlineLink" href="{{ "/prompts.html" | relative_url }}">Browse the three featured prompts</a></div></section>
   <section class="skillsSection" id="skills">
     <div class="wrap">
       <div class="sectionHead">
@@ -179,37 +126,7 @@
         <p>{{ page.skills.text }}</p>
       </div>
 
-      <div class="skillShell" data-tabgroup="skills">
-        <div class="runToolbar">
-          <div class="runTabs" role="tablist" aria-label="Install by coding agent">
-            {%- for a in page.skills.agents %}
-            <button class="runTab" type="button" data-tab="{{ a.key }}" aria-selected="false">{{ a.name }}</button>
-            {%- endfor %}
-          </div>
-          <div class="runStatus">One install. 17 skills.</div>
-        </div>
-        {%- for a in page.skills.agents %}
-        <div class="skillPanel" role="tabpanel" data-panel="{{ a.key }}">
-          <span class="panelName">{{ a.name }}</span>
-          <p>{{ a.blurb }}</p>
-          <div class="codeBox">
-            <pre id="skill-code-{{ a.key }}">{{ a.code }}</pre>
-            <button class="copyBtn" type="button" data-copy="#skill-code-{{ a.key }}"
-                    data-copy-event="install_cmd_copy" data-copy-source="skills-{{ a.key }}"
-                    aria-label="Copy the {{ a.name }} install command">Copy</button>
-          </div>
-          {%- if a.alt_code %}
-          <div class="codeBox">
-            <pre id="skill-alt-{{ a.key }}">{{ a.alt_code }}</pre>
-            <button class="copyBtn" type="button" data-copy="#skill-alt-{{ a.key }}"
-                    data-copy-event="install_cmd_copy" data-copy-source="skills-{{ a.key }}"
-                    aria-label="Copy the portable install command">Copy</button>
-          </div>
-          {%- endif %}
-        </div>
-        {%- endfor %}
-      </div>
-
+      <p><a class="inlineLink" href="{{ site.container_site }}/agent-skills.html">Read installation instructions and prerequisites →</a></p>
       <div class="skillMeta">
         <div class="chips">
           {%- for c in page.skills.chips %}<code>{{ c }}</code>{% endfor %}
@@ -222,26 +139,9 @@
     </div>
   </section>
 
-  <section id="existing">
-    <div class="wrap">
-      <div class="existingWrap">
-        <div class="existingText">
-          <div class="sectionLabel">Already have Azure SQL data?</div>
-          <h2>{{ page.existing.heading }}</h2>
-          <p>{{ page.existing.text }}</p>
-          <div class="pills">
-            {%- for p in page.existing.pills %}<span class="pill">{{ p }}</span>{% endfor %}
-          </div>
-          <a class="inlineLink" href="{{ '/build/rag.html' | relative_url }}" data-event="existing_data_clicked">Build AI on existing Azure SQL data →</a>
-        </div>
-        <div class="sqlVisual">
-          <small>One database</small>
-          <pre id="existing-sql">{{ page.existing.sql }}</pre>
-        </div>
-      </div>
-    </div>
-  </section>
-
+  <section id="existing"><div class="wrap"><div class="sectionHead"><h2>Already have Azure SQL data?</h2><p>Use an existing development database with the examples above. Review permissions and schema changes before running a prompt.</p><a class="inlineLink" href="{{ "/build/rag-app.html" | relative_url }}">Explore the RAG example</a></div></div></section>
+  <section id="continuity"><div class="wrap"><div class="sectionHead"><h2>{{ page.continuity.heading }}</h2><p>{{ page.continuity.text }}</p><a class="inlineLink" href="{{ site.container_signup }}">Sign up for the Private Preview</a> · <a class="inlineLink" href="{{ site.container_site }}/getting-started.html">Container quickstart</a></div></div></section>
+  <section id="faq"><div class="wrap"><div class="sectionHead"><h2>Before you build</h2></div><details><summary>What do I need?</summary><p>A coding agent, the runtime for your selected example, and access to an Azure SQL development database. The RAG example also needs embedding and generation services.</p></details><details><summary>Have these prompts been validated?</summary><p>These are review drafts. Engineering will test the exact published prompts and record supported environments before launch.</p></details><details><summary>Can an agent read this site?</summary><p>Use the Markdown link on each page or the <a href="{{ '/for-agents.html' | relative_url }}">agent-readable site guide</a>.</p></details></div></section>
   {{ content }}
 </main>
 

@@ -4,7 +4,7 @@
 ---
 # Azure SQL Developer Hub
 
-> The front door for building with Azure SQL Database in the age of AI-assisted development. Three ways in: run the Azure SQL Database engine locally in a container (Private Preview), create a database in the Microsoft Azure cloud on the free offer, or install the agent skills and let an AI coding agent do the setup. Every page is authored as markdown and published twice: append `.md` to any page URL for the source.
+> Azure SQL Developer Hub: three featured cloud-first application prompt drafts, portal setup guidance and optional skills resources. Engineering validation is pending. Earlier scenario pages remain available for review. Replace `.html` with `.md` for a page's Markdown twin; the homepage is `/index.md`.
 
 For the whole site as one document, read {{ '/llms-full.txt' | absolute_url }}.
 For the machine-readable surface guide, read {{ '/for-agents.md' | absolute_url }}.
@@ -37,3 +37,12 @@ For the machine-readable surface guide, read {{ '/for-agents.md' | absolute_url 
 ## Status
 - The Azure SQL Database container is in Private Preview.
 - This site is in active development.
+
+## Draft cloud application prompts
+
+- [Build a JavaScript app]({{ '/build/javascript-app.md' | absolute_url }}): Draft, validation pending.
+- [Create a Python API]({{ '/build/python-api.md' | absolute_url }}): Draft, validation pending.
+- [Scaffold a .NET app]({{ '/build/dotnet-app.md' | absolute_url }}): Draft, validation pending.
+- [Build a RAG workflow]({{ '/build/rag-app.md' | absolute_url }}): Draft, validation pending.
+- [Build a serverless API]({{ '/build/serverless-api.md' | absolute_url }}): Draft, validation pending.
+- [React to database changes]({{ '/build/event-driven-app.md' | absolute_url }}): Draft, validation pending.

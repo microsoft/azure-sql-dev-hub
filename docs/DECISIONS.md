@@ -23,3 +23,10 @@ reversed, add a new line saying so and why.
 - 2026-09-08: no .well-known discovery files. No current artifact defines one: there is no Azure SQL MCP endpoint yet, and llms.txt lives at the site root by convention. Inventing a discovery surface that points at nothing would be worse than absence; /for-agents documents what exists.
 - 2026-09-08: telemetry stays behind one track() that logs to the console for the demo and fans out to App Insights when configured. quickstart_start fires only on user interaction, not on page load as in the mockup, so the metric means a person chose a path.
 - 2026-09-08: repository visibility changed from private to internal, on the owner's decision, so everyone in the Microsoft enterprise can view the demo site after signing in. The Pages site stays privately published on the same generated domain; nothing is exposed to the public internet. Public visibility was considered and rejected for a pre-release demo.
+
+- 2026-09-11: propose six cloud-first application prompts across JavaScript, Python, and .NET before engineering handoff. Preserve existing scenario URLs. Container setup becomes an optional signup path; new prompts remain explicitly draft until reproduced and validated.
+# Decisions for the SQLCon review
+
+2026-09-16: Feature three cloud-first draft prompts for a focused review; retain earlier URLs, and require engineering execution evidence before launch claims.
+2026-09-16: Engineering owns both Clarity telemetry implementation and prompt validation; PM owns content, mockup approval and launch messaging.
+2026-09-16: Exclude local output packages from site publishing and agent indexes; omit unavailable video placeholders.

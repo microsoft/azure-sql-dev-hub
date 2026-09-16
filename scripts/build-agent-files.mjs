@@ -19,7 +19,7 @@ import yaml from 'js-yaml';
 
 const SITE = '_site';
 const SKIP_FILES = new Set(['README.md', 'CONTRIBUTING.md', 'CODE_OF_CONDUCT.md', 'SECURITY.md', 'SUPPORT.md']);
-const SKIP_DIRS = new Set(['_site', '_includes', '_layouts', 'docs', 'scripts', 'node_modules', '.github', '.git', 'assets', 'vendor', '.jekyll-cache']);
+const SKIP_DIRS = new Set(['_site', '_includes', '_layouts', 'docs', 'scripts', 'node_modules', '.github', '.git', 'assets', 'vendor', '.jekyll-cache', 'outputs']);
 
 // Reading order for llms-full.txt. Anything discovered but not listed appends
 // alphabetically, so a new page is never silently dropped.
@@ -102,15 +102,9 @@ function homeToMarkdown(d) {
     out.push(`${m.link.label.replace(/\s*→\s*$/, '')}: ${m.link.href}`, '');
   }
 
-  const c = d.continuity || {};
-  out.push('## Local to cloud {#continuity}', '', c.heading, '', c.text, '',
-    'Local environment:', '', fence(c.local_env, 'text'), '',
-    'In Azure:', '', fence(c.azure_env, 'text'), '',
-    'Same application code. Only the connection target changes.', '');
-
   out.push('## Build {#build}', '', 'Start with the job you need done:', '');
   for (const s of d.scenarios || []) {
-    out.push(`- [${s.title}](build/${s.slug}.md): ${s.blurb}`);
+    out.push(`### [${s.title}](build/${s.slug}.md)`, "", s.tag || "", "", s.blurb, "", "Draft prompt. Engineering validation pending.", "", fence(s.prompt, "text"), "");
   }
   out.push('');
 
@@ -129,9 +123,7 @@ function homeToMarkdown(d) {
   if (sk.chips) out.push(`Skills include: ${sk.chips.map((x) => '`' + x + '`').join(' ')}`, '');
   if (sk.mcp_note) out.push(sk.mcp_note, '');
 
-  const e = d.existing || {};
-  out.push('## Already have Azure SQL data? {#existing}', '', e.heading, '', e.text, '',
-    fence(e.sql, 'sql'), '');
+  out.push('## Existing data {#existing}', '', 'Use an existing development database. Review permissions and schema changes before running a prompt.', '', '## Optional local development {#continuity}', '', d.continuity.heading, '', d.continuity.text, '');
   return out.join('\n');
 }
 
@@ -143,7 +135,7 @@ function scenarioToMarkdown(d) {
     '## Skill', '', d.skill.note, ''];
   if (d.skill.install) out.push(fence(d.skill.install, 'bash'), '');
   out.push(`## Docs`, '', `${d.docs.label}: ${d.docs.href}`, '',
-    '## Walkthrough', '', 'Video: coming soon.', '');
+    '');
   return out.join('\n');
 }
 
