@@ -8,14 +8,12 @@
     <div class="navlinks">
       <a href="{{ '/' | relative_url }}#get-running">Quickstarts</a>
       <a href="{{ '/' | relative_url }}#build">Build</a>
-      <a href="{{ '/' | relative_url }}#prompts">Prompts</a>
       <a href="{{ '/' | relative_url }}#skills">Skills</a>
       <a href="{{ '/' | relative_url }}#watch">Videos</a>
-      <a href="{{ site.azure_sql_docs }}" rel="noopener">Docs</a>
     </div>
-    <div class="navright" hidden>
-      <a class="utility" href="{{ md_path | default: '/index.md' | relative_url }}" data-event="md_fetch">.md</a>
-      <a class="utility" href="{{ '/llms.txt' | relative_url }}">llms.txt</a>
+    <div class="navright">
+      <a class="utility" href="https://microsoft.qualtrics.com/jfe/form/SV_9ytUzrnNnbcxPlI" target="_blank" rel="noopener" data-event="nav_feedback">Submit feedback</a>
+      <a class="utility" href="{{ site.repo | default: 'https://github.com/microsoft/azure-sql-dev-hub' }}" target="_blank" rel="noopener" data-event="nav_star">&#9734; Give a star</a>
     </div>
   </div>
 </nav>
