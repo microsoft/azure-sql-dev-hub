@@ -36,8 +36,8 @@ Ask for the server and database names. Do not create a database.
 ```bash
 func init TasksApi --worker-runtime dotnet-isolated --target-framework net8.0
 cd TasksApi
-dotnet add package Microsoft.Azure.Functions.Worker.Extensions.Sql
-dotnet add package Microsoft.Azure.Functions.Worker.Extensions.Http
+dotnet add package Microsoft.Azure.Functions.Worker.Extensions.Sql --version 3.1.536
+dotnet add package Microsoft.Azure.Functions.Worker.Extensions.Http --version 3.3.0
 ```
 
 ### 3. Configure the connection, identity over secrets
@@ -74,6 +74,7 @@ Create `Task.cs`:
 
 ```csharp
 public record TaskItem(int? id, string title, bool done);
+public record CreateTaskRequest(string? title);
 ```
 
 Create `TasksFunctions.cs`:
@@ -102,18 +103,40 @@ public class TasksFunctions
     public async Task<CreateTaskOutput> CreateTask(
         [HttpTrigger(AuthorizationLevel.Function, "post", Route = "tasks")] HttpRequestData req)
     {
-        var body = await JsonSerializer.DeserializeAsync<TaskItem>(req.Body);
-        var item = new TaskItem(null, body!.title, false);
+        CreateTaskRequest? body;
+        try
+        {
+            body = await JsonSerializer.DeserializeAsync<CreateTaskRequest>(req.Body);
+        }
+        catch (JsonException)
+        {
+            return await BadRequest(req, "Request body must be valid JSON.");
+        }
+
+        var title = body?.title?.Trim();
+        if (string.IsNullOrEmpty(title) || title.Length > 200)
+        {
+            return await BadRequest(req, "Title must contain between 1 and 200 characters.");
+        }
+
+        var item = new TaskItem(null, title, false);
         var res = req.CreateResponse(HttpStatusCode.Created);
         await res.WriteStringAsync(JsonSerializer.Serialize(item));
         return new CreateTaskOutput { Task = item, HttpResponse = res };
+    }
+
+    private static async Task<CreateTaskOutput> BadRequest(HttpRequestData req, string message)
+    {
+        var res = req.CreateResponse(HttpStatusCode.BadRequest);
+        await res.WriteStringAsync(JsonSerializer.Serialize(new { error = message }));
+        return new CreateTaskOutput { HttpResponse = res };
     }
 }
 
 public class CreateTaskOutput
 {
     [SqlOutput("dbo.tasks", "SqlConnectionString")]
-    public TaskItem Task { get; set; } = default!;
+    public TaskItem? Task { get; set; }
     public HttpResponseData HttpResponse { get; set; } = default!;
 }
 ```
@@ -139,6 +162,7 @@ Before deploying, put Microsoft Entra authentication in front of the app (App Se
 
 - `GET /api/tasks` returns rows read from `dbo.tasks` through `[SqlInput]`.
 - `POST /api/tasks` inserts a row through `[SqlOutput]`; the next `GET` shows it.
+- Malformed JSON and titles outside 1 to 200 characters return 400 without writing a row.
 - `SqlConnectionString` contains no password. `Authentication=Active Directory Default`, `Encrypt=True`, `TrustServerCertificate=False`.
 - The SQL in `[SqlInput]` is a fixed statement, not built from request input.
 - No function uses `AuthorizationLevel.Anonymous`.

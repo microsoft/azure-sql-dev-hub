@@ -37,10 +37,10 @@ Ask for the server name and database name if they are not in `.env`. Do not crea
 ### 2. Create the project
 
 ```bash
-npx create-next-app@latest sql-tasks --typescript --app --no-tailwind --eslint --src-dir --import-alias "@/*"
+npx create-next-app@16.3.4 sql-tasks --typescript --app --no-tailwind --eslint --src-dir --import-alias "@/*"
 cd sql-tasks
-npm install mssql @azure/identity
-npm install -D @types/mssql
+npm install mssql@12.7.2 @azure/identity@4.13.3
+npm install -D @types/mssql@12.3.0 tsx@4.23.13
 ```
 
 ### 3. Configure the connection, identity over secrets
