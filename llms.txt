@@ -1,39 +1,36 @@
----
-# Front matter tells Jekyll to resolve the links below against the site config,
-# so a baseurl change cannot leave this file pointing at the wrong host.
----
 # Azure SQL Developer Hub
 
-> The front door for building with Azure SQL Database in the age of AI-assisted development. Three ways in: run the Azure SQL Database engine locally in a container (Private Preview), create a database in the Microsoft Azure cloud on the free offer, or install the agent skills and let an AI coding agent do the setup. Every page is authored as markdown and published twice: append `.md` to any page URL for the source.
+> The front door for building applications on Azure SQL Database with an AI coding agent. Start free in the cloud, hand your agent a build prompt, and verify a working app. Built for AI workloads: native vector search, in-engine embeddings, JSON, and row-level security. Agent skills teach Claude Code, GitHub Copilot, Codex, and Cursor how the engine works.
 
-For the whole site as one document, read {{ '/llms-full.txt' | absolute_url }}.
-For the machine-readable surface guide, read {{ '/for-agents.md' | absolute_url }}.
+_Last updated: September 2026._
 
-## Pages
-- [Home]({{ '/index.md' | absolute_url }}): quickstart commands for the agent, local container, and Azure CLI paths; the six build scenarios; featured prompts; per-agent skill install commands.
-- [Start a database]({{ '/build/start-database.md' | absolute_url }}): container verification with sqlcmd, plus the Azure free offer portal path.
-- [Connect your app]({{ '/build/connect-app.md' | absolute_url }}): connection-string configuration and a parameterized query with the current driver.
-- [Wire up RAG]({{ '/build/rag.md' | absolute_url }}): vector column schema and cosine similarity search with VECTOR_DISTANCE.
-- [Multi-tenant setup]({{ '/build/multi-tenant.md' | absolute_url }}): Row-Level Security with a SESSION_CONTEXT predicate and security policy.
-- [Fix a slow query]({{ '/build/query-performance.md' | absolute_url }}): capture IO and timing statistics, then tune from evidence.
-- [Ship local to cloud]({{ '/build/local-to-cloud.md' | absolute_url }}): move the app from the local engine to Azure SQL Database through configuration.
-- [Prompt library]({{ '/prompts.md' | absolute_url }}): copyable build prompts, plus the container repository's prompt catalog.
-- [For agents]({{ '/for-agents.md' | absolute_url }}): every machine-readable surface of this site.
+> Every page on this site has a markdown twin at the same path with `.md`. The whole site in one file is at /llms-full.txt.
+
+## Documentation
+- [Get running](https://microsoft.github.io/azure-sql-dev-hub/#get-running): create a free Azure SQL Database, verify the connection, pick a path.
+- [Skills](https://aka.ms/azuresql-skills): what the agent skills do, per-tool install, and the full catalog.
+- [Before you build](https://microsoft.github.io/azure-sql-dev-hub/#faq): what you need, what it costs, whether you need the container, whether it is safe to let an agent write to your database.
+- [For agents](https://microsoft.github.io/azure-sql-dev-hub/for-agents.md): how this site is laid out for machine readers.
+
+## Build prompts
+Copy-and-run prompts to hand your AI coding agent. Each targets Azure SQL Database in the cloud and ends in a working app, with validation rules at the end:
+- [Scaffold a JavaScript app (Next.js, mssql driver, Entra)](https://microsoft.github.io/azure-sql-dev-hub/build/javascript-app.md)
+- [Create a Python API (FastAPI, mssql-python, Entra token)](https://microsoft.github.io/azure-sql-dev-hub/build/python-api.md)
+- [Wire up RAG (Python, native VECTOR, hosted embeddings)](https://microsoft.github.io/azure-sql-dev-hub/build/rag-app.md)
+- [Go serverless (.NET, Azure Functions SQL bindings)](https://microsoft.github.io/azure-sql-dev-hub/build/serverless-api.md)
+- [React to row changes (.NET, SQL trigger with Change Tracking)](https://microsoft.github.io/azure-sql-dev-hub/build/event-driven-app.md)
+- [Make it multi-tenant (JavaScript, row-level security)](https://microsoft.github.io/azure-sql-dev-hub/build/multi-tenant.md)
 
 ## Key facts
-- Local: the Azure SQL Database container image is `sqldbpreview-dpgaeqhmgphzd4bk.azurecr.io/azure-sql/db-dev`, x64 (linux/amd64). On a host that is not x64, add `--platform linux/amd64`. The registry is private during the Private Preview; credentials come from signing up at https://aka.ms/sqldbcontainerpreview-signup.
-- Cloud: the Azure SQL Database free offer gives 100,000 vCore seconds of serverless compute, 32 GB of data, and 32 GB of backup storage per database per month, for up to 10 databases per Azure subscription. It needs an Azure account and subscription. The CLI path is `az sql db create ... --use-free-limit --free-limit-exhaustion-behavior AutoPause`.
-- Agent: 17 agent skills install with `npx skills add microsoft/azure-sql-database-container` in Claude Code, Codex, Cursor, and VS Code with GitHub Copilot. Claude Code and Codex can also install them as a native plugin with `/plugin marketplace add microsoft/azure-sql-database-container`.
-- AI-native: native vector data type, VECTOR_DISTANCE similarity search, and in-database embeddings. Exact top-k search is recommended up to roughly 50,000 candidate vectors; DiskANN vector indexes for approximate search are in preview.
-- Connection: TCP port 1433, SQL login (sa) locally, Microsoft Entra in the cloud. Moving from the local container to Azure SQL Database in the cloud is a connection-string change, not a code change.
-- MCP: an Azure SQL MCP endpoint is not published yet. The skills optionally use the public Microsoft Learn MCP (https://learn.microsoft.com/api/mcp) as a live documentation layer.
+- Target: Azure SQL Database in the Microsoft Azure cloud. The free offer covers every prompt on this site, within its limits. Connect with Microsoft Entra; never a password in code or config.
+- Authentication by driver: `mssql` (Node) uses `authentication: { type: "azure-active-directory-default" }`; `Microsoft.Data.SqlClient` (.NET) uses `Authentication=Active Directory Default`; `mssql-python` acquires a token with `azure-identity` and passes it to the driver.
+- AI-native: native `VECTOR` type, `VECTOR_DISTANCE` similarity search, `AI_GENERATE_EMBEDDINGS`, `CREATE EXTERNAL MODEL`, native JSON, RegEx. Insert vectors as JSON arrays cast through `NVARCHAR(MAX)` first, or a long embedding is sent as ntext and fails with error 529.
+- Event-driven: the Azure Functions SQL trigger requires Change Tracking on the database and the table. Output bindings upsert with `MERGE` and need a primary key and compatibility level 130 or higher.
+- Multi-tenant: row-level security with a filter and block predicate keyed on `SESSION_CONTEXT`, set per connection with `sp_set_session_context`.
+- The free offer runs on serverless compute with auto-pause; the first connection to a paused database can return error 40613 and succeeds on retry.
+- Local development: the Azure SQL Database container runs the same engine offline. Private Preview; sign up at https://aka.ms/sqldbcontainerpreview-signup. Its prompts are local-scoped and live at https://microsoft.github.io/azure-sql-database-container/.
 
-## Related sites
-- [Azure SQL Database container]({{ site.container_site }}): container documentation, prerequisites, getting started, agent skills, known limitations.
-- [Container repository]({{ site.container_repo }}): source, skills, build prompts, and issues.
-- [Azure SQL Database free offer]({{ site.azure_free_offer }}): current limits, behavior at the monthly cap, and exclusions.
-- [Azure SQL documentation]({{ site.azure_sql_docs }}): the full product documentation.
-
-## Status
-- The Azure SQL Database container is in Private Preview.
-- This site is in active development.
+## Optional
+- [Repository](https://github.com/microsoft/azure-sql-dev-hub), short link https://aka.ms/azuresql-hub
+- [Install the agent skills](https://aka.ms/azuresql-skills): `npx skills add microsoft/azure-sql-skills` (Claude Code, Codex, Cursor, VS Code with GitHub Copilot); Claude Code plugin with `claude plugin marketplace add microsoft/azure-sql-skills` then `claude plugin install azure-sql-skills@azure-sql-skills`; or `gh skill install microsoft/azure-sql-skills --all --agent <claude-code|github-copilot|cursor>`.
+- [Azure SQL Database container](https://microsoft.github.io/azure-sql-database-container/): the local engine, Private Preview.

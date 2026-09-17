@@ -1,0 +1,138 @@
+---
+layout: page
+title: Scaffold a JavaScript app
+description: Scaffold a JavaScript app on Azure SQL Database
+tag: JavaScript
+last_verified: 2026-09-16
+validated: false
+---
+
+# AI Prompt: Scaffold a JavaScript app on Azure SQL Database
+
+**Role:** You are an expert full-stack engineer scaffolding a small web application in the current project, using Azure SQL Database in the cloud as the only data store.
+
+**Purpose:** Stand up a Next.js task-tracking app that connects to an existing Azure SQL Database with Microsoft Entra, creates the schema, seeds a few rows, and renders them on one page. No passwords in code or config.
+
+**Scope:**
+- Assumes Node.js 20+ and an Azure SQL Database that already exists (free tier is fine). The person running this has signed in with `az login` and their identity can connect to the database.
+- Uses the `mssql` package, which wraps `tedious`. That is the only place the name `tedious` should appear.
+- If the project already has code, add to it. Do not replace an existing framework.
+
+Read the entire instruction set before executing.
+
+---
+
+## Instructions
+
+Identify the project's package manager (`npm`, `yarn`, `pnpm`, `bun`) and use it for all commands. Examples below use `npm`.
+
+### 1. Confirm the target database
+
+Ask for the server name and database name if they are not in `.env`. Do not create a database; it must already exist. Expect the form `<server>.database.windows.net` and a database on it.
+
+### 2. Create the project
+
+```bash
+npx create-next-app@latest sql-tasks --typescript --app --no-tailwind --eslint --src-dir --import-alias "@/*"
+cd sql-tasks
+npm install mssql @azure/identity
+npm install -D @types/mssql
+```
+
+### 3. Configure the connection, identity over secrets
+
+Create `.env.local`:
+
+```dotenv
+SQL_SERVER=<server>.database.windows.net
+SQL_DATABASE=<database>
+```
+
+Create `src/lib/db.ts`. One pool at module scope, never one per request; a pool per invocation exhausts SNAT ports on serverless hosts.
+
+```ts
+import sql from "mssql";
+
+const config: sql.config = {
+  server: process.env.SQL_SERVER!,
+  database: process.env.SQL_DATABASE!,
+  authentication: { type: "azure-active-directory-default" },
+  options: { encrypt: true, trustServerCertificate: false },
+  pool: { max: 10, min: 0, idleTimeoutMillis: 30000 },
+};
+
+let pool: Promise<sql.ConnectionPool> | undefined;
+export function getPool() {
+  pool ??= new sql.ConnectionPool(config).connect();
+  return pool;
+}
+```
+
+### 4. Create the schema and seed data
+
+Create `scripts/init.ts` and run it once with `npx tsx scripts/init.ts`:
+
+```ts
+import { getPool } from "../src/lib/db";
+
+const pool = await getPool();
+await pool.request().batch(`
+IF OBJECT_ID('dbo.tasks') IS NULL
+CREATE TABLE dbo.tasks (
+  id INT IDENTITY(1,1) PRIMARY KEY,
+  title NVARCHAR(200) NOT NULL,
+  done BIT NOT NULL DEFAULT 0,
+  created_at DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME()
+);
+IF NOT EXISTS (SELECT 1 FROM dbo.tasks)
+INSERT INTO dbo.tasks (title) VALUES (N'Connect the app'), (N'Render the list'), (N'Ship it');
+`);
+console.log("schema ready");
+await pool.close();
+```
+
+### 5. Render the list
+
+Replace `src/app/page.tsx`:
+
+```tsx
+import { getPool } from "@/lib/db";
+
+export const dynamic = "force-dynamic";
+
+export default async function Home() {
+  const pool = await getPool();
+  const result = await pool.request().query<{ id: number; title: string; done: boolean }>(
+    "SELECT id, title, done FROM dbo.tasks ORDER BY created_at"
+  );
+  return (
+    <main style={{ padding: 32, fontFamily: "system-ui" }}>
+      <h1>Tasks</h1>
+      <ul>{result.recordset.map(t => <li key={t.id}>{t.done ? "✓ " : ""}{t.title}</li>)}</ul>
+    </main>
+  );
+}
+```
+
+Run it:
+
+```bash
+npm run dev
+```
+
+Open http://localhost:3000. Three tasks should render.
+
+---
+
+## Validation rules
+
+- The app starts and the page renders rows read from `dbo.tasks` on Azure SQL Database.
+- No password anywhere: `.env.local` holds only server and database names; authentication is `azure-active-directory-default`.
+- `encrypt` is `true` and `trustServerCertificate` is `false`. Never set `trustServerCertificate: true` against a cloud database.
+- Exactly one connection pool, created at module scope.
+
+## Do not
+
+- Do not create the database. It exists; ask for its name.
+- Do not fall back to SQL authentication or `ActiveDirectoryPassword`.
+- Do not open a new pool per request or per component.

@@ -435,3 +435,6 @@ _site/
 node_modules/
 Gemfile.lock
 _config_pages.yml
+
+# Local review packages
+outputs/

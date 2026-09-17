@@ -1,5 +1,8 @@
 # Decisions
 
+- 2026-09-16: Keep validation tracking and agent-file documentation in repository docs; remove the For agents page from publishing and human navigation while retaining machine-readable files and alternate links.
+- 2026-09-16: Use visual links to existing SQL videos without auto-playing or embedding a player; retain a complete hero without a demo placeholder.
+
 One dated line per irreversible or debatable choice. Append to this file in any
 pull request that makes one. Do not rewrite past entries: if a decision is
 reversed, add a new line saying so and why.
@@ -23,3 +26,20 @@ reversed, add a new line saying so and why.
 - 2026-09-08: no .well-known discovery files. No current artifact defines one: there is no Azure SQL MCP endpoint yet, and llms.txt lives at the site root by convention. Inventing a discovery surface that points at nothing would be worse than absence; /for-agents documents what exists.
 - 2026-09-08: telemetry stays behind one track() that logs to the console for the demo and fans out to App Insights when configured. quickstart_start fires only on user interaction, not on page load as in the mockup, so the metric means a person chose a path.
 - 2026-09-08: repository visibility changed from private to internal, on the owner's decision, so everyone in the Microsoft enterprise can view the demo site after signing in. The Pages site stays privately published on the same generated domain; nothing is exposed to the public internet. Public visibility was considered and rejected for a pre-release demo.
+
+- 2026-09-11: propose six cloud-first application prompts across JavaScript, Python, and .NET before engineering handoff. Preserve existing scenario URLs. Container setup becomes an optional signup path; new prompts remain explicitly draft until reproduced and validated.
+# Decisions for the SQLCon review
+
+2026-09-16: Feature three cloud-first draft prompts for a focused review; retain earlier URLs, and require engineering execution evidence before launch claims.
+2026-09-16: Engineering owns both Clarity telemetry implementation and prompt validation; PM owns content, mockup approval and launch messaging.
+2026-09-16: Exclude local output packages from site publishing and agent indexes; omit unavailable video placeholders.
+
+## 2026-09-16: Hub prompts are cloud-scoped, and need a cloud accuracy baseline
+
+The six build prompts target Azure SQL Database in the cloud (free offer), not the container. The container is Private Preview until Ignite, so a prompt that needs it would fail for a stranger on launch day. The container's own prompts stay local-scoped on the container site; the Hub's stay cloud-scoped. Same jobs, different target, no duplication.
+
+Consequence for `hub-new-prompt` (contributor skill, drafted, not yet implemented): its accuracy baseline is the container baseline (image, `EngineEdition=5`, `SQL_CONNECTION_STRING`, `--platform linux/amd64`). Cloud prompts cannot hold it. They need a second baseline: Entra over passwords, `Encrypt=true` and `TrustServerCertificate=false`, the 40613 retry on auto-pause, the 529 vector cast, primary key and compat level 130 for Functions output bindings. The six prompts follow that baseline today; the skill should encode it before it gates anything.
+
+## 2026-09-16: Homepage design and prompt files
+
+Human layer added on top of the agent layer: hero video with chapter stamps, three setup paths as tabs, six scenario cards with illustrations, workload tiles, agent selector that switches the install command, video reel. Prompts moved from short front matter strings to full instruction sets in `build/*.md` (role, purpose, scope, numbered steps, validation rules, do-nots), matching the container site's prompt structure. The homepage Copy button fetches the page's markdown twin, so the card and the file cannot drift. `dotnet-app` replaced by `multi-tenant`; the .NET framework is covered by the serverless and event-driven scenarios. All install commands and skills links point at `microsoft/azure-sql-skills` (aka.ms/azuresql-skills), which launches at SQLCon alongside the Hub.

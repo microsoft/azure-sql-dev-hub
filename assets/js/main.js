@@ -74,12 +74,14 @@
 
   function copyText(text, btn) {
     if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(text).then(function () { flash(btn); }, function () {});
+      return navigator.clipboard.writeText(text).then(function () { flash(btn); return true; }, function () { btn.textContent = "Select text to copy"; return false; });
     } else {
       var ta = document.createElement("textarea");
       ta.value = text; document.body.appendChild(ta); ta.select();
-      try { document.execCommand("copy"); flash(btn); } catch (e) {}
+      var copied = false;
+      try { copied = document.execCommand("copy"); if (copied) flash(btn); } catch (e) {}
       document.body.removeChild(ta);
+      return Promise.resolve(copied);
     }
   }
 
@@ -94,14 +96,14 @@
   document.querySelectorAll("[data-copy]").forEach(function (btn) {
     btn.addEventListener("click", function () {
       var target = document.querySelector(btn.getAttribute("data-copy"));
-      var raw = target ? target.innerText : "";
+      var raw = target ? target.textContent : "";
       var isPrompt = btn.getAttribute("data-copy-kind") === "prompt";
       var text = isPrompt ? raw.trim() : normalizeCommand(raw);
-      copyText(text, btn);
+      copyText(text, btn).then(function (copied) { if (!copied) return;
       track(
         btn.getAttribute("data-copy-event") || (isPrompt ? "copy_prompt" : commandEvent(text, null)),
         { source: btn.getAttribute("data-copy-source") || "page" }
-      );
+      ); });
     });
   });
 
@@ -116,8 +118,8 @@
     btn.addEventListener("click", function () {
       var code = pre.querySelector("code") || pre;
       var text = normalizeCommand(code.innerText);
-      copyText(text, btn);
-      track(commandEvent(text, /npx |plugin /.test(text) ? null : "copy_code"), { source: "prose" });
+      var isPrompt = code.classList.contains("language-text");
+      copyText(text, btn).then(function (copied) { if (copied) track(isPrompt ? "copy_prompt" : commandEvent(text, /npx |plugin /.test(text) ? null : "copy_code"), { source: "prose" }); });
     });
     pre.appendChild(btn);
   });

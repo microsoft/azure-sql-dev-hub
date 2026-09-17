@@ -45,6 +45,6 @@ jobs:
           test -s _site/llms.txt
           test -s _site/llms-full.txt
           test -s _site/build/rag.md
-          test -s _site/for-agents.md
+          test ! -e _site/for-agents.html
           grep -q 'rel="alternate" type="text/markdown"' _site/index.html
           grep -q 'rel="alternate" type="text/markdown"' _site/build/rag.html
