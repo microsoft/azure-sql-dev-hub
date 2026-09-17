@@ -104,7 +104,7 @@ function homeToMarkdown(d) {
 
   out.push('## Build {#build}', '', 'Start with the job you need done:', '');
   for (const s of d.scenarios || []) {
-    out.push(`### [${s.title}](build/${s.slug}.md)`, "", s.tag || "", "", s.blurb, "", "Draft prompt. Engineering validation pending.", "", fence(s.prompt, "text"), "");
+    out.push(`### [${s.title}](build/${s.slug}.md)`, "", s.tag || "", "", s.blurb, "", fence(s.prompt, "text"), "");
   }
   out.push('');
 
@@ -124,6 +124,9 @@ function homeToMarkdown(d) {
   if (sk.mcp_note) out.push(sk.mcp_note, '');
 
   out.push('## Existing data {#existing}', '', 'Use an existing development database. Review permissions and schema changes before running a prompt.', '', '## Optional local development {#continuity}', '', d.continuity.heading, '', d.continuity.text, '');
+  for (const v of d.videos || []) out.push(`## ${v.title}`, '', v.text, '', `[${v.label}](${v.href})`, '');
+  out.push('## Before you build', '');
+  for (const f of d.faqs || []) out.push(`### ${f.question}`, '', f.answer, '');
   return out.join('\n');
 }
 
@@ -140,7 +143,7 @@ function scenarioToMarkdown(d) {
 }
 
 const config = yaml.load(readFileSync('_config.yml', 'utf8')) || {};
-const found = findPages('.', '');
+const found = findPages('.', '').filter(f => splitFrontMatter(readFileSync(f, 'utf8')).data.published !== false);
 const pages = [
   ...ORDER.filter((f) => found.includes(f)),
   ...found.filter((f) => !ORDER.includes(f)).sort(),

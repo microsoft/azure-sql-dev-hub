@@ -1,10 +1,10 @@
 ---
 layout: page
 title: Build prompt library
-description: Three featured cloud-first draft prompts for review.
+description: Cloud-first application prompts for Azure SQL.
 ---
 
-These prompts are drafts pending engineering validation. Open a page for the complete prompt, prerequisites and expected result.
+Choose an application example for Azure SQL Database. Open a page for the complete prompt, prerequisites and expected result.
 
 ## Build a JavaScript app
 

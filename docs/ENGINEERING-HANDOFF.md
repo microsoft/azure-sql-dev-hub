@@ -4,6 +4,8 @@ September 16, 2026. PM owns content and mockup approval. Engineering owns prompt
 
 ## Prompt validation
 
+Customer pages use final-facing copy and omit internal draft/status messages. This is a presentation decision, not validation evidence: all six new prompt sources still need engineering execution, fixes and recorded results before public launch. Three are currently featured. Confirm the six-workflow versus three-workflow launch scope with PM before release. Keep this checklist outside the published site.
+
 Start with the featured JavaScript app, Python API and Python RAG drafts. Confirm the final launch selection with PM. Execute the exact published prompts in documented environments, check the resulting application and database operations, record agent/model and runtime versions, and return one consolidated correction list. RAG requires available embedding and generation services.
 
 Extend the existing evaluation lab where appropriate. Use explicit outcome checks and retained run evidence. Include independent review instead of relying only on the executing agent's self-assessment. Record preview access requirements and limitations. A page preview or successful copy is not proof that an application works.

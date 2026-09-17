@@ -56,7 +56,7 @@
                         data-copy-event="{{ m.copy_event }}" data-copy-source="quickstart-{{ m.key }}"
                         aria-label="Copy the {{ m.name }} command">Copy</button>
               </div>
-              {%- if m.prompt %}
+              {%- if m.prompt and m.prompt != empty %}
               <div class="promptBox">
                 <small>Then ask</small>
                 <span id="qs-prompt-{{ m.key }}">{{ m.prompt }}</span>
@@ -96,7 +96,7 @@
       <div class="sectionHead">
         <div class="sectionLabel">Build</div>
         <h2>Start with the job you need done.</h2>
-        <p>Three draft examples for JavaScript and Python. Copy a task or open its requirements and expected result. End-to-end engineering validation is pending.</p>
+        <p>Choose a JavaScript or Python example. Review what you will build, check the prerequisites, and copy the prompt.</p>
       </div>
       <div class="scenarioGrid">
         {%- for s in page.scenarios %}
@@ -109,7 +109,7 @@
             <button type="button" data-copy="#build-prompt-{{ s.slug }}" data-copy-kind="prompt" data-copy-source="build-{{ s.slug }}">Copy prompt</button>
             <a href="{{ '/build/' | append: s.slug | append: '.html' | relative_url }}"
                data-event="gallery_card_open" data-event-scenario-id="{{ s.slug }}">Open scenario →</a>
-            <span>Draft</span>
+            <span>{{ s.tag }}</span>
           </div>
         </article>
         {%- endfor %}
@@ -117,7 +117,7 @@
     </div>
   </section>
 
-  <section class="prompts" id="prompts"><div class="wrap"><div class="sectionHead"><div class="sectionLabel">Prompt library</div><h2>Know what a working result looks like.</h2><p>Each example includes a complete draft prompt, prerequisites, and acceptance criteria. Test results will be added after engineering validation.</p></div><a class="inlineLink" href="{{ "/prompts.html" | relative_url }}">Browse the three featured prompts</a></div></section>
+  <section class="prompts" id="prompts"><div class="wrap"><div class="sectionHead"><div class="sectionLabel">Prompt library</div><h2>Know what a working result looks like.</h2><p>Each example brings together the prompt, prerequisites, and expected result so you can follow the steps and check your work.</p></div><a class="inlineLink" href="{{ "/prompts.html" | relative_url }}">Browse the three featured prompts</a></div></section>
   <section class="skillsSection" id="skills">
     <div class="wrap">
       <div class="sectionHead">
@@ -141,7 +141,8 @@
 
   <section id="existing"><div class="wrap"><div class="sectionHead"><h2>Already have Azure SQL data?</h2><p>Use an existing development database with the examples above. Review permissions and schema changes before running a prompt.</p><a class="inlineLink" href="{{ "/build/rag-app.html" | relative_url }}">Explore the RAG example</a></div></div></section>
   <section id="continuity"><div class="wrap"><div class="sectionHead"><h2>{{ page.continuity.heading }}</h2><p>{{ page.continuity.text }}</p><a class="inlineLink" href="{{ site.container_signup }}">Sign up for the Private Preview</a> · <a class="inlineLink" href="{{ site.container_site }}/getting-started.html">Container quickstart</a></div></div></section>
-  <section id="faq"><div class="wrap"><div class="sectionHead"><h2>Before you build</h2></div><details><summary>What do I need?</summary><p>A coding agent, the runtime for your selected example, and access to an Azure SQL development database. The RAG example also needs embedding and generation services.</p></details><details><summary>Have these prompts been validated?</summary><p>These are review drafts. Engineering will test the exact published prompts and record supported environments before launch.</p></details><details><summary>Can an agent read this site?</summary><p>Use the Markdown link on each page or the <a href="{{ '/for-agents.html' | relative_url }}">agent-readable site guide</a>.</p></details></div></section>
+  <section id="watch"><div class="wrap"><div class="sectionHead"><div class="sectionLabel">Watch and learn</div><h2>See Azure SQL in action.</h2><p>Explore existing demos and practical sessions from Microsoft SQL.</p></div><div class="videoGrid">{% for v in page.videos %}<a class="videoCard" href="{{ v.href }}" target="_blank" rel="noopener" aria-label="{{ v.title }}: opens YouTube in a new tab"><div class="videoVisual"><img src="{{ v.image }}" alt="{{ v.title }}" loading="lazy" width="640" height="360"><span class="playIcon" aria-hidden="true">▶</span></div><div class="videoBody"><small>{{ v.tag }}</small><h3>{{ v.title }}</h3><p>{{ v.text }}</p><span class="inlineLink">{{ v.label }} ↗</span></div></a>{% endfor %}</div><p><a class="inlineLink" href="https://aka.ms/microsoftsqlyt">More from Microsoft SQL on YouTube →</a></p></div></section>
+  <section id="faq"><div class="wrap"><div class="sectionHead"><h2>Before you build</h2></div>{% for f in page.faqs %}<details><summary>{{ f.question }}</summary><p>{{ f.answer }}</p></details>{% endfor %}</div></section>
   {{ content }}
 </main>
 

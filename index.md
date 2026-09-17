@@ -4,8 +4,8 @@ title: Azure SQL Developer Hub
 description: The front door for building with Azure SQL Database in the age of AI-assisted development.
 hero:
   eyebrow: Build with Azure SQL Database
-  headline: From a prompt to
-  headline_accent: a working app.
+  headline: Azure SQL, built for
+  headline_accent: AI workloads.
   subline: >-
     Start with a focused application prompt for Azure SQL Database. Review the prerequisites, copy
     the prompt, and verify the result with your coding agent.
@@ -148,4 +148,36 @@ skills:
   agents: []
   chips: []
   mcp_note: ''
+faqs:
+  - question: What do I need to get started?
+    answer: >-
+      Use a coding agent, the runtime for your chosen example, and an Azure SQL development database
+      you can access. Each example lists its prerequisites. RAG also requires access to embedding
+      and generation services.
+  - question: Do I need the Azure SQL Database container?
+    answer: >-
+      No. These examples use Azure SQL Database in Azure. Local development with the container is
+      optional and requires Private Preview signup and registry access.
+  - question: Can I use an existing database?
+    answer: >-
+      Yes. Start with a development database and review the proposed schema changes and permissions
+      before running them. Keep credentials in your environment or approved secret store, outside
+      prompts and source control.
+  - question: Will running an example cost money?
+    answer: >-
+      Azure resources and AI model usage may incur charges. Check the Azure SQL free-offer
+      eligibility and limits, review any additional services, and follow the example cleanup
+      instructions when you finish.
+  - question: How do I use a build prompt?
+    answer: >-
+      Open an example, review its requirements, and copy the prompt into your coding agent. Supply
+      the requested project details, review the generated changes, then follow the verification
+      steps to check the result.
+videos:
+  - title: Azure SQL Database Foundations
+    text: Four sessions covering getting started, migration, performance and AI.
+    href: https://aka.ms/azuresqlfoundationseries
+    image: https://devblogs.microsoft.com/wp-content/uploads/2026/08/word-image-22210-2.webp
+    label: Watch the series on YouTube
+    tag: FOUNDATIONS · 4 EPISODES
 ---

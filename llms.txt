@@ -7,7 +7,6 @@
 > Azure SQL Developer Hub: three featured cloud-first application prompt drafts, portal setup guidance and optional skills resources. Engineering validation is pending. Earlier scenario pages remain available for review. Replace `.html` with `.md` for a page's Markdown twin; the homepage is `/index.md`.
 
 For the whole site as one document, read {{ '/llms-full.txt' | absolute_url }}.
-For the machine-readable surface guide, read {{ '/for-agents.md' | absolute_url }}.
 
 ## Pages
 - [Home]({{ '/index.md' | absolute_url }}): quickstart commands for the agent, local container, and Azure CLI paths; the six build scenarios; featured prompts; per-agent skill install commands.
@@ -18,7 +17,6 @@ For the machine-readable surface guide, read {{ '/for-agents.md' | absolute_url 
 - [Fix a slow query]({{ '/build/query-performance.md' | absolute_url }}): capture IO and timing statistics, then tune from evidence.
 - [Ship local to cloud]({{ '/build/local-to-cloud.md' | absolute_url }}): move the app from the local engine to Azure SQL Database through configuration.
 - [Prompt library]({{ '/prompts.md' | absolute_url }}): copyable build prompts, plus the container repository's prompt catalog.
-- [For agents]({{ '/for-agents.md' | absolute_url }}): every machine-readable surface of this site.
 
 ## Key facts
 - Local: the Azure SQL Database container image is `sqldbpreview-dpgaeqhmgphzd4bk.azurecr.io/azure-sql/db-dev`, x64 (linux/amd64). On a host that is not x64, add `--platform linux/amd64`. The registry is private during the Private Preview; credentials come from signing up at https://aka.ms/sqldbcontainerpreview-signup.

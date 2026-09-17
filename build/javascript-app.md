@@ -6,7 +6,7 @@ description: >-
   Azure SQL Database.
 ---
 
-**JavaScript · Draft prompt. Engineering validation pending.**
+**JavaScript**
 
 ## What you will build
 
@@ -32,15 +32,9 @@ Use current official documentation to verify driver, authentication, and framewo
 
 Create a task, reload the app, and confirm it persists. Update and delete it through the UI.
 
-## Validation status
-
-This is a proposed example, not a tested walkthrough. Runnable starter code, exact dependency versions, and a recorded test result are pending engineering validation.
-
 ## References
 
 - [Azure SQL documentation](https://learn.microsoft.com/azure/azure-sql/)
 - [Optional skill catalog]({{ site.skills_catalog }})
 
-## Walkthrough
 
-A walkthrough will be added after the example is validated.

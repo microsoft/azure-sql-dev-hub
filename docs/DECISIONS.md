@@ -1,5 +1,8 @@
 # Decisions
 
+- 2026-09-16: Keep validation tracking and agent-file documentation in repository docs; remove the For agents page from publishing and human navigation while retaining machine-readable files and alternate links.
+- 2026-09-16: Use visual links to existing SQL videos without auto-playing or embedding a player; retain a complete hero without a demo placeholder.
+
 One dated line per irreversible or debatable choice. Append to this file in any
 pull request that makes one. Do not rewrite past entries: if a decision is
 reversed, add a new line saying so and why.

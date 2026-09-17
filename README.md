@@ -27,8 +27,8 @@ once as its own source at the same path with `.md` appended. So `/build/rag.html
 has a twin at `/build/rag.md`, and every page links to its source with
 `<link rel="alternate" type="text/markdown">`. Two more files serve agents:
 `/llms.txt` indexes the site, and `/llms-full.txt` concatenates it, both
-generated at build time by `scripts/build-agent-files.mjs`. The `/for-agents`
-page documents all of it.
+generated at build time by `scripts/build-agent-files.mjs`. Maintainer guidance
+lives in `docs/AGENT-FILES.md`, outside the published site.
 
 Telemetry hooks go through one `track()` function in `assets/js/main.js` and
 currently log to the console. Engineering owns Clarity implementation and
@@ -57,7 +57,7 @@ every internal link, and fails if the agent-facing files went missing.
 | `index.md` | The home page. Section copy lives in its front matter as structured data. |
 | `build/*.md` | Three featured draft examples plus earlier pages retained at their URLs. |
 | `prompts.md` | The prompt library. |
-| `for-agents.md` | Documents every machine-readable surface. |
+| `for-agents.md` | Unpublished legacy source; maintainer guidance is in docs. |
 | `llms.txt` | Site description and linked index of every page, for agents. |
 | `_config.yml` | Jekyll config, shared links, and the analytics switch. |
 | `_layouts/` | `home`, `scenario`, and `page` layouts. |

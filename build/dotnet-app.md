@@ -6,7 +6,7 @@ description: >-
   data-access library.
 ---
 
-**.NET · Draft prompt. Engineering validation pending.**
+**.NET**
 
 ## What you will build
 
@@ -32,15 +32,9 @@ Use current official documentation to verify driver, authentication, and framewo
 
 Apply the schema, create a record through the app, restart it, and verify the record remains.
 
-## Validation status
-
-This is a proposed example, not a tested walkthrough. Runnable starter code, exact dependency versions, and a recorded test result are pending engineering validation.
-
 ## References
 
 - [Azure SQL documentation](https://learn.microsoft.com/azure/azure-sql/)
 - [Optional skill catalog]({{ site.skills_catalog }})
 
-## Walkthrough
 
-A walkthrough will be added after the example is validated.

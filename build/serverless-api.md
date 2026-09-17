@@ -6,7 +6,7 @@ description: >-
   currently supported JavaScript runtime.
 ---
 
-**JavaScript / Azure Functions · Draft prompt. Engineering validation pending.**
+**JavaScript / Azure Functions**
 
 ## What you will build
 
@@ -32,15 +32,9 @@ Use current official documentation to verify driver, authentication, and framewo
 
 Invoke the function to create and retrieve a record. Demonstrate validation errors and document the deployment prerequisites.
 
-## Validation status
-
-This is a proposed example, not a tested walkthrough. Runnable starter code, exact dependency versions, and a recorded test result are pending engineering validation.
-
 ## References
 
 - [Azure SQL documentation](https://learn.microsoft.com/azure/azure-sql/)
 - [Optional skill catalog]({{ site.skills_catalog }})
 
-## Walkthrough
 
-A walkthrough will be added after the example is validated.
