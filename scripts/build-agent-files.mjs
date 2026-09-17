@@ -10,8 +10,9 @@
 // source file, published twice.
 //
 // Pages that keep structured copy in front matter (the home page's hero and
-// section data, a scenario page's prompt and starter) get that data rendered
-// back into markdown here, because it is real page content, not metadata.
+// section data) get that data rendered back into markdown here, because it is
+// real page content, not metadata. Scenario pages carry the prompt in the body,
+// so the twin is the body itself.
 
 import { readdirSync, statSync, readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs';
 import { join, dirname } from 'node:path';
@@ -25,12 +26,12 @@ const SKIP_DIRS = new Set(['_site', '_includes', '_layouts', 'docs', 'scripts', 
 // alphabetically, so a new page is never silently dropped.
 const ORDER = [
   'index.md',
-  'build/start-database.md',
-  'build/connect-app.md',
-  'build/rag.md',
+  'build/javascript-app.md',
+  'build/python-api.md',
+  'build/rag-app.md',
+  'build/serverless-api.md',
+  'build/event-driven-app.md',
   'build/multi-tenant.md',
-  'build/query-performance.md',
-  'build/local-to-cloud.md',
   'prompts.md',
   'for-agents.md',
 ];
@@ -60,9 +61,6 @@ function splitFrontMatter(raw) {
   return { data: yaml.load(m[1]) || {}, body: raw.slice(m[0].length) };
 }
 
-// Liquid the sources may contain. The twin resolves it the same way the page
-// did instead of publishing raw template syntax. Handles {{ site.key }},
-// {{ 'path' | relative_url }}, and {{ 'path' | absolute_url }}.
 function resolveLiquid(text, config) {
   const siteUrl = String(config.url || '').replace(/\/$/, '');
   const base = String(config.baseurl || '');
@@ -74,7 +72,6 @@ function resolveLiquid(text, config) {
     );
 }
 
-// Kramdown inline attribute lists mark up the HTML, not the prose.
 function stripAttributeLists(body) {
   return body
     .split('\n')
@@ -87,6 +84,11 @@ function fence(code, lang) {
   return '```' + (lang || '') + '\n' + String(code).replace(/\s+$/, '') + '\n```';
 }
 
+// Strip inline HTML the front matter carries for the page (icons, logos, <code>).
+function plain(s) {
+  return String(s || '').replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim();
+}
+
 // The home page's structured front matter, rendered back into markdown.
 function homeToMarkdown(d) {
   const out = [];
@@ -94,51 +96,51 @@ function homeToMarkdown(d) {
   out.push(`# ${h.headline} ${h.headline_accent}`.trim(), '', h.subline, '');
   if (h.agents) out.push(`Works with ${h.agents.join(', ')}.`, '');
 
-  out.push('## Get running {#get-running}', '',
-    'Choose the path that matches your workflow.', '');
-  for (const m of d.quickstart || []) {
-    out.push(`### ${m.name}: ${m.title}`, '', m.desc, '', fence(m.code, 'bash'), '');
-    if (m.prompt) out.push('Then ask:', '', fence(m.prompt, 'text'), '');
-    out.push(`${m.link.label.replace(/\s*→\s*$/, '')}: ${m.link.href}`, '');
+  const v = d.video || {};
+  if (v.id) {
+    out.push('## Demo video', '', `${v.title}. ${v.sub}`, '', `https://www.youtube.com/watch?v=${v.id}`, '');
+    if (v.chapters) out.push(v.chapters.map((c) => `${c.stamp} ${c.label}`).join(' · '), '');
   }
 
-  out.push('## Build {#build}', '', 'Start with the job you need done:', '');
+  out.push('## Get running {#get-running}', '', d.quickstart_text || '', '');
+  for (const m of d.quickstart || []) {
+    out.push(`### ${m.name}: ${m.title}`, '', m.desc, '');
+    if (m.code) out.push(fence(m.code, 'bash'), '');
+    for (const c of m.checks || []) out.push(`- ${c[0]}: ${c[1]}`);
+    out.push('');
+    if (m.button) out.push(`${m.button.label}: ${m.button.href}`, '');
+    if (m.link) out.push(`${m.link.label}: ${m.link.href}`, '');
+  }
+  if (d.then) out.push(`Then: ${d.then.from} to ${d.then.to}. ${d.then.note}`, '');
+
+  out.push('## Build {#build}', '', d.build_text || '', '');
   for (const s of d.scenarios || []) {
-    out.push(`### [${s.title}](build/${s.slug}.md)`, "", s.tag || "", "", s.blurb, "", fence(s.prompt, "text"), "");
+    out.push(`### [${s.title}](build/${s.slug}.md)`, '', `${s.tag}. ${s.blurb}`, '', `Full prompt: build/${s.slug}.md`, '');
+  }
+
+  out.push('## Built for AI workloads {#workloads}', '', d.workloads_text || '', '');
+  for (const t of d.workloads || []) {
+    out.push(`- ${t.title}: ${plain(t.text)}${t.link && /^https?:/.test(t.link.href) ? ` (${t.link.href})` : ''}`);
   }
   out.push('');
-
-  out.push('## Prompt library {#prompts}', '');
-  for (const p of d.prompts_featured || []) {
-    out.push(`### ${p.title} (${p.tag})`, '', p.blurb, '', fence(p.prompt, 'text'), '');
-  }
-  out.push('The full library is at [prompts.md](prompts.md).', '');
 
   const sk = d.skills || {};
   out.push('## Skills {#skills}', '', sk.heading, '', sk.text, '');
   for (const a of sk.agents || []) {
-    out.push(`### ${a.name}`, '', a.blurb, '', fence(a.code, 'text'), '');
-    if (a.alt_code) out.push(fence(a.alt_code, 'bash'), '');
+    out.push(`### ${a.name}`, '', fence(a.code, 'bash'), '', plain(a.note), '');
   }
-  if (sk.chips) out.push(`Skills include: ${sk.chips.map((x) => '`' + x + '`').join(' ')}`, '');
-  if (sk.mcp_note) out.push(sk.mcp_note, '');
+  if (sk.chips) out.push('Example prompts once the skills are installed:', '', ...sk.chips.map((c) => `- ${c}`), '');
+  if (sk.note) out.push(plain(sk.note), '');
 
-  out.push('## Existing data {#existing}', '', 'Use an existing development database. Review permissions and schema changes before running a prompt.', '', '## Optional local development {#continuity}', '', d.continuity.heading, '', d.continuity.text, '');
-  for (const v of d.videos || []) out.push(`## ${v.title}`, '', v.text, '', `[${v.label}](${v.href})`, '');
+  out.push('## Videos {#watch}', '', d.videos_text || '', '');
+  for (const vv of d.videos || []) out.push(`- [${vv.title}](${vv.href}): ${vv.text}`);
+  out.push('');
+
+  if (d.existing) out.push('## Existing data {#existing}', '', d.existing.text, '');
+  if (d.continuity) out.push('## Local development {#continuity}', '', d.continuity.heading, '', d.continuity.text, '');
   out.push('## Before you build', '');
   for (const f of d.faqs || []) out.push(`### ${f.question}`, '', f.answer, '');
-  return out.join('\n');
-}
-
-// A scenario page's structured front matter, rendered ahead of its body.
-function scenarioToMarkdown(d) {
-  const out = [`# ${d.title}`, '', d.intro, '',
-    '## Prompt', '', fence(d.prompt, 'text'), '',
-    '## Starter', '', fence(d.starter.code, d.starter.language || ''), '',
-    '## Skill', '', d.skill.note, ''];
-  if (d.skill.install) out.push(fence(d.skill.install, 'bash'), '');
-  out.push(`## Docs`, '', `${d.docs.label}: ${d.docs.href}`, '',
-    '');
+  if (d.close) out.push('## Get started', '', d.close.heading, '', fence(d.close.code, 'bash'), '');
   return out.join('\n');
 }
 
@@ -162,8 +164,7 @@ for (const file of pages) {
 
   let head = '';
   if (data.layout === 'home') head = homeToMarkdown(data);
-  else if (data.layout === 'scenario') head = scenarioToMarkdown(data);
-  else if (data.title) head = `# ${data.title}\n`;
+  // Scenario pages: the body is the prompt and already carries its own H1.
 
   const markdown = [head, stripAttributeLists(resolveLiquid(body, config))]
     .filter(Boolean)

@@ -1,41 +1,104 @@
 ---
 layout: page
-title: React to database changes
-description: >-
-  Build a small .NET Azure Functions workflow that reacts to changes in Azure
-  SQL Database using a supported Azure SQL trigger. Verify current trigger
-  prerequisites and permissions first.
+title: React to row changes
+description: React to row changes in Azure SQL Database with a SQL trigger function
+tag: .NET
+last_verified: 2026-09-16
+validated: false
 ---
 
-**.NET / Events**
+# AI Prompt: React to row changes in Azure SQL Database with a SQL trigger function
 
-## What you will build
+**Role:** You are an expert .NET engineer adding an event-driven function to the current project that runs whenever rows change in an Azure SQL Database table.
 
-Build a small .NET Azure Functions workflow that reacts to changes in Azure SQL Database using a supported Azure SQL trigger. Verify current trigger prerequisites and permissions first.
+**Purpose:** Enable Change Tracking on the database and on `dbo.tasks`, then add an Azure Functions SQL trigger that fires on inserts, updates, and deletes and logs each change. Prove it with one insert.
 
-## Before you start
+**Scope:**
+- Assumes the serverless scenario's project exists (`TasksApi`, .NET isolated worker, `SqlConnectionString` configured with `Active Directory Default`). If not, create that project first using the serverless scenario.
+- Change Tracking is required by the SQL trigger. Without it the function never fires and reports no error.
+- The free tier runs on serverless compute with auto-pause. The trigger polls; the first poll against a paused database can fail with error 40613 and then succeed once the database resumes. Expect one retry, not a bug.
 
-Use an Azure account and an accessible development database. Confirm authentication, runtime, permissions, and potential service costs. No private container credentials are required by this prompt.
+Read the entire instruction set before executing.
 
-## Copy this prompt
+---
 
-```text
-Build a small .NET Azure Functions workflow that reacts to changes in Azure SQL Database using a supported Azure SQL trigger. Verify current trigger prerequisites and permissions first.
+## Instructions
 
-Before writing code, ask for my Azure SQL server and database, available authentication method, target runtime, and any missing requirements. Use an existing cloud database unless I explicitly approve resource creation and costs. Do not require the private-preview container. Never ask me to paste credentials into chat or put secrets in source control.
+### 1. Enable Change Tracking
 
-Success criteria: Change a test row and show the processing result. Test repeat delivery and explain how duplicate side effects are avoided.
+Run once against the database:
 
-Use current official documentation to verify driver, authentication, and framework choices. Include complete project files, dependency versions, configuration placeholders, schema setup, and parameterized data access. Explain permissions and any resources that could incur charges. Provide exact run instructions, a small repeatable verification test, expected output, and cleanup steps. Run available tests and report what actually passed, what required a manual change, and what could not be verified. Do not claim completion from code generation alone.
+```sql
+ALTER DATABASE CURRENT SET CHANGE_TRACKING = ON (CHANGE_RETENTION = 2 DAYS, AUTO_CLEANUP = ON);
+ALTER TABLE dbo.tasks ENABLE CHANGE_TRACKING;
 ```
 
-## Expected result
+Confirm:
 
-Change a test row and show the processing result. Test repeat delivery and explain how duplicate side effects are avoided.
+```sql
+SELECT OBJECT_NAME(object_id) FROM sys.change_tracking_tables;
+```
 
-## References
+`tasks` must appear.
 
-- [Azure SQL documentation](https://learn.microsoft.com/azure/azure-sql/)
-- [Optional skill catalog]({{ site.skills_catalog }})
+### 2. Add the trigger function
 
+Create `TasksChanged.cs`:
 
+```csharp
+using Microsoft.Azure.Functions.Worker;
+using Microsoft.Azure.Functions.Worker.Extensions.Sql;
+using Microsoft.Extensions.Logging;
+
+public class TasksChanged
+{
+    private readonly ILogger _log;
+    public TasksChanged(ILoggerFactory f) => _log = f.CreateLogger<TasksChanged>();
+
+    [Function("TasksChanged")]
+    public void Run(
+        [SqlTrigger("dbo.tasks", "SqlConnectionString")] IReadOnlyList<SqlChange<TaskItem>> changes)
+    {
+        foreach (var c in changes)
+            _log.LogInformation("{Op} task {Id} \"{Title}\"", c.Operation, c.Item.id, c.Item.title);
+    }
+}
+```
+
+The trigger needs a leases table for state. The binding creates `az_func.Leases_Tables_...` on first run; the connecting identity must be able to create a schema and table. If that fails, grant it once:
+
+```sql
+GRANT CREATE TABLE TO [<your-entra-user>];
+ALTER AUTHORIZATION ON SCHEMA::az_func TO [<your-entra-user>];
+```
+
+Only run the second statement if the `az_func` schema already exists.
+
+### 3. Run and prove it
+
+```bash
+func start
+```
+
+In a second terminal, insert a row through the existing API or directly:
+
+```sql
+INSERT INTO dbo.tasks (title) VALUES (N'trigger test');
+```
+
+Within a few seconds the `func start` output logs `Insert task <id> "trigger test"`.
+
+---
+
+## Validation rules
+
+- `sys.change_tracking_tables` lists `tasks`.
+- One insert produces exactly one `Insert` log line from `TasksChanged`.
+- The function uses `[SqlTrigger]`; it does not poll the table with its own timer.
+- `SqlConnectionString` is unchanged from the serverless scenario: no password.
+
+## Do not
+
+- Do not skip enabling Change Tracking on the table; the database-level setting alone is not enough.
+- Do not replace the trigger with a timer that queries for new rows.
+- Do not treat a single 40613 on first poll as a failure; retry once after the database resumes.

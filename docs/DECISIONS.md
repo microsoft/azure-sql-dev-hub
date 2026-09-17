@@ -33,3 +33,13 @@ reversed, add a new line saying so and why.
 2026-09-16: Feature three cloud-first draft prompts for a focused review; retain earlier URLs, and require engineering execution evidence before launch claims.
 2026-09-16: Engineering owns both Clarity telemetry implementation and prompt validation; PM owns content, mockup approval and launch messaging.
 2026-09-16: Exclude local output packages from site publishing and agent indexes; omit unavailable video placeholders.
+
+## 2026-09-16: Hub prompts are cloud-scoped, and need a cloud accuracy baseline
+
+The six build prompts target Azure SQL Database in the cloud (free offer), not the container. The container is Private Preview until Ignite, so a prompt that needs it would fail for a stranger on launch day. The container's own prompts stay local-scoped on the container site; the Hub's stay cloud-scoped. Same jobs, different target, no duplication.
+
+Consequence for `hub-new-prompt` (contributor skill, drafted, not yet implemented): its accuracy baseline is the container baseline (image, `EngineEdition=5`, `SQL_CONNECTION_STRING`, `--platform linux/amd64`). Cloud prompts cannot hold it. They need a second baseline: Entra over passwords, `Encrypt=true` and `TrustServerCertificate=false`, the 40613 retry on auto-pause, the 529 vector cast, primary key and compat level 130 for Functions output bindings. The six prompts follow that baseline today; the skill should encode it before it gates anything.
+
+## 2026-09-16: Homepage design and prompt files
+
+Human layer added on top of the agent layer: hero video with chapter stamps, three setup paths as tabs, six scenario cards with illustrations, workload tiles, agent selector that switches the install command, video reel. Prompts moved from short front matter strings to full instruction sets in `build/*.md` (role, purpose, scope, numbered steps, validation rules, do-nots), matching the container site's prompt structure. The homepage Copy button fetches the page's markdown twin, so the card and the file cannot drift. `dotnet-app` replaced by `multi-tenant`; the .NET framework is covered by the serverless and event-driven scenarios. All install commands and skills links point at `microsoft/azure-sql-skills` (aka.ms/azuresql-skills), which launches at SQLCon alongside the Hub.

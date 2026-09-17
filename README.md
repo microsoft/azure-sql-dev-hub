@@ -1,76 +1,78 @@
 # Azure SQL Developer Hub
 
-The Azure SQL Dev Hub is one front door for developers and AI agents to start
-building on Azure SQL. It gives a person the shortest useful action (a
-quickstart command, a scenario page, a prompt) and gives an agent the current
-machine-readable context behind it, generated from the same content.
+**https://aka.ms/azuresql-hub**
 
-## Live site
+The front door for building applications on Azure SQL Database with an AI coding agent. Start free in the cloud, hand your agent a build prompt, and verify a working app.
 
-<https://didactic-adventure-jgqz4oz.pages.github.io/>
+Curated by the Azure SQL Database product team.
 
-The current Pages URL requires authorized GitHub access. Verify access with an
-intended reader before circulating it. Public launch needs a publicly accessible
-URL; the deployment workflow reads the configured Pages URL at build time.
+## What is here
 
-Deploys run on every push to `main`.
+- **Build prompts.** Six copy-and-run prompts, each targeting Azure SQL Database in the cloud and ending in a working app with validation rules at the end. They live in [`build/`](build/).
+- **Setup paths.** Free cloud tier, the local container (Private Preview), or let your agent do it.
+- **Agent skills.** Install once from [aka.ms/azuresql-skills](https://aka.ms/azuresql-skills); the skills load themselves when the work matches.
+- **An agent-readable layer.** Every page has a markdown twin at `<page>.md`, an index at [`llms.txt`](llms.txt), and an alternate link in its head. Agents read that; people read the page.
 
-## How it works
+## Build prompts
 
-Static markdown and Jekyll, built and deployed by GitHub Actions. There is no
-JavaScript framework, and no content on this site needs JavaScript to be read:
-tabs render stacked and copy buttons disappear, but every command stays on the
-page.
+| Scenario | Framework | Prompt |
+|---|---|---|
+| Scaffold a new app | JavaScript, Next.js | [javascript-app.md](build/javascript-app.md) |
+| Build a Python API | Python, FastAPI | [python-api.md](build/python-api.md) |
+| Build a RAG workflow | Python, native `VECTOR` | [rag-app.md](build/rag-app.md) |
+| Go serverless | .NET, Azure Functions SQL bindings | [serverless-api.md](build/serverless-api.md) |
+| React to row changes | .NET, SQL trigger with Change Tracking | [event-driven-app.md](build/event-driven-app.md) |
+| Make it multi-tenant | JavaScript, row-level security | [multi-tenant.md](build/multi-tenant.md) |
 
-Every page is authored as a `.md` file and published twice: once as HTML and
-once as its own source at the same path with `.md` appended. So `/build/rag.html`
-has a twin at `/build/rag.md`, and every page links to its source with
-`<link rel="alternate" type="text/markdown">`. Two more files serve agents:
-`/llms.txt` indexes the site, and `/llms-full.txt` concatenates it, both
-generated at build time by `scripts/build-agent-files.mjs`. Maintainer guidance
-lives in `docs/AGENT-FILES.md`, outside the published site.
+Each prompt is the whole instruction set: role, scope, numbered steps with code, validation rules, and what not to do. Copy it from the site or from the file, paste it into your agent, check the result against the rules.
 
-Telemetry hooks go through one `track()` function in `assets/js/main.js` and
-currently log to the console. Engineering owns Clarity implementation and
-prompt validation. Analytics remains disabled. See `docs/ENGINEERING-HANDOFF.md`.
+Prompts here target the cloud. Prompts that target the local container live with the [Azure SQL Database container](https://microsoft.github.io/azure-sql-database-container/).
 
-## How to contribute
-
-Edit the `.md` file for the page, open a pull request, and let CI check it:
+## Install the skills
 
 ```bash
-npm install
-npm test
+npx skills add microsoft/azure-sql-skills
 ```
 
-To preview the site: `bundle install && bundle exec jekyll serve --baseurl ""`.
+Claude Code plugin:
 
-House rules run on every pull request and locally as `npm test`: no em-dashes,
-no absolute claims about what an AI agent will do, and no wording that
-overstates a preview product's release status. CI also builds the site, checks
-every internal link, and fails if the agent-facing files went missing.
+```bash
+claude plugin marketplace add microsoft/azure-sql-skills
+claude plugin install azure-sql-skills@azure-sql-skills
+```
 
-## Repo map
+Full catalog, per-tool install, and feedback at [aka.ms/azuresql-skills](https://aka.ms/azuresql-skills).
 
-| Path | What it is |
-| --- | --- |
-| `index.md` | The home page. Section copy lives in its front matter as structured data. |
-| `build/*.md` | Three featured draft examples plus earlier pages retained at their URLs. |
-| `prompts.md` | The prompt library. |
-| `for-agents.md` | Unpublished legacy source; maintainer guidance is in docs. |
-| `llms.txt` | Site description and linked index of every page, for agents. |
-| `_config.yml` | Jekyll config, shared links, and the analytics switch. |
-| `_layouts/` | `home`, `scenario`, and `page` layouts. |
-| `_includes/` | Head, nav, footer, and the analytics loader. |
-| `assets/` | Stylesheet (V8 design system) and the JS for tabs, copy, telemetry. |
-| `scripts/` | House rules, agent-files generator, internal link check. |
-| `docs/` | Dated decisions and the engineering handoff for validation and Clarity. |
-| `.github/workflows/` | `ci.yml` checks pull requests, `pages.yml` builds and deploys. |
+## Scope
 
-## Who owns it
+Cloud means Azure SQL Database. Not Managed Instance, not Fabric SQL, not SQL Server on virtual machines. Local means the Azure SQL Database container.
 
-The Azure SQL team. For anything about this site, including a broken link,
-wrong copy, or a page you expected to find:
-[open an issue](https://github.com/microsoft/azure-sql-dev-hub/issues). For the
-container itself, use the
-[container repository](https://github.com/microsoft/azure-sql-database-container).
+## Run the site locally
+
+The site is Jekyll, served from the repository root. Scenario pages live in `build/`, the homepage content in `index.md` front matter.
+
+```bash
+bundle install
+bundle exec jekyll build --baseurl ""
+npm install
+npm run build:agent-files      # markdown twins and llms-full.txt into _site
+npm test                       # house rules
+```
+
+The prompt Copy buttons fetch the page's markdown twin over HTTP, so use a served build rather than opening files from disk.
+
+## Contributing
+
+Pull requests are welcome. Read [`docs/DECISIONS.md`](docs/DECISIONS.md) first for why the site is shaped the way it is. House rules run in CI on every pull request: no em dashes in copy, and the agent layer (`llms.txt`, markdown twins, alternate links) must be present on every build.
+
+A prompt is ready to merge when it has been run once, end to end, against a fresh Azure SQL Database and its validation rules held.
+
+## Feedback
+
+- A prompt or the site said something wrong, stale, or unhelpful: [open an issue](https://github.com/microsoft/azure-sql-dev-hub/issues).
+- A skill said something wrong: [skill feedback](https://aka.ms/sql-agent-skills-feedback).
+- The product misbehaved rather than the prompt: the Azure SQL Database feedback channels.
+
+## Trademarks
+
+This project may contain trademarks or logos for projects, products, or services. Authorized use of Microsoft trademarks or logos is subject to and must follow [Microsoft's Trademark & Brand Guidelines](https://www.microsoft.com/legal/intellectualproperty/trademarks). Use of Microsoft trademarks or logos in modified versions of this project must not cause confusion or imply Microsoft sponsorship. Any use of third-party trademarks or logos are subject to those third-party's policies.

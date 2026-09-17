@@ -1,115 +1,181 @@
 <!doctype html>
 <html lang="en">
 {% include head.html %}
+<style>
+.h{--ink:#1a1a1a;--muted:#5a626c;--faint:#8a919a;--line:#e1e6eb;--accent:#0067b8;--accent-ink:#00508f;--tint:#eff6fc;--ok:#107c10;--dark:#0e1a2b;--dark2:#162538;--panel:#f5f7fa;--panel2:#fafbfd;--r:12px;color:var(--ink);line-height:1.55}
+.h *{box-sizing:border-box}
+.h .w{max-width:1080px;margin:0 auto;padding:0 24px}
+.h h1,.h h2,.h h3{margin:0;line-height:1.15;letter-spacing:-0.02em}
+.h h2{font-size:34px;font-weight:700}.h h3{font-size:18px;font-weight:600}.h p{margin:0}
+.h .muted{color:var(--muted)}.h .faint{color:var(--faint);font-size:13px}
+.h code,.h pre,.h .mono{font-family:ui-monospace,"Cascadia Code",Menlo,Consolas,monospace}
+.h a{color:var(--accent);text-decoration:none}.h a:hover{text-decoration:underline}
+.h [id]{scroll-margin-top:80px}
+.h .btn{display:inline-flex;align-items:center;gap:8px;padding:12px 22px;border-radius:9px;font-weight:600;font-size:15px;border:1px solid transparent;cursor:pointer;font-family:inherit}
+.h .btn-p{background:var(--accent);color:#fff}.h .btn-p:hover{background:var(--accent-ink);text-decoration:none}
+.h .btn-s{background:#fff;color:var(--ink);border-color:#c7ced6}.h .btn-s:hover{border-color:var(--ink);text-decoration:none}
+.h .cp{padding:6px 12px;font-size:13px;border-radius:6px;background:#fff;color:var(--accent);border:1px solid var(--line);cursor:pointer;font-family:inherit}
+.h .cp:hover{border-color:var(--accent)}.h .cp.ok{color:var(--ok);border-color:var(--ok)}.h .cp.bad,.h .chip.bad{color:#b0244a;border-color:#b0244a}
+.h .hero{padding:64px 0 28px;text-align:center}
+.h .hero h1{font-size:clamp(40px,6vw,60px);font-weight:700;max-width:14ch;margin:0 auto 18px}.h .hero h1 span{color:var(--accent)}
+.h .hero .sub{font-size:19px;color:var(--muted);max-width:52ch;margin:0 auto 24px}
+.h .ctas{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-bottom:22px}
+.h .agentline{font-size:13px;color:var(--faint)}.h .agentline span{color:var(--muted)}
+.h .vid{max-width:760px;margin:28px auto 0}
+.h .vframe{position:relative;padding-top:56.25%;border-radius:var(--r) var(--r) 0 0;overflow:hidden;background:var(--dark)}
+.h .vframe iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.h .poster{position:absolute;inset:0;width:100%;height:100%;border:0;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;color:#fff;background:linear-gradient(180deg,#0b1526 0%,#1a2f52 100%);font-family:inherit;padding:0}
+.h .poster:hover .pplay{transform:scale(1.06)}
+.h .pplay{width:68px;height:68px;border-radius:50%;background:#fff;color:#0e1a2b;display:flex;align-items:center;justify-content:center;font-size:26px;padding-left:5px;margin-bottom:10px;transition:transform .15s}
+.h .ptitle{font-size:24px;font-weight:700}.h .psub{font-size:14px;color:#9fb0c3}.h .pph{font-size:12px;color:#6b7d93;margin-top:6px}
+.h .chapters{display:grid;grid-template-columns:repeat(3,1fr);border:1px solid var(--line);border-top:0;border-radius:0 0 var(--r) var(--r);overflow:hidden;background:#fff}
+.h .chapter{padding:14px 10px;text-align:center;border-right:1px solid var(--line);cursor:pointer;background:#fff;border-top:0;border-bottom:0;border-left:0;font-family:inherit}
+.h .chapter:last-child{border-right:0}.h .chapter:hover{background:var(--tint)}
+.h .chapter time{display:block;font-size:12px;color:var(--faint)}.h .chapter b{display:block;font-size:14px;font-weight:600;margin-top:2px}
+.h section{padding:60px 0}.h section.alt{background:var(--panel)}
+.h .sh{margin-bottom:26px;max-width:64ch}.h .sh p{font-size:17px;color:var(--muted);margin-top:10px}
+.h .tabs{display:flex;gap:8px;margin-bottom:22px;flex-wrap:wrap}
+.h .tab{padding:9px 16px;border-radius:999px;border:1px solid var(--line);background:#fff;font-size:14px;font-weight:600;cursor:pointer;color:var(--muted);font-family:inherit}
+.h .tab[aria-selected="true"]{background:var(--accent);color:#fff;border-color:var(--accent)}
+.h .tab .pill{font-size:11px;font-weight:600;margin-left:8px;padding:2px 7px;border-radius:5px;background:#fff3cd;color:#7a5a00}
+.h .tab[aria-selected="true"] .pill{background:rgba(255,255,255,.22);color:#fff}
+.h .panel{display:none;border:1px solid var(--line);border-radius:var(--r);overflow:hidden;background:#fff}
+.h .panel.on{display:grid;grid-template-columns:1.1fr 1fr}
+.h .pdark{background:var(--dark);color:#e6edf3;padding:32px}.h .pdark h3{color:#fff;font-size:20px;margin-bottom:8px}.h .pdark p{color:#9fb0c3;font-size:14px}
+.h .cmd{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;background:var(--dark2);border:1px solid #24374e;border-radius:8px;padding:12px 14px;margin-top:16px;font-size:13.5px;color:#e6edf3}
+.h .cmd code{white-space:pre-wrap;word-break:break-all}
+.h .cmd .cp{background:#24374e;border-color:#31485f;color:#e6edf3;flex:none}.h .cmd .cp.ok{color:#7bd88f;border-color:#7bd88f}
+.h .plight{padding:32px}
+.h .steps{list-style:none;padding:0;margin:20px 0 0}.h .steps li{display:flex;gap:12px;padding:12px 0;border-bottom:1px solid var(--line);font-size:14px}.h .steps li:last-child{border-bottom:0}
+.h .steps .n{flex:none;width:24px;height:24px;border-radius:50%;background:var(--tint);color:var(--accent);font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center}
+.h .steps b{display:block;font-weight:600}.h .steps span{color:var(--muted)}
+.h .then{display:flex;align-items:center;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:22px;padding:12px;background:var(--panel2);border:1px solid var(--line);border-radius:9px;font-size:13px;color:var(--muted)}
+.h .then .node{padding:6px 12px;border:1px solid var(--line);border-radius:7px;background:#fff;font-weight:600;color:var(--ink)}.h .then .arrow{color:var(--accent);font-size:16px}
+.h .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:18px}
+.h .card{border:1px solid var(--line);border-radius:var(--r);overflow:hidden;background:#fff;display:flex;flex-direction:column}
+.h .art{height:150px;position:relative;display:flex;align-items:center;justify-content:center}.h .art svg{width:120px;height:90px}
+.h .tag{position:absolute;top:12px;left:14px;font-size:12px;font-weight:600;color:var(--ink);background:rgba(255,255,255,.85);padding:3px 9px;border-radius:6px}
+.h .cbody{padding:20px 20px 18px;display:flex;flex-direction:column;gap:10px;flex:1}.h .cbody p{font-size:14px;color:var(--muted);flex:1}
+.h .cact{display:flex;align-items:center;gap:12px;margin-top:6px}.h .cact .cp{padding:8px 14px;font-size:14px}.h .cact a{font-size:14px;font-weight:600}
+.h .tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
+.h .tile{background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:22px}.h .tile b{display:block;font-size:16px;margin-bottom:4px}.h .tile p{font-size:14px;color:var(--muted)}
+.h .tile .g{width:36px;height:36px;border-radius:9px;background:var(--tint);display:flex;align-items:center;justify-content:center;margin-bottom:14px}.h .tile .g svg{width:20px;height:20px;stroke:var(--accent);fill:none;stroke-width:2}
+.h .tile .tl{display:inline-block;margin-top:14px;font-size:14px;font-weight:600}
+.h .skills{text-align:center}
+.h .agents{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;max-width:760px;margin:30px auto 20px}
+.h .agent{border:1px solid var(--line);border-radius:var(--r);padding:20px 12px;background:#fff;cursor:pointer;text-align:center;position:relative;font-family:inherit}
+.h .agent:hover{border-color:#b9c4d0}.h .agent[aria-pressed="true"]{border:2px solid var(--accent);background:#f7fbff}
+.h .agent[aria-pressed="true"]::after{content:"\2713";position:absolute;top:8px;right:10px;color:var(--accent);font-size:13px;font-weight:700}
+.h .agent .logo{width:48px;height:48px;border-radius:12px;background:#1a1a2e;display:flex;align-items:center;justify-content:center;margin:0 auto 12px}.h .agent .logo svg{width:26px;height:26px}
+.h .agent b{display:block;font-size:14px}.h .agent span{font-size:12px;color:var(--faint)}
+.h .install{max-width:620px;margin:0 auto}.h .install .cmd{margin-top:0}.h .inote{margin-top:10px;font-size:13px;color:var(--faint)}
+.h .ask{max-width:760px;margin:26px auto 0;padding-top:22px;border-top:1px solid var(--line)}.h .asklabel{font-weight:600;margin-bottom:12px}
+.h .chips{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-bottom:10px}
+.h .chip{border:1px solid var(--line);background:#fff;border-radius:999px;padding:10px 16px;font-size:14px;cursor:pointer;color:var(--ink);font-family:inherit}
+.h .chip:hover{border-color:var(--accent);background:var(--tint)}.h .chip.ok{border-color:var(--ok);color:var(--ok)}
+.h .reel{display:flex;gap:16px;overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:10px;scrollbar-width:thin}
+.h .v{flex:0 0 320px;scroll-snap-align:start;border:1px solid var(--line);border-radius:var(--r);overflow:hidden;background:#fff;color:var(--ink)}.h .v:hover{text-decoration:none;border-color:#b9c4d0}
+.h .v .thumb{position:relative;aspect-ratio:16/9;background:linear-gradient(160deg,#0e1a2b,#1f3556);overflow:hidden}.h .v .thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.h .v .play{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}.h .v .play i{width:46px;height:46px;border-radius:50%;background:rgba(255,255,255,.92);display:flex;align-items:center;justify-content:center;color:var(--accent);font-style:normal;font-size:17px;padding-left:3px}
+.h .v .dur{position:absolute;bottom:8px;right:10px;font-size:11px;background:rgba(0,0,0,.6);color:#fff;padding:2px 7px;border-radius:4px}
+.h .v .meta{padding:14px 16px}.h .v .meta b{display:block;font-size:14px;line-height:1.35}.h .v .meta span{font-size:12px;color:var(--faint)}
+.h .vmore{flex:0 0 160px;scroll-snap-align:start;display:flex;align-items:center;justify-content:center;border:1px dashed var(--line);border-radius:var(--r);font-size:14px;font-weight:600;text-align:center;padding:16px}
+.h .two{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.h .aud{border:1px solid var(--line);border-radius:var(--r);padding:22px 24px;background:#fff}.h .aud h3{font-size:22px;margin-bottom:10px}.h .aud p{font-size:15px;color:var(--muted);margin-bottom:16px}.h .aud .links a{font-weight:600;font-size:14px;margin-right:16px}
+.h .badge{display:inline-block;font-size:11px;font-weight:600;padding:3px 9px;border-radius:5px;background:#fff3cd;color:#7a5a00;margin-left:8px;vertical-align:middle}
+.h .faq{max-width:760px}.h .faq details{border-bottom:1px solid var(--line);padding:14px 0}
+.h .faq summary{cursor:pointer;font-size:16px;font-weight:600;list-style:none;display:flex;justify-content:space-between;align-items:center}.h .faq summary::-webkit-details-marker{display:none}
+.h .faq summary::after{content:"+";color:var(--accent);font-size:20px;font-weight:400}.h .faq details[open] summary::after{content:"\2013"}
+.h .faq details p{margin-top:10px;font-size:15px;color:var(--muted);max-width:66ch}
+.h .close{text-align:center;padding:48px 0 56px}.h .close h2{margin-bottom:22px}.h .close .install{margin-bottom:20px}
+@media (max-width:820px){.h .panel.on{grid-template-columns:1fr}.h .agents{grid-template-columns:repeat(2,1fr)}.h .two{grid-template-columns:1fr}.h section{padding:44px 0}.h .hero{padding-top:44px}.h .ptitle{font-size:18px}.h .psub{font-size:12px}}
+</style>
 <body>
 {% include nav.html %}
+{%- assign skills_site = site.skills_site | default: "https://aka.ms/azuresql-skills" %}
+{%- assign hub_repo = site.repo | default: "https://github.com/microsoft/azure-sql-dev-hub" %}
 
-<main id="main">
+<main id="main" class="h">
+
   <header class="hero" id="top">
-    <div class="wrap">
-      <div class="heroCopy">
-        <div class="eyebrow">{{ page.hero.eyebrow }}</div>
-        <h1>{{ page.hero.headline }} <span>{{ page.hero.headline_accent }}</span></h1>
-        <p class="heroSub">{{ page.hero.subline }}</p>
-        <div class="heroActions">
-          <a class="btn primary" href="#build" data-event="quickstart_start" data-event-source="hero">Choose a build prompt</a>
-          <a class="btn secondary" href="#get-running" data-event="quickstart_start">Set up your database</a>
+    <div class="w">
+      <h1>{{ page.hero.headline }} <span>{{ page.hero.headline_accent }}</span></h1>
+      <p class="sub">{{ page.hero.subline }}</p>
+      <div class="ctas">
+        <a class="btn btn-p" href="#get-running" data-event="cta_get_started">Get started</a>
+        <a class="btn btn-s" href="#skills" data-event="cta_install_skills">Install skills</a>
+      </div>
+      <p class="agentline">Works with <span>{{ page.hero.agents | join: " · " }}</span></p>
+
+      <div class="vid">
+        <div class="vframe" id="hFrame" data-video="{{ page.video.id }}">
+          <button class="poster" id="hPoster" type="button" aria-label="Play: {{ page.video.title }}" data-event="hero_video_play">
+            <span class="pplay" aria-hidden="true">&#9654;</span>
+            <span class="ptitle">{{ page.video.title }}</span>
+            <span class="psub">{{ page.video.sub }}</span>
+            {%- if page.video.placeholder %}<span class="pph">{{ page.video.placeholder }}</span>{% endif %}
+          </button>
         </div>
-        <div class="heroAgents">
-          <span class="label">Use your coding agent:</span>
-          {%- for a in page.hero.agents %}<span>{{ a }}</span>{% endfor %}
+        <div class="chapters" role="list" aria-label="Video chapters">
+          {%- for c in page.video.chapters %}
+          <button class="chapter" type="button" role="listitem" data-seek="{{ c.seconds }}" data-event="chapter_click"><time>{{ c.stamp }}</time><b>{{ c.label }}</b></button>
+          {%- endfor %}
         </div>
+        {%- if page.video.note %}<p class="faint" style="margin-top:12px">{{ page.video.note }}</p>{% endif %}
       </div>
     </div>
   </header>
 
-  <section class="getRunning" id="get-running">
-    <span class="alias-anchor" id="start" aria-hidden="true"></span><span class="alias-anchor" id="connect" aria-hidden="true"></span>
-    <div class="wrap">
-      <div class="sectionHead">
-        <div class="sectionLabel">Get running</div>
-        <h2>Connect to your development database.</h2>
-        <p>Follow the setup guide, verify your connection, then choose a prompt.</p>
-      </div>
-
-      <div class="runShell" data-tabgroup="quickstart">
-        <div class="runToolbar">
-          <div class="runTabs" role="tablist" aria-label="Azure SQL quickstart path">
-            {%- for m in page.quickstart %}
-            <button class="runTab" type="button" data-tab="{{ m.key }}" aria-selected="false">{{ m.name }}</button>
-            {%- endfor %}
-          </div>
-          <div class="runStatus" data-tab-status>{{ page.quickstart[0].status }}</div>
-        </div>
-
+  <section id="get-running" class="alt">
+    <span id="start" aria-hidden="true"></span><span id="connect" aria-hidden="true"></span>
+    <div class="w">
+      <div class="sh"><h2>{{ page.quickstart_heading }}</h2><p>{{ page.quickstart_text }}</p></div>
+      <div class="tabs" role="tablist">
         {%- for m in page.quickstart %}
-        <div class="runPanel" role="tabpanel" data-panel="{{ m.key }}" data-status="{{ m.status }}">
-          <span class="panelName">{{ m.name }} path</span>
-          <div class="runBody">
-            <div class="codePane">
-              <div class="paneLabel">{{ m.label }}</div>
-              <div class="codeTitle">{{ m.title }}</div>
-              <div class="codeDesc">{{ m.desc }}</div>
-              <div class="codeBox">
-                <pre id="qs-code-{{ m.key }}">{{ m.code }}</pre>
-                <button class="copyBtn" type="button" data-copy="#qs-code-{{ m.key }}"
-                        data-copy-event="{{ m.copy_event }}" data-copy-source="quickstart-{{ m.key }}"
-                        aria-label="Copy the {{ m.name }} command">Copy</button>
-              </div>
-              {%- if m.prompt and m.prompt != empty %}
-              <div class="promptBox">
-                <small>Then ask</small>
-                <span id="qs-prompt-{{ m.key }}">{{ m.prompt }}</span>
-                <button class="promptCopy" type="button" data-copy="#qs-prompt-{{ m.key }}"
-                        data-copy-kind="prompt" data-copy-source="quickstart-{{ m.key }}"
-                        aria-label="Copy the prompt">Copy prompt</button>
-              </div>
-              {%- endif %}
-            </div>
-            <div class="detailPane">
-              <h3>{{ m.detail_title }}</h3>
-              <p>{{ m.detail_text }}</p>
-              <div class="checks">
-                {%- for c in m.checks %}
-                <div class="check">
-                  <div class="checkMark">✓</div>
-                  <div><b>{{ c[0] }}</b><span>{{ c[1] }}</span></div>
-                </div>
-                {%- endfor %}
-              </div>
-              {%- assign l = m.link %}
-              {%- if l.href contains '://' %}
-              <a class="inlineLink" href="{{ l.href }}" rel="noopener">{{ l.label }}</a>
-              {%- else %}
-              <a class="inlineLink" href="{{ l.href }}">{{ l.label }}</a>
-              {%- endif %}
-            </div>
-          </div>
-        </div>
+        <button class="tab" type="button" role="tab" aria-selected="{% if forloop.first %}true{% else %}false{% endif %}" data-htab="{{ m.key }}" data-event="path_{{ m.key }}">{{ m.name }}{% if m.pill %}<span class="pill">{{ m.pill }}</span>{% endif %}</button>
         {%- endfor %}
+      </div>
+      {%- for m in page.quickstart %}
+      <div class="panel{% if forloop.first %} on{% endif %}" role="tabpanel" data-hpanel="{{ m.key }}">
+        <div class="pdark">
+          <h3>{{ m.title }}</h3>
+          <p>{{ m.desc }}</p>
+          {%- if m.code %}
+          <div class="cmd"><code>{{ m.code }}</code><button class="cp" type="button" data-hcopy="{{ m.code | escape }}" data-event="{{ m.copy_event }}">Copy</button></div>
+          {%- endif %}
+          {%- if m.button %}<p style="margin-top:18px"><a class="btn btn-s" href="{{ m.button.href }}" data-event="{{ m.button.event }}">{{ m.button.label }}</a></p>{% endif %}
+        </div>
+        <div class="plight">
+          <h3>{{ m.detail_title }}</h3>
+          <ol class="steps">
+            {%- for c in m.checks %}
+            <li><span class="n">{{ forloop.index }}</span><div><b>{{ c[0] }}</b><span>{{ c[1] }}</span></div></li>
+            {%- endfor %}
+          </ol>
+          <p style="margin-top:16px"><a href="{{ m.link.href }}" data-event="{{ m.link.event }}">{{ m.link.label }}</a></p>
+        </div>
+      </div>
+      {%- endfor %}
+      <div class="then">
+        <span>Then:</span><span class="node">{{ page.then.from }}</span><span class="arrow">&rarr;</span><span class="node">{{ page.then.to }}</span><span>{{ page.then.note }}</span>
       </div>
     </div>
   </section>
 
-  <section id="build"><span class="alias-anchor" id="samples" aria-hidden="true"></span>
-    <div class="wrap">
-      <div class="sectionHead">
-        <div class="sectionLabel">Build</div>
-        <h2>Start with the job you need done.</h2>
-        <p>Choose a JavaScript or Python example. Review what you will build, check the prerequisites, and copy the prompt.</p>
-      </div>
-      <div class="scenarioGrid">
+  <section id="build"><span id="prompts" aria-hidden="true"></span><span id="samples" aria-hidden="true"></span>
+    <div class="w">
+      <div class="sh"><h2>{{ page.build_heading }}</h2><p>{{ page.build_text }}</p></div>
+      <div class="cards">
         {%- for s in page.scenarios %}
-        <article class="scenario">
-          <div class="scenarioNum">{{ s.num }} · {{ s.tag }}</div>
-          <h3>{{ s.title }}</h3>
-          <p>{{ s.blurb }}</p>
-          <pre id="build-prompt-{{ s.slug }}" hidden>{{ s.prompt | escape }}</pre>
-          <div class="scenarioFoot">
-            <button type="button" data-copy="#build-prompt-{{ s.slug }}" data-copy-kind="prompt" data-copy-source="build-{{ s.slug }}">Copy prompt</button>
-            <a href="{{ '/build/' | append: s.slug | append: '.html' | relative_url }}"
-               data-event="gallery_card_open" data-event-scenario-id="{{ s.slug }}">Open scenario →</a>
-            <span>{{ s.tag }}</span>
+        <article class="card" id="{{ s.slug }}">
+          <div class="art" style="background:{{ s.art.bg }}"><span class="tag">{{ s.tag }}</span>{{ s.art.svg }}</div>
+          <div class="cbody">
+            <h3>{{ s.title }}</h3>
+            <p>{{ s.blurb }}</p>
+            <div class="cact">
+              <button class="cp" type="button" data-hprompt="{{ '/build/' | append: s.slug | append: '.md' | relative_url }}" data-event="copy_prompt" data-scenario="{{ s.slug }}">Copy prompt</button>
+              <a href="{{ hub_repo }}/blob/main/build/{{ s.slug }}.md" target="_blank" rel="noopener" data-event="open_scenario" data-scenario="{{ s.slug }}">View prompt</a>
+            </div>
           </div>
         </article>
         {%- endfor %}
@@ -117,45 +183,115 @@
     </div>
   </section>
 
-  <section class="prompts" id="prompts"><div class="wrap"><div class="sectionHead"><div class="sectionLabel">Prompt library</div><h2>Know what a working result looks like.</h2><p>Each example brings together the prompt, prerequisites, and expected result so you can follow the steps and check your work.</p></div><a class="inlineLink" href="{{ "/prompts.html" | relative_url }}">Browse the three featured prompts</a></div></section>
-  <section class="skillsSection" id="skills">
-    <div class="wrap">
-      <div class="sectionHead">
-        <div class="sectionLabel">Skills</div>
-        <h2>{{ page.skills.heading }}</h2>
-        <p>{{ page.skills.text }}</p>
-      </div>
-
-      <p><a class="inlineLink" href="{{ site.container_site }}/agent-skills.html">Read installation instructions and prerequisites →</a></p>
-      <div class="skillMeta">
-        <div class="chips">
-          {%- for c in page.skills.chips %}<code>{{ c }}</code>{% endfor %}
-        </div>
-        <div>
-          <a class="inlineLink" href="{{ site.skills_catalog }}" rel="noopener">Full catalog →</a>
-        </div>
-        <p class="mutedLine">{{ page.skills.mcp_note }}</p>
+  <section id="workloads" class="alt">
+    <div class="w">
+      <div class="sh"><h2>{{ page.workloads_heading }}</h2><p>{{ page.workloads_text }}</p></div>
+      <div class="tiles">
+        {%- for t in page.workloads %}
+        <div class="tile"><div class="g">{{ t.icon }}</div><b>{{ t.title }}</b><p>{{ t.text }}</p>{% if t.link %}<a class="tl" href="{{ t.link.href }}" data-event="{{ t.link.event }}">{{ t.link.label }}</a>{% endif %}</div>
+        {%- endfor %}
       </div>
     </div>
   </section>
 
-  <section id="existing"><div class="wrap"><div class="sectionHead"><h2>Already have Azure SQL data?</h2><p>Use an existing development database with the examples above. Review permissions and schema changes before running a prompt.</p><a class="inlineLink" href="{{ "/build/rag-app.html" | relative_url }}">Explore the RAG example</a></div></div></section>
-  <section id="continuity"><div class="wrap"><div class="sectionHead"><h2>{{ page.continuity.heading }}</h2><p>{{ page.continuity.text }}</p><a class="inlineLink" href="{{ site.container_signup }}">Sign up for the Private Preview</a> · <a class="inlineLink" href="{{ site.container_site }}/getting-started.html">Container quickstart</a></div></div></section>
-  <section id="watch"><div class="wrap"><div class="sectionHead"><div class="sectionLabel">Watch and learn</div><h2>See Azure SQL in action.</h2><p>Explore existing demos and practical sessions from Microsoft SQL.</p></div><div class="videoGrid">{% for v in page.videos %}<a class="videoCard" href="{{ v.href }}" target="_blank" rel="noopener" aria-label="{{ v.title }}: opens YouTube in a new tab"><div class="videoVisual"><img src="{{ v.image }}" alt="{{ v.title }}" loading="lazy" width="640" height="360"><span class="playIcon" aria-hidden="true">▶</span></div><div class="videoBody"><small>{{ v.tag }}</small><h3>{{ v.title }}</h3><p>{{ v.text }}</p><span class="inlineLink">{{ v.label }} ↗</span></div></a>{% endfor %}</div><p><a class="inlineLink" href="https://aka.ms/microsoftsqlyt">More from Microsoft SQL on YouTube →</a></p></div></section>
-  <section id="faq"><div class="wrap"><div class="sectionHead"><h2>Before you build</h2></div>{% for f in page.faqs %}<details><summary>{{ f.question }}</summary><p>{{ f.answer }}</p></details>{% endfor %}</div></section>
+  <section id="skills">
+    <div class="w skills">
+      <h2>{{ page.skills.heading }}</h2>
+      <p class="muted" style="font-size:17px;margin-top:10px">{{ page.skills.text }}</p>
+      <div class="agents" role="group" aria-label="Choose your coding agent">
+        {%- for a in page.skills.agents %}
+        <button class="agent" type="button" aria-pressed="{% if forloop.first %}true{% else %}false{% endif %}" data-agent="{{ a.key }}" data-cmd="{{ a.code | escape }}" data-note="{{ a.note | escape }}" data-event="agent_select">
+          <span class="logo">{{ a.logo }}</span><b>{{ a.name }}</b><span>{{ a.blurb }}</span>
+        </button>
+        {%- endfor %}
+      </div>
+      <div class="install">
+        {%- assign a0 = page.skills.agents[0] %}
+        <div class="cmd"><code id="hInstall">{{ a0.code }}</code><button class="cp" type="button" id="hInstallCopy" data-hcopy="{{ a0.code | escape }}" data-event="copy_skill_install">Copy</button></div>
+        <p class="inote" id="hInstallNote">{{ a0.note }}</p>
+      </div>
+      <div class="ask">
+        <p class="asklabel">Then just ask:</p>
+        <div class="chips">
+          {%- for c in page.skills.chips %}
+          <button class="chip" type="button" data-hcopy="{{ c | escape }}" data-event="copy_ask">{{ c }}</button>
+          {%- endfor %}
+        </div>
+        <p class="faint">Click to copy. Paste into your agent.</p>
+      </div>
+      <div class="ctas" style="margin-top:24px">
+        <a class="btn btn-s" href="{{ skills_site }}" data-event="link_skills_site">Browse the skills</a>
+        <a class="btn btn-s" href="{{ skills_site }}#installation" data-event="link_skills_install">Per-tool install guide</a>
+      </div>
+      <p class="faint" style="margin-top:14px">{{ page.skills.note }}</p>
+    </div>
+  </section>
+
+  <section id="watch" class="alt">
+    <div class="w">
+      <div class="sh"><h2>{{ page.videos_heading }}</h2><p>{{ page.videos_text }}</p></div>
+      <div class="reel" aria-label="Video walkthroughs">
+        {%- for v in page.videos %}
+        <a class="v" href="{{ v.href }}" target="_blank" rel="noopener" data-event="deep_dive_click" data-video="{{ v.id }}">
+          <div class="thumb">{% if v.image %}<img src="{{ v.image }}" alt="" loading="lazy" onerror="this.style.display='none'">{% endif %}<span class="play"><i>&#9654;</i></span><span class="dur">{{ v.tag }}</span></div>
+          <div class="meta"><b>{{ v.title }}</b><span>{{ v.text }}</span></div>
+        </a>
+        {%- endfor %}
+        <a class="vmore" href="https://aka.ms/microsoftsqlyt" target="_blank" rel="noopener" data-event="link_youtube_channel">More on the Microsoft SQL channel</a>
+      </div>
+    </div>
+  </section>
+
+  <section id="existing" style="padding:36px 0">
+    <div class="w two">
+      <div class="aud">
+        <h3>{{ page.existing.heading }}</h3><p>{{ page.existing.text }}</p>
+        <div class="links"><a href="#rag-app" data-event="aud_existing_rag">{{ page.existing.link }}</a></div>
+      </div>
+      <div class="aud" id="continuity">
+        <h3>{{ page.continuity.heading }}<span class="badge">Private Preview</span></h3><p>{{ page.continuity.text }}</p>
+        <div class="links"><a href="{{ site.container_signup }}" data-event="aud_container_signup">Sign up</a><a href="{{ site.container_site }}/getting-started.html" data-event="aud_container_quickstart">Container quickstart</a></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="faq" class="alt">
+    <div class="w">
+      <div class="sh"><h2>Before you build</h2></div>
+      <div class="faq">{% for f in page.faqs %}<details><summary>{{ f.question }}</summary><p>{{ f.answer }}</p></details>{% endfor %}</div>
+    </div>
+  </section>
+
+  <section class="close">
+    <div class="w">
+      <h2>{{ page.close.heading }}</h2>
+      <div class="install"><div class="cmd"><code>{{ page.close.code }}</code><button class="cp" type="button" data-hcopy="{{ page.close.code | escape }}" data-event="copy_skills_close">Copy</button></div></div>
+      <a class="btn btn-p" href="#get-running" data-event="cta_close">Get started</a>
+    </div>
+  </section>
   {{ content }}
 </main>
 
 {% include footer.html %}
 <script src="{{ '/assets/js/main.js' | relative_url }}" defer></script>
-<script type="application/ld+json">
-{
-  "@context":"https://schema.org",
-  "@type":"WebSite",
-  "name":"Azure SQL Developer Hub",
-  "description":"{{ site.description | strip_newlines | escape }}",
-  "publisher":{"@type":"Organization","name":"Microsoft"}
-}
+<script>
+(function(){
+  function copyText(t,cb){function legacy(){var ta=document.createElement('textarea');ta.value=t;ta.setAttribute('readonly','');ta.style.position='fixed';ta.style.top='-1000px';document.body.appendChild(ta);ta.select();var ok=false;try{ok=document.execCommand('copy')}catch(e){}document.body.removeChild(ta);cb(ok)}
+    if(navigator.clipboard&&window.isSecureContext){navigator.clipboard.writeText(t).then(function(){cb(true)},legacy)}else{legacy()}}
+  function flash(b,ok){if(b.classList.contains('chip')){b.classList.add(ok?'ok':'bad');setTimeout(function(){b.classList.remove('ok','bad')},1600);return}var t=b.textContent;b.textContent=ok?'Copied':'Select and copy';b.classList.add(ok?'ok':'bad');setTimeout(function(){b.textContent=t;b.classList.remove('ok','bad')},1600)}
+  document.querySelectorAll('[data-hcopy]').forEach(function(b){b.addEventListener('click',function(){copyText(b.getAttribute('data-hcopy'),function(ok){flash(b,ok)})})});
+  document.querySelectorAll('[data-hprompt]').forEach(function(b){b.addEventListener('click',function(){fetch(b.getAttribute('data-hprompt')).then(function(r){if(!r.ok)throw 0;return r.text()}).then(function(t){copyText(t,function(ok){flash(b,ok)})}).catch(function(){window.open(b.getAttribute('data-hprompt'),'_blank')})})});
+  var tabs=document.querySelectorAll('[data-htab]'),panels=document.querySelectorAll('[data-hpanel]');
+  tabs.forEach(function(t){t.addEventListener('click',function(){tabs.forEach(function(x){x.setAttribute('aria-selected','false')});panels.forEach(function(p){p.classList.remove('on')});t.setAttribute('aria-selected','true');document.querySelector('[data-hpanel="'+t.getAttribute('data-htab')+'"]').classList.add('on')})});
+  var cmdEl=document.getElementById('hInstall'),noteEl=document.getElementById('hInstallNote'),copyEl=document.getElementById('hInstallCopy');
+  document.querySelectorAll('.agent').forEach(function(a){a.addEventListener('click',function(){document.querySelectorAll('.agent').forEach(function(x){x.setAttribute('aria-pressed','false')});a.setAttribute('aria-pressed','true');cmdEl.textContent=a.getAttribute('data-cmd');noteEl.innerHTML=a.getAttribute('data-note');copyEl.setAttribute('data-hcopy',a.getAttribute('data-cmd'))})});
+  var frame=document.getElementById('hFrame'),vid=frame&&frame.getAttribute('data-video'),player=null,mounted=false;
+  function mount(){if(mounted||!vid)return;frame.innerHTML='<iframe id="hVideo" src="https://www.youtube-nocookie.com/embed/'+vid+'?rel=0&enablejsapi=1&autoplay=1" title="Hub demo" allow="accelerometer; autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>';mounted=true}
+  var poster=document.getElementById('hPoster');if(poster)poster.addEventListener('click',mount);
+  function ensure(cb){mount();if(player){cb();return}function mk(){player=new YT.Player('hVideo',{events:{onReady:cb}})}if(!window.YT||!window.YT.Player){var s=document.createElement('script');s.src='https://www.youtube.com/iframe_api';document.body.appendChild(s);window.onYouTubeIframeAPIReady=mk}else{mk()}}
+  document.querySelectorAll('.chapter').forEach(function(c){c.addEventListener('click',function(){var t=parseInt(c.getAttribute('data-seek'),10);ensure(function(){player.seekTo(t,true);player.playVideo()})})});
+})();
 </script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"Azure SQL Developer Hub","description":"{{ site.description | strip_newlines | escape }}","publisher":{"@type":"Organization","name":"Microsoft"}}</script>
 </body>
 </html>
