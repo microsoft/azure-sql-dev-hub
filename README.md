@@ -9,7 +9,7 @@ Curated by the Azure SQL Database product team.
 ## What is here
 
 - **Build prompts.** Six copy-and-run prompts, each targeting Azure SQL Database in the cloud and ending in a working app with validation rules at the end. They live in [`build/`](build/).
-- **Setup paths.** Free cloud tier, the local container (Private Preview), or let your agent do it.
+- **Setup paths.** Free cloud tier, the local container (Preview), or let your agent do it.
 - **Agent skills.** Install once from [aka.ms/azuresql-skills](https://aka.ms/azuresql-skills); the skills load themselves when the work matches.
 - **An agent-readable layer.** Every page has a markdown twin at `<page>.md`, an index at [`llms.txt`](llms.txt), and an alternate link in its head. Agents read that; people read the page.
 
