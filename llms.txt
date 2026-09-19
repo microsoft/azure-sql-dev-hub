@@ -28,9 +28,9 @@ Copy-and-run prompts to hand your AI coding agent. Each targets Azure SQL Databa
 - Event-driven: the Azure Functions SQL trigger requires Change Tracking on the database and the table. Output bindings upsert with `MERGE` and need a primary key and compatibility level 130 or higher.
 - Multi-tenant: row-level security with a filter and block predicate keyed on `SESSION_CONTEXT`, set per connection with `sp_set_session_context`.
 - The free offer runs on serverless compute with auto-pause; the first connection to a paused database can return error 40613 and succeeds on retry.
-- Local development: the Azure SQL Database container runs the same engine offline. Private Preview; sign up at https://aka.ms/sqldbcontainerpreview-signup. Its prompts are local-scoped and live at https://microsoft.github.io/azure-sql-database-container/.
+- Local development: the Azure SQL Database container runs the same engine offline. Preview; sign up at https://aka.ms/sqldbcontainerpreview-signup. Its prompts are local-scoped and live at https://microsoft.github.io/azure-sql-database-container/.
 
 ## Optional
 - [Repository](https://github.com/microsoft/azure-sql-dev-hub), short link https://aka.ms/azuresql-hub
 - [Install the agent skills](https://aka.ms/azuresql-skills): `npx skills add microsoft/azure-sql-skills` (Claude Code, Codex, Cursor, VS Code with GitHub Copilot); Claude Code plugin with `claude plugin marketplace add microsoft/azure-sql-skills` then `claude plugin install azure-sql-skills@azure-sql-skills`; or `gh skill install microsoft/azure-sql-skills --all --agent <claude-code|github-copilot|cursor>`.
-- [Azure SQL Database container](https://microsoft.github.io/azure-sql-database-container/): the local engine, Private Preview.
+- [Azure SQL Database container](https://microsoft.github.io/azure-sql-database-container/): the local engine, Preview.

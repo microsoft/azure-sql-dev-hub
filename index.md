@@ -50,11 +50,11 @@ quickstart:
     event: docs_free_offer
 - key: local
   name: Local container
-  pill: Private Preview
+  pill: Preview
   title: Run the Azure SQL Database engine on your laptop.
-  desc: Same engine as the cloud, in a container, offline. Private Preview today. Sign up and we send registry access.
+  desc: Same engine as the cloud, in a container, offline. Preview today. Sign up and we send registry access.
   button:
-    label: Sign up for the Private Preview
+    label: Sign up for the Preview
     href: https://aka.ms/sqldbcontainerpreview-signup
     event: container_signup
   detail_title: What you get once you are in.
@@ -210,7 +210,7 @@ skills:
   - Scaffold the schema, migrations, and data layer for this app
   - Add vector search to this table and make it use the index
   - Why does my first query after idle fail with 40613
-  note: Full catalog, every skill's source, and the feedback form at aka.ms/azuresql-skills. Skills teach your agent the engine; they do not grant access to the Private Preview container.
+  note: Full catalog, every skill's source, and the feedback form at aka.ms/azuresql-skills. Skills teach your agent the engine; they do not grant access to the Preview container.
 videos_heading: See it in action.
 videos_text: Longer walkthroughs from the Microsoft SQL team. Scroll for more.
 videos:
@@ -244,14 +244,14 @@ existing:
   link: Start with the RAG example
 continuity:
   heading: Prefer local development?
-  text: The Azure SQL Database container runs the same engine offline. Sign up for the Private Preview.
+  text: The Azure SQL Database container runs the same engine offline. Sign up for the Preview.
 faqs:
 - question: What do I need to get started?
-  answer: An Azure account and a development database. The free offer covers everything on this page, within its limits. If you want to work offline, sign up for the container Private Preview.
+  answer: An Azure account and a development database. The free offer covers everything on this page, within its limits. If you want to work offline, sign up for the container Preview.
 - question: Is it safe to let an agent write to my database?
   answer: Use a development database with least-privilege access. The skills default to parameterised queries, Entra identity over passwords, and row-level security for multi-tenant work. Review schema changes before they run against anything real.
 - question: Do I need the container?
-  answer: No. Every prompt here targets Azure SQL Database in the cloud. The container is the local option, in Private Preview today.
+  answer: No. Every prompt here targets Azure SQL Database in the cloud. The container is the local option, in Preview today.
 - question: What does this cost?
   answer: The free offer covers the database for every example here, within its limits; see the offer details for what those are. The RAG example needs an embedding service, priced by whoever provides it; the prompt asks which one you have before using it.
 - question: How is this different from SQL Server?
