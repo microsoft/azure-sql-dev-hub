@@ -167,6 +167,36 @@ class CommandTests(unittest.TestCase):
             self.assertIn("token=[REDACTED]", text)
             self.assertNotIn("super-secret", text)
 
+    def test_final_result_lines_use_status_emoji_and_nonpass_details(self) -> None:
+        output = io.StringIO()
+        reporter = ProgressReporter(stream=output, error_stream=output)
+        reporter.result(
+            status="PASS",
+            scenario="javascript-app",
+            harness="copilot",
+            model="gpt",
+            details="not printed",
+        )
+        reporter.result(
+            status="BLOCKED",
+            scenario="multi-tenant",
+            harness="copilot",
+            model="claude",
+            details="dependency failed\nwith details",
+        )
+        lines = output.getvalue().splitlines()
+        self.assertEqual(
+            lines[0],
+            "✅ PASS | scenario=javascript-app | harness=copilot | model=gpt",
+        )
+        self.assertEqual(
+            lines[1],
+            (
+                "⚠️ BLOCKED | scenario=multi-tenant | harness=copilot | "
+                "model=claude | details=dependency failed with details"
+            ),
+        )
+
     def test_copilot_adapter_accepts_valid_jsonl_result(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)

@@ -64,6 +64,34 @@ Copilot CLI noninteractive mode requires an authenticated Copilot session. The
 harness disables the built-in GitHub MCP server and grants unattended local tool
 execution inside each generated workspace.
 
+Check that Copilot CLI is installed:
+
+```bash
+command -v copilot
+copilot --version
+```
+
+Both commands should print a path/version. If `command -v` prints nothing,
+install Copilot CLI using the linked GitHub instructions above.
+
+Check authentication with a minimal noninteractive request:
+
+```bash
+copilot -p "Reply with exactly AUTHENTICATED." \
+  --model gpt-5.4 \
+  --silent \
+  --stream off \
+  --disable-builtin-mcps \
+  --allow-all-tools
+```
+
+The command should print `AUTHENTICATED` and exit zero. If it reports an
+authentication error or opens an authentication flow, run:
+
+```bash
+copilot login
+```
+
 ## Check the plan without creating anything
 
 From the repository root:
@@ -185,6 +213,15 @@ stdout and stderr continue to be written to evidence files. Output includes:
 - local API, Function, and Azurite process start/stop events
 - independent SQL probes
 - safely redacted error summaries and exact evidence paths
+
+After cleanup, the final console block prints the result for each
+scenario/harness/model combo:
+
+```text
+✅ PASS | scenario=javascript-app | harness=copilot | model=gpt-5.4
+⚠️ BLOCKED | scenario=multi-tenant | harness=copilot | model=gpt-5.4 | details=dependencies did not pass: javascript-app
+❌ FAIL | scenario=python-api | harness=copilot | model=claude-sonnet-5 | details=validation failed: ...
+```
 
 Runs are written under `eval/runs/<UTC timestamp>-<unique suffix>/`. Each run contains:
 

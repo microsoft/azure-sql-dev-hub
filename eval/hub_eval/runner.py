@@ -144,6 +144,24 @@ class EvaluationRunner:
             status="PASS" if exit_code == 0 else "FAIL",
             detail=f"exit={exit_code} summary={self.run_dir / 'summary.md'}",
         )
+        self.reporter.info("summary", "scenario results", f"count={len(self.results)}")
+        for result in self.results:
+            self.reporter.result(
+                status=result.status,
+                scenario=result.scenario,
+                harness=self.agent.name,
+                model=result.model,
+                details=result.reason,
+            )
+        for message in self.cleanup_errors:
+            model, _, details = message.partition(":")
+            self.reporter.result(
+                status="ERROR",
+                scenario="cleanup",
+                harness=self.agent.name,
+                model=model or "unknown",
+                details=details or message,
+            )
         return exit_code
 
     def _run_model(self, model: str, selected: tuple[str, ...]) -> None:

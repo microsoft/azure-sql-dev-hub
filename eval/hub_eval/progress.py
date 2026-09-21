@@ -71,6 +71,36 @@ class ProgressReporter:
         """Report an evidence or generated artifact path."""
         self.info("artifact", description, str(path))
 
+    def result(
+        self,
+        *,
+        status: str,
+        scenario: str,
+        harness: str,
+        model: str,
+        details: str | None = None,
+    ) -> None:
+        """Print one final emoji status line for a scenario/harness/model tuple."""
+        emoji = {
+            "PASS": "✅",
+            "FAIL": "❌",
+            "ERROR": "❌",
+            "INVALID": "❌",
+            "CANCELLED": "❌",
+            "BLOCKED": "⚠️",
+            "SKIP": "⚠️",
+        }.get(status, "ℹ️")
+        fields = [
+            f"{emoji} {status}",
+            f"scenario={scenario}",
+            f"harness={harness}",
+            f"model={model}",
+        ]
+        if status != "PASS" and details:
+            fields.append(f"details={' '.join(details.split())}")
+        with self._lock:
+            print(" | ".join(fields), file=self.stream, flush=True)
+
     def _write(
         self,
         event: str,
