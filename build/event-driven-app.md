@@ -83,6 +83,7 @@ GRANT VIEW CHANGE TRACKING ON dbo.tasks TO [<your-entra-user>];
 If another identity already created the `az_func` schema, also grant access to its internal state without transferring schema ownership:
 
 ```sql
+GRANT ALTER ON SCHEMA::az_func TO [<your-entra-user>];
 GRANT SELECT, INSERT, UPDATE, DELETE ON SCHEMA::az_func TO [<your-entra-user>];
 ```
 
