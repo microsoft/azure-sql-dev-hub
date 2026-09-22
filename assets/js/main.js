@@ -8,31 +8,49 @@
 
   // ---- telemetry ----
   // Telemetry contract for engineering. One track() fans out to every provider.
-  // The console line is the demo implementation; App Insights joins the fan-out
-  // automatically once _config.yml carries a connection string. Event taxonomy:
+  // Providers join the fan-out when their IDs are configured in _config.yml.
+  // Event taxonomy:
   //   quickstart_start, agent_start_clicked, install_cmd_copy, copy_command,
   //   copy_prompt, copy_code, gallery_card_open, docs_deep_read, docs_outbound,
   //   azure_outbound, md_fetch, existing_data_clicked, walkthrough_open
+  var clarityTagKeys = ["agent_id", "mode", "scenario_id", "source", "video_id"];
+
   function track(name, props) {
     var p = props || {};
     p.path = location.pathname;
     try { console.log("[telemetry]", name, p); } catch (e) {}
+    try {
+      if (typeof window.clarity === "function") {
+        clarityTagKeys.forEach(function (key) {
+          if (p[key] !== undefined && p[key] !== null && p[key] !== "") {
+            window.clarity("set", key, String(p[key]));
+          }
+        });
+        window.clarity("event", name);
+      }
+    } catch (e) {}
     try {
       if (window.appInsights && typeof window.appInsights.trackEvent === "function") {
         window.appInsights.trackEvent({ name: name }, p);
       }
     } catch (e) {}
   }
+  window.trackHubEvent = track;
 
   // Declarative events: any element with data-event fires it on click, with
   // optional data-event-* props (data-event-scenario-id becomes scenario_id).
   document.querySelectorAll("[data-event]").forEach(function (el) {
+    if (el.hasAttribute("data-copy") || el.hasAttribute("data-hcopy") || el.hasAttribute("data-hprompt")) return;
     el.addEventListener("click", function () {
       var props = {};
       Array.prototype.forEach.call(el.attributes, function (a) {
         if (a.name.indexOf("data-event-") === 0) {
           props[a.name.slice(11).replace(/-/g, "_")] = a.value;
         }
+      });
+      ["agent", "scenario", "video"].forEach(function (key) {
+        var value = el.getAttribute("data-" + key);
+        if (value) props[key + "_id"] = value;
       });
       track(el.getAttribute("data-event"), props);
     });
