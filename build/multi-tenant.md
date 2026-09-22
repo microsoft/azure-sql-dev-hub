@@ -108,6 +108,10 @@ Update `src/app/page.tsx` to get the caller's object id from the Entra session (
 
 Create `tests/rls.test.ts` (Vitest shown):
 
+```bash
+npm install -D vitest@5.0.0
+```
+
 ```ts
 import { describe, it, expect } from "vitest";
 import sql from "mssql";

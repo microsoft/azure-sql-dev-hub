@@ -35,7 +35,7 @@ Ask for the server and database names if they are not in `.env`. Do not create a
 ### 2. Install dependencies
 
 ```bash
-pip install fastapi uvicorn mssql-python azure-identity python-dotenv
+pip install fastapi==0.141.1 uvicorn==0.53.0 mssql-python==1.15.0 azure-identity==1.25.3 python-dotenv==1.2.3
 ```
 
 ### 3. Configure the connection with a token
@@ -47,21 +47,17 @@ SQL_SERVER=<server>.database.windows.net
 SQL_DATABASE=<database>
 ```
 
-Create `db.py`. The token comes from `azure-identity`; the driver receives it as an access token attribute rather than a password.
+Create `db.py`. Reuse one `DefaultAzureCredential`; the driver requests and refreshes tokens through its token-provider integration rather than receiving a password or a caller-managed raw token.
 
 ```python
-import os, struct
+import os
+
 import mssql_python
 from azure.identity import DefaultAzureCredential
 from dotenv import load_dotenv
 
 load_dotenv()
-SQL_COPT_SS_ACCESS_TOKEN = 1256
-
-def _token_struct() -> bytes:
-    token = DefaultAzureCredential().get_token("https://database.windows.net/.default").token
-    raw = token.encode("utf-16-le")
-    return struct.pack("<I", len(raw)) + raw
+credential = DefaultAzureCredential()
 
 def connect():
     conn_str = (
@@ -69,7 +65,7 @@ def connect():
         f"Database={os.environ['SQL_DATABASE']};"
         "Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30;"
     )
-    return mssql_python.connect(conn_str, attrs_before={SQL_COPT_SS_ACCESS_TOKEN: _token_struct()})
+    return mssql_python.connect(conn_str, token_provider=credential)
 ```
 
 ### 4. Create the schema
@@ -79,17 +75,26 @@ Create `init.py` and run it once with `python init.py`:
 ```python
 from db import connect
 
-conn = connect(); cur = conn.cursor()
-cur.execute("""
-IF OBJECT_ID('dbo.tasks') IS NULL
-CREATE TABLE dbo.tasks (
-  id INT IDENTITY(1,1) PRIMARY KEY,
-  title NVARCHAR(200) NOT NULL,
-  done BIT NOT NULL DEFAULT 0,
-  created_at DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME()
-);
-""")
-conn.commit(); cur.close(); conn.close()
+conn = connect()
+cur = conn.cursor()
+try:
+    cur.execute("""
+    IF OBJECT_ID('dbo.tasks') IS NULL
+    CREATE TABLE dbo.tasks (
+      id INT IDENTITY(1,1) PRIMARY KEY,
+      title NVARCHAR(200) NOT NULL,
+      done BIT NOT NULL DEFAULT 0,
+      created_at DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME()
+    );
+    """)
+    conn.commit()
+except Exception:
+    conn.rollback()
+    raise
+finally:
+    cur.close()
+    conn.close()
+
 print("schema ready")
 ```
 
@@ -98,37 +103,52 @@ print("schema ready")
 Create `main.py`:
 
 ```python
-from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
+from contextlib import contextmanager
+from typing import Annotated
+
 from db import connect
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel, StringConstraints
 
 app = FastAPI(title="Tasks on Azure SQL")
 
 class NewTask(BaseModel):
-    title: str
+    title: Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=200)]
+
+@contextmanager
+def _cursor(*, commit: bool = False):
+    conn = connect()
+    cur = conn.cursor()
+    try:
+        yield cur
+        if commit:
+            conn.commit()
+    except Exception:
+        if commit:
+            conn.rollback()
+        raise
+    finally:
+        cur.close()
+        conn.close()
 
 @app.get("/tasks")
 def list_tasks():
-    conn = connect(); cur = conn.cursor()
-    cur.execute("SELECT id, title, done FROM dbo.tasks ORDER BY created_at")
-    rows = [{"id": r[0], "title": r[1], "done": bool(r[2])} for r in cur.fetchall()]
-    cur.close(); conn.close()
-    return rows
+    with _cursor() as cur:
+        cur.execute("SELECT id, title, done FROM dbo.tasks ORDER BY created_at")
+        return [{"id": r[0], "title": r[1], "done": bool(r[2])} for r in cur.fetchall()]
 
 @app.post("/tasks", status_code=201)
 def create_task(t: NewTask):
-    conn = connect(); cur = conn.cursor()
-    cur.execute("INSERT INTO dbo.tasks (title) OUTPUT INSERTED.id VALUES (?)", t.title)
-    new_id = cur.fetchone()[0]
-    conn.commit(); cur.close(); conn.close()
+    with _cursor(commit=True) as cur:
+        cur.execute("INSERT INTO dbo.tasks (title) OUTPUT INSERTED.id VALUES (?)", t.title)
+        new_id = cur.fetchone()[0]
     return {"id": new_id, "title": t.title, "done": False}
 
 @app.post("/tasks/{task_id}/complete")
 def complete_task(task_id: int):
-    conn = connect(); cur = conn.cursor()
-    cur.execute("UPDATE dbo.tasks SET done = 1 WHERE id = ?", task_id)
-    updated = cur.rowcount
-    conn.commit(); cur.close(); conn.close()
+    with _cursor(commit=True) as cur:
+        cur.execute("UPDATE dbo.tasks SET done = 1 WHERE id = ?", task_id)
+        updated = cur.rowcount
     if updated == 0:
         raise HTTPException(404, "task not found")
     return {"id": task_id, "done": True}
@@ -154,7 +174,9 @@ curl -s localhost:8000/tasks
 - `GET /tasks` returns 200 and a JSON array read from `dbo.tasks` on Azure SQL Database.
 - `POST /tasks` returns 201 with the new id; a second `GET` shows the row.
 - Every query is parameterized with `?`. No string formatting into SQL.
-- No password anywhere. The connection uses an Entra access token from `DefaultAzureCredential`.
+- No password anywhere. The connection uses one `DefaultAzureCredential` as the driver's token provider.
+- Connections and cursors close after successful and failed requests; failed writes roll back.
+- Task titles are trimmed, non-empty, and at most 200 characters.
 - `Encrypt=yes` and `TrustServerCertificate=no`.
 
 ## Do not

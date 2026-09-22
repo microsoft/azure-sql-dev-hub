@@ -35,14 +35,14 @@ Ask for: server name, database name, embedding provider, model name, and output 
 ### 2. Install dependencies
 
 ```bash
-pip install mssql-python azure-identity python-dotenv openai
+pip install mssql-python==1.15.0 azure-identity==1.25.3 python-dotenv==1.2.3 openai==3.14.1
 ```
 
 `openai` is the client for both OpenAI and Azure OpenAI; swap the client if the person names another provider.
 
 ### 3. Configure
 
-Create `.env` with the database names plus the embedding settings the person gave you (endpoint, key or identity, model, dimension). Reuse `db.py` from the Python API scenario if it exists; otherwise create it with the token-based `connect()` from that scenario.
+Create `.env` with the database names plus the embedding settings the person gave you (endpoint, key or identity, model, dimension). Reuse `db.py` from the Python API scenario if it exists; otherwise create it with the token-provider `connect()` from that scenario.
 
 ### 4. Create the RAG script
 

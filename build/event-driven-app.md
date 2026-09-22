@@ -71,14 +71,21 @@ public class TasksChanged
 }
 ```
 
-The trigger needs a leases table for state. The binding creates `az_func.Leases_Tables_...` on first run; the connecting identity must be able to create a schema and table. If that fails, grant it once:
+The trigger needs a leases table for state. The binding creates `az_func.Leases_Tables_...` on first run. Grant the connecting identity only the documented database and table permissions it needs:
 
 ```sql
+GRANT CREATE SCHEMA TO [<your-entra-user>];
 GRANT CREATE TABLE TO [<your-entra-user>];
-ALTER AUTHORIZATION ON SCHEMA::az_func TO [<your-entra-user>];
+GRANT SELECT ON dbo.tasks TO [<your-entra-user>];
+GRANT VIEW CHANGE TRACKING ON dbo.tasks TO [<your-entra-user>];
 ```
 
-Only run the second statement if the `az_func` schema already exists.
+If another identity already created the `az_func` schema, also grant access to its internal state without transferring schema ownership:
+
+```sql
+GRANT ALTER ON SCHEMA::az_func TO [<your-entra-user>];
+GRANT SELECT, INSERT, UPDATE, DELETE ON SCHEMA::az_func TO [<your-entra-user>];
+```
 
 ### 3. Run and prove it
 
