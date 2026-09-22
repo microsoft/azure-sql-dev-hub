@@ -24,16 +24,17 @@ azure_portal_hub: "https://aka.ms/azuresqlhub"
 azure_sql_docs: "https://learn.microsoft.com/azure/azure-sql/"
 
 # Web analytics (client-side). Loads only when `enabled` is true and a provider
-# is configured. An Application Insights connection string is browser-embeddable
-# and is not a secret, so it belongs in this file rather than in a repo secret.
+# is configured. Clarity project IDs and Application Insights connection strings
+# are browser-embeddable identifiers, not secrets, so they belong in this file.
 #
 # TODO: this hub has no Application Insights resource yet. Create one for the
-# hub, paste its connection string below, and set enabled to true. The loader in
+# hub and paste its connection string below. The loader in
 # _includes/analytics/app-insights.html and the track() helper in
-# assets/js/main.js are already wired; track() logs to the console for the demo
-# and fans out to App Insights the moment this is filled in.
+# assets/js/main.js are already wired; track() fans out to App Insights the
+# moment this is filled in.
 analytics:
-  enabled: false
+  enabled: true
+  clarity_project_id: "yjvfuw0h6k"
   app_insights_connection_string: ""
 
 markdown: kramdown

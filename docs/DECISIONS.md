@@ -33,6 +33,7 @@ reversed, add a new line saying so and why.
 2026-09-16: Feature three cloud-first draft prompts for a focused review; retain earlier URLs, and require engineering execution evidence before launch claims.
 2026-09-16: Engineering owns both Clarity telemetry implementation and prompt validation; PM owns content, mockup approval and launch messaging.
 2026-09-16: Exclude local output packages from site publishing and agent indexes; omit unavailable video placeholders.
+2026-09-22: Enable Microsoft Clarity as the first production analytics provider, using Strict masking, Clarity cookies disabled, no custom user identifiers, and a site privacy disclosure. Existing action names fan out through `track()` to Clarity custom events; only stable allowlisted dimensions become session-level custom tags.
 
 ## 2026-09-16: Hub prompts are cloud-scoped, and need a cloud accuracy baseline
 

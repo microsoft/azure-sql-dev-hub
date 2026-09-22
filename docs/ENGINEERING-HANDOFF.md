@@ -14,9 +14,11 @@ Publish only the paths that pass validation and PM content approval. Additional 
 
 ## Clarity implementation
 
-Engineering owns project setup, site configuration, applicable consent and masking configuration, instrumentation, and ingestion verification. PM owns measurement questions and reporting interpretation. The current mock retains console event hooks; Clarity is not installed or activated by this PR.
+Engineering owns project setup, site configuration, applicable consent and masking configuration, instrumentation, and ingestion verification. PM owns measurement questions and reporting interpretation. Clarity loads only when `analytics.enabled` is true and `analytics.clarity_project_id` is configured in `_config.yml`.
 
-Measure page views and preserve existing action names: gallery_card_open, copy_prompt, copy_code, copy_command, install_cmd_copy, docs_outbound and azure_outbound where the relevant UI exists. Count copies only after clipboard success. Use stable scenario/source identifiers, never copied content or credentials. Document how event names and dimensions map to Clarity's API.
+Measure page views and preserve existing action names: gallery_card_open, copy_prompt, copy_code, copy_command, install_cmd_copy, docs_outbound and azure_outbound where the relevant UI exists. Count copies only after clipboard success. Use stable scenario/source identifiers, never copied content or credentials. Action names are sent through Clarity's `event` API. The allowlisted `agent_id`, `mode`, `scenario_id`, `source` and `video_id` dimensions are session-level custom tags; URLs, copied content and arbitrary event properties are not sent as Clarity tags.
+
+The Clarity project uses Strict masking with Clarity cookies disabled. Changes to masking, cookies, custom identifiers or Copilot in Clarity require a new privacy review. Do not call Clarity's Identify API for this anonymous public site.
 
 Verify a controlled visit, scenario open, successful copy and outbound click in Clarity. Test clipboard failure and blocked analytics, and ensure the site stays usable. Give PM reporting access. Use existing reporting features for launch; a custom dashboard is deferred. Do not add telemetry to installed skills or interpret browser actions as completed applications or direct agent fetches.
 
