@@ -438,3 +438,9 @@ _config_pages.yml
 
 # Local review packages
 outputs/
+
+# Prompt evaluation evidence and generated workspaces
+eval/runs/
+eval/.venv/
+eval/validation.env
+!eval/validation.EXAMPLE.env
