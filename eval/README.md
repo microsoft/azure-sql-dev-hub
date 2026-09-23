@@ -155,7 +155,7 @@ Available scenarios:
 
 ## RAG embedding deployment
 
-When `rag-app` is selected, the harness first tries to create an Azure OpenAI
+When `rag-app` is selected, the harness first tries to create an Azure OpenAI Service
 account and a `text-embedding-3-small` deployment in the disposable resource
 group. It uses Microsoft Entra authentication and does not retrieve or record an
 API key.

@@ -15,7 +15,7 @@ validated: false
 
 **Scope:**
 - Assumes Python 3.10+, an Azure SQL Database that already exists, and `az login` done.
-- The embedding model is hosted. **Before writing any code, ask which embedding service the person can access** (Azure OpenAI, OpenAI, or another provider) and what the model's dimension is. Do not assume one.
+- The embedding model is hosted. **Before writing any code, ask which embedding service the person can access** (Azure OpenAI Service, OpenAI, or another provider) and what the model's dimension is. Do not assume one.
 - Uses `mssql-python` with an Entra access token, same pattern as the Python API scenario.
 
 Read the entire instruction set before executing.
@@ -38,7 +38,7 @@ Ask for: server name, database name, embedding provider, model name, and output 
 pip install mssql-python==1.15.0 azure-identity==1.25.3 python-dotenv==1.2.3 openai==3.14.1
 ```
 
-`openai` is the client for both OpenAI and Azure OpenAI; swap the client if the person names another provider.
+`openai` is the client for both OpenAI and Azure OpenAI Service; swap the client if the person names another provider.
 
 ### 3. Configure
 

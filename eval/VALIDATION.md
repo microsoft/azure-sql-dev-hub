@@ -52,7 +52,7 @@ The live evaluation found and corrected the following harness issues:
    by the successful RAG, trigger, and RLS checks.
 
 The RAG prompt itself was insufficient for unattended execution in this
-subscription because the authenticated identity cannot create Azure OpenAI
+subscription because the authenticated identity cannot create Azure OpenAI Service
 resources and no existing deployment is visible. The prompt now permits a
 clearly labeled deterministic fixture-vector fallback when no hosted provider is
 available. The fallback proves Azure SQL storage and ranking mechanics without
@@ -66,7 +66,7 @@ pass, failure, and harness exception, Azure CLI checks returned empty lists for:
 
 - databases named `hub_prompt_eval_*`
 - firewall rules named `evaluation-client-*`
-- Azure OpenAI accounts named `aoai-*`
+- Azure OpenAI Service accounts named `aoai-*`
 
 The initial resource-group attempt failed authorization before creating a group,
 and `az group list` confirmed no `rg-sqlhub-eval-*` group existed.

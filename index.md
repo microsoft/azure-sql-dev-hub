@@ -14,7 +14,7 @@ hero:
 video:
   id: biJywQPbqn0
   title: Build on Azure SQL with your AI agent
-  sub: One prompt. The agent does the setup. The query runs.
+  sub: One prompt. The agent writes the setup. You review it and run the query.
   placeholder: PLACEHOLDER  replace with the demo cover image
   chapters:
   - stamp: 0:05
@@ -22,7 +22,7 @@ video:
     label: One prompt
   - stamp: 0:18
     seconds: 18
-    label: Agent does the setup
+    label: Agent writes the setup
   - stamp: 0:34
     seconds: 34
     label: Query runs
@@ -62,7 +62,7 @@ quickstart:
   - - One docker run
     - Sign in to the preview registry, pull the image, start the engine.
   - - Agent skills included
-    - Your agent already knows how to provision, connect, migrate, seed, and ship it.
+    - Skills teach your agent to provision, connect, migrate, seed, and ship, with you reviewing each step.
   - - Ship to Azure unchanged
     - Only the connection string changes.
   link:
@@ -70,9 +70,9 @@ quickstart:
     href: https://microsoft.github.io/azure-sql-database-container/getting-started.html
     event: docs_container
 - key: agent
-  name: Let your agent do it
+  name: With your coding agent
   title: Install the skills, then ask in plain English.
-  desc: One command teaches Claude Code, Copilot, Codex, or Cursor how Azure SQL actually works.
+  desc: One command teaches Claude Code, Copilot, Codex, or Cursor how Azure SQL works. You stay in the loop on every step.
   code: npx skills add microsoft/azure-sql-skills
   copy_event: copy_skills_start
   detail_title: Then say what you want.
@@ -143,7 +143,7 @@ scenarios:
     bg: '#e8f4f4'
     svg: <svg viewBox="0 0 120 90" aria-hidden="true"><path d="M60 12l30 10v22c0 16-13 28-30 34-17-6-30-18-30-34V22z" fill="#fff" stroke="#0e7c7c" stroke-width="2"/><path d="M46 46l9 9 19-19" fill="none" stroke="#0e7c7c" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>
 workloads_heading: Built for AI workloads.
-workloads_text: The pieces an AI app needs, inside the engine. No extension to install, no second database to run.
+workloads_text: The pieces an AI app needs, inside the engine.
 workloads:
 - title: Vector search
   text: A native VECTOR type and VECTOR_DISTANCE. Store embeddings next to the rows they describe.
