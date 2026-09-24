@@ -91,54 +91,59 @@ then:
   from: Local or free tier
   to: Azure SQL Database
   note: Same code, connection string changes, app goes live.
-build_heading: What will you build?
-build_text: Each prompt targets Azure SQL Database in the cloud and ends in a working app. Copy the full prompt, hand it to your agent, check the result against the validation rules at the end.
+build_heading: Bring your app idea to life
+build_text: Start with a task app, an API, or search over your content. Choose a scenario and use its prompt with your coding agent to build on Azure SQL.
+build_note: You'll need an existing Azure SQL Database and az login done. The prompts don't create one.
+build_steps:
+  - Choose a scenario
+  - Copy the prompt
+  - Build and verify
 scenarios:
 - num: '01'
   slug: javascript-app
-  title: Scaffold a JavaScript app
+  title: Build a task-tracking app
   tag: JavaScript
-  blurb: A Next.js task app on the mssql driver, Entra sign-in, one pool, three seeded rows on screen.
+  blurb: Build a web app that displays tasks stored in Azure SQL. Start with sample data and make it your own.
   art:
     bg: '#eaf3fc'
     svg: <svg viewBox="0 0 120 90" aria-hidden="true"><rect x="10" y="12" width="100" height="66" rx="8" fill="#fff" stroke="#0067b8" stroke-width="2"/><rect x="10" y="12" width="100" height="14" rx="8" fill="#0067b8"/><rect x="22" y="36" width="50" height="6" rx="3" fill="#c7dcf0"/><rect x="22" y="48" width="70" height="6" rx="3" fill="#c7dcf0"/><rect x="22" y="60" width="40" height="6" rx="3" fill="#0067b8"/></svg>
 - num: '02'
   slug: python-api
-  title: Create a Python API
+  title: Build an API for your app
   tag: Python
-  blurb: A FastAPI service for a task list, connected with an Entra token. No password.
+  blurb: Give your app a way to create, complete, and retrieve tasks. Build a Python API that connects to Azure SQL with Microsoft Entra, no passwords.
   art:
     bg: '#eaf6ec'
     svg: <svg viewBox="0 0 120 90" aria-hidden="true"><rect x="14" y="20" width="92" height="50" rx="8" fill="#fff" stroke="#107c10" stroke-width="2"/><path d="M30 45h20M60 45h30M30 57h40" stroke="#107c10" stroke-width="4" stroke-linecap="round"/><circle cx="34" cy="33" r="3" fill="#107c10"/><circle cx="44" cy="33" r="3" fill="#a9d8ab"/><circle cx="54" cy="33" r="3" fill="#a9d8ab"/></svg>
 - num: '03'
   slug: rag-app
-  title: Wire up RAG
+  title: Search your content by meaning
   tag: Python / AI
-  blurb: Source text and embeddings in one table, native VECTOR column, ranked similarity search.
+  blurb: Find relevant text with vector search in Azure SQL. Build the retrieval layer for a RAG app using sample text and an embedding model you provide.
   art:
     bg: '#f2ecfa'
     svg: <svg viewBox="0 0 120 90" aria-hidden="true"><circle cx="40" cy="45" r="16" fill="#fff" stroke="#7719aa" stroke-width="2"/><circle cx="80" cy="30" r="9" fill="#fff" stroke="#7719aa" stroke-width="2"/><circle cx="84" cy="62" r="9" fill="#fff" stroke="#7719aa" stroke-width="2"/><path d="M54 40l17-7M55 51l20 8" stroke="#7719aa" stroke-width="2"/><circle cx="40" cy="45" r="5" fill="#7719aa"/></svg>
 - num: '04'
   slug: serverless-api
-  title: Go serverless
+  title: Create a serverless task API
   tag: .NET
-  blurb: An HTTP API in Azure Functions using the SQL input and output bindings. Managed identity, no password in config.
+  blurb: Read and save tasks through an Azure Functions API backed by Azure SQL. Build and test the functions locally.
   art:
     bg: '#fdf1e7'
     svg: <svg viewBox="0 0 120 90" aria-hidden="true"><path d="M52 12l-18 40h16l-8 26 30-42H56z" fill="#fff" stroke="#c05612" stroke-width="2" stroke-linejoin="round"/><rect x="14" y="66" width="30" height="10" rx="5" fill="#f5d8c2"/><rect x="78" y="14" width="28" height="10" rx="5" fill="#f5d8c2"/></svg>
 - num: '05'
   slug: event-driven-app
-  title: React to row changes
+  title: Respond to data changes
   tag: .NET
-  blurb: A SQL trigger in Azure Functions that fires when rows change. Change Tracking on, no polling.
+  blurb: Extend the serverless API with a function that reacts when tasks change in Azure SQL. Log inserts, updates, and deletes as a starting point for automation.
   art:
     bg: '#fdeef1'
     svg: <svg viewBox="0 0 120 90" aria-hidden="true"><rect x="14" y="30" width="40" height="30" rx="6" fill="#fff" stroke="#b0244a" stroke-width="2"/><rect x="66" y="30" width="40" height="30" rx="6" fill="#fff" stroke="#b0244a" stroke-width="2"/><path d="M54 45h12" stroke="#b0244a" stroke-width="3"/><path d="M62 40l6 5-6 5" fill="none" stroke="#b0244a" stroke-width="3"/><circle cx="34" cy="45" r="5" fill="#b0244a"/><path d="M80 40v10M86 40v10M92 40v10" stroke="#f3c3ce" stroke-width="3"/></svg>
 - num: '06'
   slug: multi-tenant
-  title: Make it multi-tenant
+  title: Separate each customer's data
   tag: JavaScript
-  blurb: Row-level security enforced by the engine, set from the app per connection, with a test that proves the isolation holds.
+  blurb: Extend a task app for multiple customers. Add row-level security and test that one tenant cannot read another tenant's tasks.
   art:
     bg: '#e8f4f4'
     svg: <svg viewBox="0 0 120 90" aria-hidden="true"><path d="M60 12l30 10v22c0 16-13 28-30 34-17-6-30-18-30-34V22z" fill="#fff" stroke="#0e7c7c" stroke-width="2"/><path d="M46 46l9 9 19-19" fill="none" stroke="#0e7c7c" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>
