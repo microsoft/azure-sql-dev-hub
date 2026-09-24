@@ -89,14 +89,20 @@ function plain(s) {
   return String(s || '').replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim();
 }
 
+// Oxford list, matching the sentence the layout renders in the hero.
+function sentenceList(items) {
+  if (items.length < 2) return items.join('');
+  return `${items.slice(0, -1).join(', ')}, and ${items[items.length - 1]}`;
+}
+
 // The home page's structured front matter, rendered back into markdown.
 function homeToMarkdown(d) {
   const out = [];
   const h = d.hero || {};
-  out.push(`# ${h.headline} ${h.headline_accent}`.trim(), '');
+  out.push(`# ${[h.headline, h.headline_accent].filter(Boolean).join(' ')}`.trim(), '');
   if (h.tagline) out.push(h.tagline, '');
   out.push(h.subline, '');
-  if (h.agents) out.push(`Works with ${h.agents.join(', ')}.`, '');
+  if (h.agents) out.push(`Works with ${sentenceList(h.agents)}.`, '');
 
   const v = d.video || {};
   if (v.id) {

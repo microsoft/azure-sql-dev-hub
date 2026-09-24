@@ -3,8 +3,7 @@ layout: home
 title: Azure SQL Developer Hub
 description: The front door for building applications on Azure SQL Database with an AI coding agent. Start free in the cloud, hand your agent a build prompt, verify a working app.
 hero:
-  headline: Azure SQL, built for
-  headline_accent: AI workloads.
+  headline: Azure SQL, built for AI workloads
   tagline: Bring the idea. Build with Azure SQL.
   subline: Start with a prompt. Give your AI coding agent SQL skills, and make your next app yours.
   agents:
@@ -19,7 +18,7 @@ video:
   sub: Azure SQL for the agent era.
   poster: /assets/img/hero-idea-to-app.jpg
   poster_alt: 'From idea to app: a prompt builds a task app on Azure SQL.'
-quickstart_heading: Get a database running.
+quickstart_heading: Get a database running
 quickstart_text: Pick your path. The same engine everywhere, so what you build here ships unchanged.
 quickstart:
 - key: cloud
@@ -141,7 +140,7 @@ scenarios:
   art:
     bg: '#e8f4f4'
     svg: <svg viewBox="0 0 120 90" aria-hidden="true"><path d="M60 12l30 10v22c0 16-13 28-30 34-17-6-30-18-30-34V22z" fill="#fff" stroke="#0e7c7c" stroke-width="2"/><path d="M46 46l9 9 19-19" fill="none" stroke="#0e7c7c" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>
-workloads_heading: Built for AI workloads.
+workloads_heading: Built for AI workloads
 workloads_text: The pieces an AI app needs, inside the engine.
 workloads:
 - title: Vector search
@@ -210,7 +209,7 @@ skills:
   - Add vector search to this table and make it use the index
   - Why does my first query after idle fail with 40613
   note: Full catalog, every skill's source, and the feedback form at aka.ms/azuresql-skills. Skills teach your agent the engine; they do not grant access to the Preview container.
-videos_heading: See it in action.
+videos_heading: See it in action
 videos_text: Longer walkthroughs from the Microsoft SQL team. Scroll for more.
 videos:
 - id: pq2drN2Qw5w
@@ -256,6 +255,6 @@ faqs:
 - question: How is this different from SQL Server?
   answer: Same engine family, managed for you, with features that ship to Azure SQL Database first. The container runs the Azure SQL Database engine, not the SQL Server image.
 close:
-  heading: Ready? Teach your agent, then ask.
+  heading: Ready? Teach your agent, then ask
   code: npx skills add microsoft/microsoft-sql
 ---
