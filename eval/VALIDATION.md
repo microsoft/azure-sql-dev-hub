@@ -16,15 +16,7 @@ GitHub Copilot CLI 1.0.85 successfully completed noninteractive smoke tests with
 - `gpt-5.4`
 - `claude-sonnet-5`
 
-## Live scenario results
-
-### Latest scenario results
-
-Run `20260924T003818Z-a580dbff` completed all six scenarios with `gpt-5.4`
-and `claude-sonnet-5`. The evidence is under
-`eval/runs/20260924T003818Z-a580dbff/`.
-Run `20260924T015743Z-7129af63` successfully reran the Claude Python API
-scenario and supersedes its transient invalid-JSONL failure from the full matrix.
+## Scenario results
 
 | Scenario | Model | Result | Run ID |
 |---|---|---|---|
@@ -36,10 +28,7 @@ scenario and supersedes its transient invalid-JSONL failure from the full matrix
 | RAG | `claude-sonnet-5` | ✅ PASS: provisioned Azure OpenAI and independent end-state validation passed. | `20260924T003818Z-a580dbff` |
 | Serverless API | `gpt-5.4` | ✅ PASS: independent end-state validation passed. | `20260924T003818Z-a580dbff` |
 | Serverless API | `claude-sonnet-5` | ✅ PASS: independent end-state validation passed. | `20260924T003818Z-a580dbff` |
-| Event-driven app | `gpt-5.4` | ❌ FAIL: the SQL trigger did not log the inserted task within five minutes. | `20260924T003818Z-a580dbff` |
-| Event-driven app | `claude-sonnet-5` | ❌ FAIL: the SQL trigger did not log the inserted task within five minutes. | `20260924T003818Z-a580dbff` |
+| Event-driven app | `gpt-5.4` | ✅ PASS: independent end-state validation passed. | `20260924T024029Z-4d08ed49` |
+| Event-driven app | `claude-sonnet-5` | ✅ PASS: independent end-state validation passed. | `20260924T024029Z-4d08ed49` |
 | Multi-tenant app | `gpt-5.4` | ✅ PASS: independent end-state validation passed. | `20260924T003818Z-a580dbff` |
 | Multi-tenant app | `claude-sonnet-5` | ✅ PASS: independent end-state validation passed. | `20260924T003818Z-a580dbff` |
-
-The latest totals are five passes and one failure for each model. Azure cleanup
-completed without errors for the full matrix and targeted rerun.
