@@ -113,7 +113,10 @@ function homeToMarkdown(d) {
   }
   if (d.then) out.push(`Then: ${d.then.from} to ${d.then.to}. ${d.then.note}`, '');
 
-  out.push('## Build {#build}', '', d.build_text || '', '');
+  out.push(`## ${d.build_heading || 'Build'} {#build}`, '', d.build_text || '', '');
+  if (d.build_note) out.push(d.build_note, '');
+  for (const [i, step] of (d.build_steps || []).entries()) out.push(`${i + 1}. ${step}`);
+  out.push('');
   for (const s of d.scenarios || []) {
     out.push(`### [${s.title}](build/${s.slug}.md)`, '', `${s.tag}. ${s.blurb}`, '', `Full prompt: build/${s.slug}.md`, '');
   }

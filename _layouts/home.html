@@ -51,6 +51,8 @@
 .h .steps b{display:block;font-weight:600}.h .steps span{color:var(--muted)}
 .h .then{display:flex;align-items:center;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:22px;padding:12px;background:var(--panel2);border:1px solid var(--line);border-radius:9px;font-size:13px;color:var(--muted)}
 .h .then .node{padding:6px 12px;border:1px solid var(--line);border-radius:7px;background:#fff;font-weight:600;color:var(--ink)}.h .then .arrow{color:var(--accent);font-size:16px}
+.h .build-note{margin:0 0 18px;max-width:64ch;color:var(--muted);font-size:14px}
+.h .build-flow{list-style:none;display:flex;flex-wrap:wrap;gap:12px 24px;padding:0;margin:0 0 28px;color:var(--muted);font-size:14px}.h .build-flow li{display:flex;align-items:center;gap:9px}.h .build-flow span{display:inline-grid;place-items:center;width:25px;height:25px;border:1px solid var(--line);border-radius:50%;color:var(--ink);font-size:12px;font-weight:600;background:var(--panel)}
 .h .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:18px}
 .h .card{border:1px solid var(--line);border-radius:var(--r);overflow:hidden;background:#fff;display:flex;flex-direction:column}
 .h .art{height:150px;position:relative;display:flex;align-items:center;justify-content:center}.h .art svg{width:120px;height:90px}
@@ -165,6 +167,10 @@
   <section id="build"><span id="prompts" aria-hidden="true"></span><span id="samples" aria-hidden="true"></span>
     <div class="w">
       <div class="sh"><h2>{{ page.build_heading }}</h2><p>{{ page.build_text }}</p></div>
+      {% if page.build_note %}<p class="build-note">{{ page.build_note }}</p>{% endif %}
+      <ol class="build-flow" aria-label="From idea to app">
+        {% for step in page.build_steps %}<li><span aria-hidden="true">{{ forloop.index }}</span>{{ step }}</li>{% endfor %}
+      </ol>
       <div class="cards">
         {%- for s in page.scenarios %}
         <article class="card" id="{{ s.slug }}">
