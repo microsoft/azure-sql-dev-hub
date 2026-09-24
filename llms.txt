@@ -14,12 +14,12 @@ _Last updated: September 2026._
 
 ## Build prompts
 Copy-and-run prompts to hand your AI coding agent. Each targets Azure SQL Database in the cloud and ends in a working app, with validation rules at the end:
-- [Scaffold a JavaScript app (Next.js, mssql driver, Entra)](https://microsoft.github.io/azure-sql-dev-hub/build/javascript-app.md)
-- [Create a Python API (FastAPI, mssql-python, Entra token)](https://microsoft.github.io/azure-sql-dev-hub/build/python-api.md)
-- [Wire up RAG (Python, native VECTOR, hosted embeddings)](https://microsoft.github.io/azure-sql-dev-hub/build/rag-app.md)
-- [Go serverless (.NET, Azure Functions SQL bindings)](https://microsoft.github.io/azure-sql-dev-hub/build/serverless-api.md)
-- [React to row changes (.NET, SQL trigger with Change Tracking)](https://microsoft.github.io/azure-sql-dev-hub/build/event-driven-app.md)
-- [Make it multi-tenant (JavaScript, row-level security)](https://microsoft.github.io/azure-sql-dev-hub/build/multi-tenant.md)
+- [Build a task-tracking app](https://microsoft.github.io/azure-sql-dev-hub/build/javascript-app.md): JavaScript. Build a web app that displays tasks stored in Azure SQL. Start with sample data and make it your own.
+- [Build an API for your app](https://microsoft.github.io/azure-sql-dev-hub/build/python-api.md): Python. Give your app a way to create, complete, and retrieve tasks. Build a Python API that connects to Azure SQL with Microsoft Entra, no passwords.
+- [Search your content by meaning](https://microsoft.github.io/azure-sql-dev-hub/build/rag-app.md): Python / AI. Find relevant text with vector search in Azure SQL. Build the retrieval layer for a RAG app using sample text and an embedding model you provide.
+- [Create a serverless task API](https://microsoft.github.io/azure-sql-dev-hub/build/serverless-api.md): .NET. Read and save tasks through an Azure Functions API backed by Azure SQL. Build and test the functions locally.
+- [Respond to data changes](https://microsoft.github.io/azure-sql-dev-hub/build/event-driven-app.md): .NET. Extend the serverless API with a function that reacts when tasks change in Azure SQL. Log inserts, updates, and deletes as a starting point for automation.
+- [Separate each customer's data](https://microsoft.github.io/azure-sql-dev-hub/build/multi-tenant.md): JavaScript. Extend a task app for multiple customers. Add row-level security and test that one tenant cannot read another tenant's tasks.
 
 ## Key facts
 - Target: Azure SQL Database in the Microsoft Azure cloud. The free offer covers every prompt on this site, within its limits. Connect with Microsoft Entra; never a password in code or config.
