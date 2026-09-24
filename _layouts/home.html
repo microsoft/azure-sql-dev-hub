@@ -167,7 +167,7 @@
   <section id="build"><span id="prompts" aria-hidden="true"></span><span id="samples" aria-hidden="true"></span>
     <div class="w">
       <div class="sh"><h2>{{ page.build_heading }}</h2><p>{{ page.build_text }}</p></div>
-      {% if page.build_note %}<p class="build-note">{{ page.build_note }}</p>{% endif %}
+      {% if page.build_note %}{% capture note_link %}<a href="{{ page.build_note_href }}">{{ page.build_note_link }}</a>{% endcapture %}<p class="build-note">{{ page.build_note | replace: page.build_note_link, note_link }}</p>{% endif %}
       <ol class="build-flow" aria-label="From idea to app">
         {% for step in page.build_steps %}<li><span aria-hidden="true">{{ forloop.index }}</span>{{ step }}</li>{% endfor %}
       </ol>
