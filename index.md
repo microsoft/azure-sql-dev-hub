@@ -5,28 +5,20 @@ description: The front door for building applications on Azure SQL Database with
 hero:
   headline: Azure SQL, built for
   headline_accent: AI workloads.
-  subline: Start free in the cloud, or straight from your AI coding agent. The engine your production already runs on, now with the setup an agent can finish for you.
+  tagline: Bring the idea. Build with Azure SQL.
+  subline: Start with a prompt. Give your AI coding agent SQL skills, and make your next app yours.
   agents:
   - Claude Code
   - GitHub Copilot
   - Codex
   - Cursor
 video:
-  id: biJywQPbqn0
-  title: Build on Azure SQL with your AI agent
-  sub: One prompt. The agent writes the setup. You review it and run the query.
-  placeholder: PLACEHOLDER  replace with the demo cover image
-  chapters:
-  - stamp: 0:05
-    seconds: 5
-    label: One prompt
-  - stamp: 0:18
-    seconds: 18
-    label: Agent writes the setup
-  - stamp: 0:34
-    seconds: 34
-    label: Query runs
-  note: Chapter times are placeholders until the final edit lands.
+  # Leave id empty to show the poster image. Set it to a video id to swap in the real video.
+  id:
+  title: From idea to app
+  sub: Azure SQL for the agent era.
+  poster: /assets/img/hero-idea-to-app.jpg
+  poster_alt: 'From idea to app: a prompt builds a task app on Azure SQL.'
 quickstart_heading: Get a database running.
 quickstart_text: Pick your path. The same engine everywhere, so what you build here ships unchanged.
 quickstart:

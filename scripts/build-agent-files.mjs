@@ -93,13 +93,17 @@ function plain(s) {
 function homeToMarkdown(d) {
   const out = [];
   const h = d.hero || {};
-  out.push(`# ${h.headline} ${h.headline_accent}`.trim(), '', h.subline, '');
+  out.push(`# ${h.headline} ${h.headline_accent}`.trim(), '');
+  if (h.tagline) out.push(h.tagline, '');
+  out.push(h.subline, '');
   if (h.agents) out.push(`Works with ${h.agents.join(', ')}.`, '');
 
   const v = d.video || {};
   if (v.id) {
     out.push('## Demo video', '', `${v.title}. ${v.sub}`, '', `https://www.youtube.com/watch?v=${v.id}`, '');
     if (v.chapters) out.push(v.chapters.map((c) => `${c.stamp} ${c.label}`).join(' · '), '');
+  } else if (v.poster) {
+    out.push(`## ${v.title}`, '', v.sub, '');
   }
 
   out.push('## Get running {#get-running}', '', d.quickstart_text || '', '');
