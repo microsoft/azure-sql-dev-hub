@@ -15,6 +15,17 @@ python3 -m venv eval/.venv
 eval/.venv/bin/python -m pip install -r eval/requirements.txt
 ```
 
+On Windows the virtualenv layout differs and the interpreter is at
+`eval/.venv/Scripts/python.exe`. Substitute that path for
+`eval/.venv/bin/python` in every command below.
+
+On Windows ARM64, pip may select the `cryptography` sdist and fail trying to
+compile it with Rust. Prebuilt ARM64 wheels exist, so force them:
+
+```bash
+eval/.venv/Scripts/python.exe -m pip install --only-binary=:all: -r eval/requirements.txt
+```
+
 ## Before you run it
 
 Install and sign in to:
