@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import re
+import shutil
 import time
 from datetime import UTC, datetime, timedelta
 from fnmatch import fnmatchcase
@@ -13,6 +14,9 @@ from uuid import uuid4
 from .command import CommandError, CommandRunner
 from .models import AzureResources
 from .progress import ProgressReporter
+
+# Windows ships az.cmd, not az.exe; CreateProcess only appends .exe.
+_AZ = shutil.which("az") or "az"
 
 PURPOSE_TAG = "azure-sql-dev-hub-prompt-eval"
 PUBLIC_AZURE_CLOUD = "AzureCloud"
@@ -104,7 +108,7 @@ class AzureCli:
     ):
         """Run an Azure CLI command and decode its JSON output."""
         result = self.runner.run(
-            ["az", *args, "--only-show-errors", "--output", "json"],
+            [_AZ, *args, "--only-show-errors", "--output", "json"],
             timeout=timeout,
             label=label,
             check=check,
@@ -126,7 +130,7 @@ class AzureCli:
     ) -> str:
         """Run an Azure CLI command and return trimmed text output."""
         result = self.runner.run(
-            ["az", *args, "--only-show-errors", "--output", "tsv"],
+            [_AZ, *args, "--only-show-errors", "--output", "tsv"],
             timeout=timeout,
             label=label,
             check=check,
@@ -136,12 +140,12 @@ class AzureCli:
     def verify_context(self) -> dict:
         """Select and verify the exact authorized subscription."""
         self.runner.run(
-            ["az", "cloud", "set", "--name", PUBLIC_AZURE_CLOUD],
+            [_AZ, "cloud", "set", "--name", PUBLIC_AZURE_CLOUD],
             label="az-cloud-set",
             check=True,
         )
         self.runner.run(
-            ["az", "account", "set", "--subscription", self.subscription_id],
+            [_AZ, "account", "set", "--subscription", self.subscription_id],
             label="az-account-set",
             check=True,
         )

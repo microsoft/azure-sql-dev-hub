@@ -140,6 +140,14 @@ class CommandRunner:
 
     @staticmethod
     def _terminate_group(pid: int, *, ignore_missing: bool = False) -> None:
+        if os.name == "nt":
+            # Windows has no process groups; taskkill /T covers the child tree.
+            subprocess.run(
+                ["taskkill", "/PID", str(pid), "/T", "/F"],
+                capture_output=True,
+                check=False,
+            )
+            return
         try:
             os.killpg(pid, signal.SIGTERM)
         except (ProcessLookupError, PermissionError):
