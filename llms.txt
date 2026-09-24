@@ -32,5 +32,5 @@ Copy-and-run prompts to hand your AI coding agent. Each targets Azure SQL Databa
 
 ## Optional
 - [Repository](https://github.com/microsoft/azure-sql-dev-hub), short link https://aka.ms/azuresql-hub
-- [Install the agent skills](https://aka.ms/azuresql-skills): `npx skills add microsoft/azure-sql-skills` (Claude Code, Codex, Cursor, VS Code with GitHub Copilot); Claude Code plugin with `claude plugin marketplace add microsoft/azure-sql-skills` then `claude plugin install azure-sql-skills@azure-sql-skills`; or `gh skill install microsoft/azure-sql-skills --all --agent <claude-code|github-copilot|cursor>`.
+- [Install the agent skills](https://aka.ms/azuresql-skills): `npx skills add microsoft/microsoft-sql` (Claude Code, Codex, Cursor, VS Code with GitHub Copilot); Claude Code plugin with `claude plugin marketplace add microsoft/microsoft-sql` then `claude plugin install microsoft-sql@microsoft-sql`; or `gh skill install microsoft/microsoft-sql --all --agent <claude-code|github-copilot|cursor>`.
 - [Azure SQL Database container](https://microsoft.github.io/azure-sql-database-container/): the local engine, Preview.

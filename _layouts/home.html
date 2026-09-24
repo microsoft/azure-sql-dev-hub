@@ -16,12 +16,21 @@
 .h .btn-s{background:#fff;color:var(--ink);border-color:#c7ced6}.h .btn-s:hover{border-color:var(--ink);text-decoration:none}
 .h .cp{padding:6px 12px;font-size:13px;border-radius:6px;background:#fff;color:var(--accent);border:1px solid var(--line);cursor:pointer;font-family:inherit}
 .h .cp:hover{border-color:var(--accent)}.h .cp.ok{color:var(--ok);border-color:var(--ok)}.h .cp.bad,.h .chip.bad{color:#b0244a;border-color:#b0244a}
-.h .hero{padding:64px 0 28px;text-align:center}
-.h .hero h1{font-size:clamp(40px,6vw,60px);font-weight:700;max-width:14ch;margin:0 auto 18px}.h .hero h1 span{color:var(--accent)}
-.h .hero .sub{font-size:19px;color:var(--muted);max-width:52ch;margin:0 auto 24px}
+.h .hero{padding:64px 0;text-align:left;background:linear-gradient(120deg,#fff 30%,#f0f7ff 100%)}
+.h .hero .hero-grid{max-width:1280px;display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:48px;align-items:center}
+.h .hero h1{font-size:clamp(40px,4.2vw,58px);font-weight:700;max-width:15ch;margin:0 0 22px}.h .hero h1 span{color:var(--accent);display:block}
+.h .hero .sub{font-size:18px;color:var(--muted);max-width:43ch;margin:0 0 26px}
+.h .hero .tagline{font-size:21px;line-height:1.4;font-weight:600;color:var(--ink);margin:0 0 12px}
+.h .hero .ctas{justify-content:flex-start}
+.h .hero-copy{min-width:0}
 .h .ctas{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-bottom:22px}
 .h .agentline{font-size:13px;color:var(--faint)}.h .agentline span{color:var(--muted)}
-.h .vid{max-width:760px;margin:28px auto 0}
+.h .vid{width:100%;min-width:0;margin:0}
+.h .hero-art{display:block;width:100%;height:auto;border-radius:var(--r);border:1px solid var(--line)}
+.h .hero-caption{margin-top:12px;text-align:center;font-size:14px;font-weight:600;color:var(--accent-ink)}
+.h .hero-figure{margin:0}
+.h .poster img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.h .poster .pplay{position:relative;z-index:1;box-shadow:0 4px 24px #0e1a2b33}
 .h .vframe{position:relative;padding-top:56.25%;border-radius:var(--r) var(--r) 0 0;overflow:hidden;background:var(--dark)}
 .h .vframe iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
 .h .poster{position:absolute;inset:0;width:100%;height:100%;border:0;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;color:#fff;background:linear-gradient(180deg,#0b1526 0%,#1a2f52 100%);font-family:inherit;padding:0}
@@ -91,6 +100,8 @@
 .h .faq details p{margin-top:10px;font-size:15px;color:var(--muted);max-width:66ch}
 .h .close{text-align:center;padding:48px 0 56px}.h .close h2{margin-bottom:22px}.h .close .install{margin-bottom:20px}
 @media (max-width:820px){.h .panel.on{grid-template-columns:1fr}.h .agents{grid-template-columns:repeat(2,1fr)}.h .two{grid-template-columns:1fr}.h section{padding:44px 0}.h .hero{padding-top:44px}.h .ptitle{font-size:18px}.h .psub{font-size:12px}}
+@media (max-width:820px){.h #top{scroll-margin-top:144px}}
+@media (max-width:820px){.h .hero .hero-grid{grid-template-columns:1fr;gap:28px}.h .hero{padding:36px 0}.h .hero h1{font-size:clamp(36px,7vw,52px);max-width:18ch}.h .hero .sub{max-width:52ch}.h .hero .agentline{font-size:12px}}
 </style>
 <body>
 {% include nav.html %}
@@ -100,30 +111,46 @@
 <main id="main" class="h">
 
   <header class="hero" id="top">
-    <div class="w">
+    <div class="w hero-grid">
+      <div class="hero-copy">
       <h1>{{ page.hero.headline }} <span>{{ page.hero.headline_accent }}</span></h1>
+      {%- if page.hero.tagline %}<p class="tagline">{{ page.hero.tagline }}</p>{% endif %}
       <p class="sub">{{ page.hero.subline }}</p>
       <div class="ctas">
         <a class="btn btn-p" href="#get-running" data-event="cta_get_started">Get started</a>
-        <a class="btn btn-s" href="#skills" data-event="cta_install_skills">Install skills</a>
+        <a class="btn btn-s" href="#get-running" data-htab-go="agent" data-event="cta_install_skills">Install skills</a>
       </div>
       <p class="agentline">Works with <span>{{ page.hero.agents | join: " · " }}</span></p>
+      </div>
 
-      <div class="vid">
-        <div class="vframe" id="hFrame" data-video="{{ page.video.id }}">
-          <button class="poster" id="hPoster" type="button" aria-label="Play: {{ page.video.title }}" data-event="hero_video_play">
-            <span class="pplay" aria-hidden="true">&#9654;</span>
-            <span class="ptitle">{{ page.video.title }}</span>
-            <span class="psub">{{ page.video.sub }}</span>
-            {%- if page.video.placeholder %}<span class="pph">{{ page.video.placeholder }}</span>{% endif %}
-          </button>
-        </div>
-        <div class="chapters" role="list" aria-label="Video chapters">
+        <div class="vid">
+          {%- if page.video.id %}
+          <div class="vframe" id="hFrame" data-video="{{ page.video.id }}">
+            <button class="poster" id="hPoster" type="button" aria-label="Play: {{ page.video.title }}" data-event="hero_video_play">
+              {%- if page.video.poster %}
+              <img src="{{ page.video.poster | relative_url }}" alt="{{ page.video.poster_alt | escape }}" fetchpriority="high">
+              {%- endif %}
+              <span class="pplay" aria-hidden="true">&#9654;</span>
+              {%- unless page.video.poster %}
+              <span class="ptitle">{{ page.video.title }}</span>
+              <span class="psub">{{ page.video.sub }}</span>
+              {%- endunless %}
+            </button>
+          </div>
+          {%- if page.video.chapters %}
+          <div class="chapters" role="list" aria-label="Video chapters">
           {%- for c in page.video.chapters %}
           <button class="chapter" type="button" role="listitem" data-seek="{{ c.seconds }}" data-event="chapter_click"><time>{{ c.stamp }}</time><b>{{ c.label }}</b></button>
           {%- endfor %}
-        </div>
-        {%- if page.video.note %}<p class="faint" style="margin-top:12px">{{ page.video.note }}</p>{% endif %}
+          </div>
+          {%- endif %}
+          {%- if page.video.note %}<p class="faint" style="margin-top:12px">{{ page.video.note }}</p>{% endif %}
+          {%- elsif page.video.poster %}
+          <figure class="hero-figure">
+          <img class="hero-art" src="{{ page.video.poster | relative_url }}" alt="{{ page.video.poster_alt | escape }}" fetchpriority="high">
+          <figcaption class="hero-caption">{{ page.video.sub }}</figcaption>
+          </figure>
+          {%- endif %}
       </div>
     </div>
   </header>
@@ -288,6 +315,7 @@
   function trackCopy(b,ok){if(!ok||typeof window.trackHubEvent!=='function')return;var p={source:'home'};var scenario=b.getAttribute('data-scenario');if(scenario)p.scenario_id=scenario;window.trackHubEvent(b.getAttribute('data-event'),p)}
   document.querySelectorAll('[data-hcopy]').forEach(function(b){b.addEventListener('click',function(){copyText(b.getAttribute('data-hcopy'),function(ok){flash(b,ok);trackCopy(b,ok)})})});
   document.querySelectorAll('[data-hprompt]').forEach(function(b){b.addEventListener('click',function(){fetch(b.getAttribute('data-hprompt')).then(function(r){if(!r.ok)throw 0;return r.text()}).then(function(t){copyText(t,function(ok){flash(b,ok);trackCopy(b,ok)})}).catch(function(){window.open(b.getAttribute('data-hprompt'),'_blank')})})});
+  document.querySelectorAll('[data-htab-go]').forEach(function(b){b.addEventListener('click',function(){var t=document.querySelector('[data-htab="'+b.getAttribute('data-htab-go')+'"]');if(t)t.click()})});
   var tabs=document.querySelectorAll('[data-htab]'),panels=document.querySelectorAll('[data-hpanel]');
   tabs.forEach(function(t){t.addEventListener('click',function(){tabs.forEach(function(x){x.setAttribute('aria-selected','false')});panels.forEach(function(p){p.classList.remove('on')});t.setAttribute('aria-selected','true');document.querySelector('[data-hpanel="'+t.getAttribute('data-htab')+'"]').classList.add('on')})});
   var cmdEl=document.getElementById('hInstall'),noteEl=document.getElementById('hInstallNote'),copyEl=document.getElementById('hInstallCopy');
