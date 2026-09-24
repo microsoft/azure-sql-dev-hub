@@ -93,7 +93,9 @@ then:
   note: Same code, connection string changes, app goes live.
 build_heading: Bring your app idea to life
 build_text: Start with a task app, an API, or search over your content. Choose a scenario and use its prompt with your coding agent to build on Azure SQL.
-build_note: You'll need an existing Azure SQL Database and az login done. The prompts don't create one.
+build_note: Each prompt works against a database you already have. No database yet? Get a database running takes three steps.
+build_note_link: Get a database running
+build_note_href: '#get-running'
 build_steps:
   - Choose a scenario
   - Copy the prompt
