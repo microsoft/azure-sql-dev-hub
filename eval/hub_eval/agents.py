@@ -92,8 +92,8 @@ class CopilotCli:
                     continue
                 try:
                     record = json.loads(line)
-                except json.JSONDecodeError as exc:
-                    raise CommandError("Copilot emitted invalid JSONL", result) from exc
+                except json.JSONDecodeError:
+                    continue
                 if record.get("type") == "result":
                     final_result = record
         if final_result is None:

@@ -387,6 +387,64 @@ class CommandTests(unittest.TestCase):
             )
             self.assertTrue(result.succeeded)
 
+    def test_copilot_adapter_tolerates_malformed_intermediate_record(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            executable = root / "fake-copilot"
+            executable.write_text(
+                textwrap.dedent(
+                    """\
+                    #!/bin/sh
+                    printf '%s\\n' '{"type":"assistant.message","data":'
+                    printf '%s\\n' '{"type":"result","exitCode":0}'
+                    """
+                )
+            )
+            executable.chmod(0o755)
+            workspace = root / "workspace"
+            workspace.mkdir()
+            result = CopilotCli(str(executable)).run(
+                AgentRequest(
+                    prompt="test",
+                    model="test-model",
+                    workspace=workspace,
+                    evidence_dir=root / "evidence",
+                    timeout_seconds=60,
+                    session_name="test-session",
+                )
+            )
+            self.assertTrue(result.succeeded)
+
+    def test_copilot_adapter_rejects_malformed_stream_without_result(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            executable = root / "fake-copilot"
+            executable.write_text(
+                textwrap.dedent(
+                    """\
+                    #!/bin/sh
+                    printf '%s\\n' '{"type":"assistant.message","data":'
+                    """
+                )
+            )
+            executable.chmod(0o755)
+            workspace = root / "workspace"
+            workspace.mkdir()
+            with self.assertRaisesRegex(
+                CommandError,
+                "Copilot emitted no final result record",
+            ):
+                CopilotCli(str(executable)).run(
+                    AgentRequest(
+                        prompt="test",
+                        model="test-model",
+                        workspace=workspace,
+                        evidence_dir=root / "evidence",
+                        timeout_seconds=60,
+                        session_name="test-session",
+                    )
+                )
+
     def test_process_cleanup_tolerates_permission_race(self) -> None:
         with (
             patch("hub_eval.command.os.killpg", side_effect=PermissionError),
