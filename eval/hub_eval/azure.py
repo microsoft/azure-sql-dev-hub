@@ -6,6 +6,7 @@ import json
 import re
 import time
 from datetime import UTC, datetime, timedelta
+from fnmatch import fnmatchcase
 from pathlib import Path
 from uuid import uuid4
 
@@ -15,6 +16,68 @@ from .progress import ProgressReporter
 
 PURPOSE_TAG = "azure-sql-dev-hub-prompt-eval"
 PUBLIC_AZURE_CLOUD = "AzureCloud"
+AUTHORIZATION_API_VERSION = "2022-04-01"
+
+RESOURCE_GROUP_PERMISSIONS = (
+    "Microsoft.Resources/subscriptions/resourceGroups/read",
+)
+EXISTING_SQL_PERMISSIONS = (
+    "Microsoft.Sql/servers/read",
+    "Microsoft.Sql/servers/databases/read",
+    "Microsoft.Sql/servers/databases/write",
+    "Microsoft.Sql/servers/databases/delete",
+    "Microsoft.Sql/servers/firewallRules/write",
+    "Microsoft.Sql/servers/firewallRules/delete",
+)
+DISPOSABLE_SQL_PERMISSIONS = (
+    "Microsoft.Resources/subscriptions/resourceGroups/write",
+    "Microsoft.Resources/subscriptions/resourceGroups/delete",
+    "Microsoft.Sql/servers/read",
+    "Microsoft.Sql/servers/write",
+    "Microsoft.Sql/servers/administrators/write",
+    "Microsoft.Sql/servers/databases/read",
+    "Microsoft.Sql/servers/databases/write",
+    "Microsoft.Sql/servers/firewallRules/write",
+)
+EMBEDDING_PERMISSIONS = (
+    "Microsoft.CognitiveServices/accounts/read",
+    "Microsoft.CognitiveServices/accounts/write",
+    "Microsoft.CognitiveServices/accounts/delete",
+    "Microsoft.CognitiveServices/accounts/deployments/write",
+    "Microsoft.Authorization/roleAssignments/write",
+    "Microsoft.Authorization/roleAssignments/delete",
+    "Microsoft.Authorization/roleDefinitions/read",
+)
+EMBEDDING_PURGE_PERMISSIONS = (
+    "Microsoft.CognitiveServices/locations/resourceGroups/deletedAccounts/read",
+    "Microsoft.CognitiveServices/locations/resourceGroups/deletedAccounts/delete",
+)
+
+
+def missing_permissions(
+    required_actions: tuple[str, ...],
+    permission_sets: list[dict],
+) -> list[str]:
+    """Return required ARM actions not granted by any effective permission set."""
+
+    def matches(action: str, patterns) -> bool:
+        return any(
+            isinstance(pattern, str)
+            and fnmatchcase(action.casefold(), pattern.casefold())
+            for pattern in patterns
+        )
+
+    missing = []
+    for action in required_actions:
+        allowed = any(
+            matches(action, permission.get("actions") or ())
+            and not matches(action, permission.get("notActions") or ())
+            for permission in permission_sets
+            if isinstance(permission, dict)
+        )
+        if not allowed:
+            missing.append(action)
+    return missing
 
 
 class AzureCli:
@@ -147,15 +210,9 @@ class AzureEnvironment:
 
     def create(self) -> AzureResources:
         """Create a logical server, Basic database, firewall rule, and optional embedding model."""
-        self.az.verify_context()
-        identity = self.az.json(
-            ["ad", "signed-in-user", "show"],
-            label="az-signed-in-user",
-        )
-        display_name = identity.get("displayName")
-        object_id = identity.get("id")
-        if not display_name or not object_id:
-            raise CommandError("could not resolve the signed-in Entra user")
+        identity = self.preflight()
+        display_name = identity["displayName"]
+        object_id = identity["id"]
         if self.existing_resource_group:
             server = self.az.json(
                 [
@@ -280,6 +337,119 @@ class AzureEnvironment:
                 self.evidence_dir / "resources.json", "Azure resource manifest"
             )
         return self.resources
+
+    def preflight(self) -> dict:
+        """Verify Azure context, providers, and effective permissions without writes."""
+        self.az.verify_context()
+        identity = self.az.json(
+            ["ad", "signed-in-user", "show"],
+            label="az-signed-in-user",
+        )
+        display_name = identity.get("displayName")
+        object_id = identity.get("id")
+        if not display_name or not object_id:
+            raise CommandError("could not resolve the signed-in Entra user")
+        self._verify_provider_registrations()
+        self._verify_permissions()
+        return identity
+
+    def _required_permissions(self) -> tuple[str, ...]:
+        permissions = list(RESOURCE_GROUP_PERMISSIONS)
+        if self.existing_resource_group:
+            permissions.extend(EXISTING_SQL_PERMISSIONS)
+        else:
+            permissions.extend(DISPOSABLE_SQL_PERMISSIONS)
+        if self.provision_embedding and not self.existing_embedding_endpoint:
+            permissions.extend(EMBEDDING_PERMISSIONS)
+            if not self.existing_resource_group:
+                permissions.extend(EMBEDDING_PURGE_PERMISSIONS)
+        return tuple(dict.fromkeys(permissions))
+
+    def _verify_provider_registrations(self) -> None:
+        namespaces = ["Microsoft.Sql"]
+        if self.provision_embedding and not self.existing_embedding_endpoint:
+            namespaces.append("Microsoft.CognitiveServices")
+        unregistered = []
+        for namespace in namespaces:
+            state = self.az.text(
+                [
+                    "provider",
+                    "show",
+                    "--namespace",
+                    namespace,
+                    "--query",
+                    "registrationState",
+                ],
+                label=f"az-provider-{namespace.rsplit('.', 1)[-1].lower()}",
+            )
+            if state != "Registered":
+                unregistered.append(namespace)
+        if unregistered:
+            commands = "\n".join(
+                f"az provider register --namespace {namespace} --wait"
+                for namespace in unregistered
+            )
+            raise CommandError(
+                "required Azure resource providers are not registered:\n"
+                f"{commands}"
+            )
+
+    def _verify_permissions(self) -> None:
+        if self.existing_resource_group:
+            scope = (
+                f"/subscriptions/{self.subscription_id}"
+                f"/resourceGroups/{self.resource_group}"
+            )
+        else:
+            scope = f"/subscriptions/{self.subscription_id}"
+        self._verify_permissions_at_scope(scope, self._required_permissions())
+        if (
+            self.existing_resource_group
+            and self.provision_embedding
+            and not self.existing_embedding_endpoint
+        ):
+            subscription_scope = f"/subscriptions/{self.subscription_id}"
+            self._verify_permissions_at_scope(
+                subscription_scope,
+                EMBEDDING_PURGE_PERMISSIONS,
+            )
+
+    def _verify_permissions_at_scope(
+        self,
+        scope: str,
+        required_permissions: tuple[str, ...],
+    ) -> None:
+        url = (
+            f"https://management.azure.com{scope}"
+            "/providers/Microsoft.Authorization/permissions"
+            f"?api-version={AUTHORIZATION_API_VERSION}"
+        )
+        permission_sets: list[dict] = []
+        page_number = 1
+        while url:
+            response = self.az.json(
+                ["rest", "--method", "get", "--url", url],
+                label=f"az-permissions-{page_number}",
+            )
+            values = response.get("value") if isinstance(response, dict) else None
+            if not isinstance(values, list):
+                raise CommandError(
+                    "Azure permissions response did not contain a value list"
+                )
+            permission_sets.extend(values)
+            next_link = response.get("nextLink")
+            if next_link is not None and not isinstance(next_link, str):
+                raise CommandError(
+                    "Azure permissions response contained an invalid nextLink"
+                )
+            url = next_link
+            page_number += 1
+        missing = missing_permissions(required_permissions, permission_sets)
+        if missing:
+            formatted = "\n- ".join(missing)
+            raise CommandError(
+                f"signed-in user is missing Azure permissions at {scope}:\n- {formatted}"
+            )
 
     def cleanup(self) -> None:
         """Delete every resource created by this environment and verify removal."""
@@ -538,10 +708,8 @@ class AzureEnvironment:
             ],
             label="az-openai-create",
             timeout=1200,
-            check=False,
+            check=True,
         )
-        if not created:
-            return None, None, None
         self.embedding_account_name = account_name
         scope = created["id"]
         assignment = self.az.json(
@@ -559,12 +727,11 @@ class AzureEnvironment:
                 scope,
             ],
             label="az-openai-role",
-            check=False,
+            check=True,
         )
-        if assignment:
-            self.embedding_role_assignment_id = assignment.get("id")
+        self.embedding_role_assignment_id = assignment["id"]
         deployment = "text-embedding-3-small"
-        deployed = self.az.json(
+        self.az.json(
             [
                 "cognitiveservices",
                 "account",
@@ -589,10 +756,8 @@ class AzureEnvironment:
             ],
             label="az-openai-deploy",
             timeout=1200,
-            check=False,
+            check=True,
         )
-        if not deployed:
-            return None, None, None
         endpoint = self.az.text(
             [
                 "cognitiveservices",

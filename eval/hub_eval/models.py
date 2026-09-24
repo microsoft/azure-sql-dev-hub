@@ -71,7 +71,6 @@ class RunSettings:
     agent_timeout_seconds: int
     validation_timeout_seconds: int
     keep_workspaces: bool
-    provision_embedding: bool
     embedding_location: str
     embedding_endpoint: str | None
     embedding_deployment: str | None

@@ -20,7 +20,6 @@ class ValidationEnvironment:
     existing_resource_group: str | None
     existing_server: str | None
     embedding_location: str
-    provision_embedding: bool
     embedding_endpoint: str | None
     embedding_deployment: str | None
     embedding_dimension: int | None
@@ -33,7 +32,6 @@ KEYS = {
     "HUB_EVAL_EXISTING_RESOURCE_GROUP",
     "HUB_EVAL_EXISTING_SQL_SERVER",
     "HUB_EVAL_EMBEDDING_LOCATION",
-    "HUB_EVAL_PROVISION_EMBEDDING",
     "HUB_EVAL_EMBEDDING_ENDPOINT",
     "HUB_EVAL_EMBEDDING_DEPLOYMENT",
     "HUB_EVAL_EMBEDDING_DIMENSION",
@@ -44,7 +42,6 @@ REQUIRED = {
     "HUB_EVAL_AZURE_SUBSCRIPTION_ID",
     "HUB_EVAL_AZURE_LOCATION",
     "HUB_EVAL_EMBEDDING_LOCATION",
-    "HUB_EVAL_PROVISION_EMBEDDING",
 }
 
 
@@ -106,11 +103,6 @@ def load_validation_environment(path: Path) -> ValidationEnvironment:
         existing_resource_group=existing_group,
         existing_server=existing_server,
         embedding_location=values["HUB_EVAL_EMBEDDING_LOCATION"],
-        provision_embedding=_boolean(
-            path,
-            "HUB_EVAL_PROVISION_EMBEDDING",
-            values["HUB_EVAL_PROVISION_EMBEDDING"],
-        ),
         embedding_endpoint=endpoint,
         embedding_deployment=deployment,
         embedding_dimension=dimension,
@@ -125,12 +117,3 @@ def _unquote(value: str) -> str:
 
 def _optional(values: dict[str, str], key: str) -> str | None:
     return values.get(key) or None
-
-
-def _boolean(path: Path, key: str, value: str) -> bool:
-    normalized = value.lower()
-    if normalized in {"true", "1", "yes"}:
-        return True
-    if normalized in {"false", "0", "no"}:
-        return False
-    raise ConfigurationError(f"{path}: {key} must be true or false")

@@ -54,11 +54,49 @@ az cloud show --query name --output tsv
 az account show --query '{tenant:tenantId,subscription:id,state:state}' --output table
 ```
 
-When both existing-resource properties are blank, the harness creates and
-deletes an entire resource group. When both are set, it creates uniquely named
-database, firewall, and optional embedding resources, then deletes each created
-resource individually. It never deletes the configured existing server or
-resource group.
+### Required Resource Providers (run as Contributor at subscription scope)
+
+- `Microsoft.Sql` — Run `az provider register --namespace Microsoft.Sql --wait`
+  so the harness can create Azure SQL resources.
+- `Microsoft.CognitiveServices` — Run
+  `az provider register --namespace Microsoft.CognitiveServices --wait` when
+  `rag-app` provisions Azure OpenAI.
+
+### Required Permissions for Disposable Resource Group
+
+- **Contributor** at subscription scope — Allows the harness to create and delete
+  the resource group, SQL server, database, firewall rule, and optional Azure
+  OpenAI account.
+- **Role Based Access Control Administrator** at subscription scope — Allows
+  `rag-app` to grant and remove `Cognitive Services OpenAI User` when it
+  provisions Azure OpenAI.
+- **Cognitive Services OpenAI User** on an existing Azure OpenAI account — Allows
+  `rag-app` to call a supplied embedding endpoint instead of provisioning one.
+
+### Required Permissions for Specified Resource Group and Server
+
+- **SQL Server Contributor** at resource-group scope — Allows the harness to read
+  the existing server and create and delete its evaluation database and firewall
+  rule.
+- **Cognitive Services Contributor** at subscription scope — Allows `rag-app`
+  to create Azure OpenAI resources and permanently purge their soft-deleted
+  accounts after the evaluation.
+- **Role Based Access Control Administrator** at resource-group scope — Allows
+  `rag-app` to grant and remove `Cognitive Services OpenAI User` when it
+  provisions Azure OpenAI.
+- **Microsoft Entra administrator** on the specified SQL server — Allows the
+  signed-in user to connect to the evaluation database for data-plane setup and
+  validation.
+- **Cognitive Services OpenAI User** on an existing Azure OpenAI account — Allows
+  `rag-app` to call a supplied embedding endpoint instead of provisioning one.
+
+Run all provider and effective-permission checks without creating resources:
+
+```bash
+PYTHONPATH=eval eval/.venv/bin/python -m run_evals \
+  --scenario rag-app \
+  --preflight
+```
 
 Copilot CLI noninteractive mode requires an authenticated Copilot session. The
 harness disables the built-in GitHub MCP server and grants unattended local tool
@@ -160,11 +198,10 @@ account and a `text-embedding-3-small` deployment in the disposable resource
 group. It uses Microsoft Entra authentication and does not retrieve or record an
 API key.
 
-Model availability and quota vary by subscription. If automatic provisioning is
-unavailable, the RAG scenario uses the prompt's deterministic fixture-vector
-fallback. That path validates SQL `VECTOR` storage and `VECTOR_DISTANCE`
-mechanics but does not claim semantic retrieval quality. An existing deployment
-can be supplied without putting a key on the command line:
+Model availability and quota vary by subscription. The RAG scenario fails during
+Azure setup if automatic provisioning is unavailable; it does not fall back to
+fixture vectors. An existing deployment can be supplied without putting a key on
+the command line:
 
 ```bash
 eval/.venv/bin/python eval/run_evals.py \
@@ -172,12 +209,6 @@ eval/.venv/bin/python eval/run_evals.py \
   --embedding-endpoint https://example.openai.azure.com/ \
   --embedding-deployment text-embedding-3-small \
   --embedding-dimension 1536
-```
-
-To deliberately use the fixture-vector path without attempting provisioning:
-
-```bash
-eval/.venv/bin/python eval/run_evals.py --skip-embedding-provision
 ```
 
 ## Cleanup behavior

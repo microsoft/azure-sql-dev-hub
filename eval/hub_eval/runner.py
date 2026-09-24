@@ -47,22 +47,22 @@ def build_prompt(
     """Combine the published prompt with complete unattended test inputs."""
     embedding = ""
     if scenario == "rag-app":
-        if resources.embedding_endpoint:
-            embedding = (
-                "\nEmbedding inputs already selected for this evaluation:\n"
-                "- Provider: Azure OpenAI\n"
-                f"- Endpoint: {resources.embedding_endpoint}\n"
-                f"- Deployment/model: {resources.embedding_deployment}\n"
-                f"- Output dimension: {resources.embedding_dimension}\n"
-                "- Authentication: Microsoft Entra via DefaultAzureCredential; do not request or use a key.\n"
+        if not (
+            resources.embedding_endpoint
+            and resources.embedding_deployment
+            and resources.embedding_dimension
+        ):
+            raise CommandError(
+                "rag-app requires a provisioned Azure OpenAI embedding deployment"
             )
-        else:
-            embedding = (
-                "\nNo hosted embedding service can be provisioned by the authenticated "
-                "identity. Use the prompt's deterministic evaluation fallback with "
-                "EMBED_PROVIDER=fixture and EMBED_DIM=8. Do not request another input and "
-                "do not describe fixture vectors as production embeddings.\n"
-            )
+        embedding = (
+            "\nEmbedding inputs already selected for this evaluation:\n"
+            "- Provider: Azure OpenAI\n"
+            f"- Endpoint: {resources.embedding_endpoint}\n"
+            f"- Deployment/model: {resources.embedding_deployment}\n"
+            f"- Output dimension: {resources.embedding_dimension}\n"
+            "- Authentication: Microsoft Entra via DefaultAzureCredential; do not request or use a key.\n"
+        )
     return f"""# Unattended evaluation context
 
 Execute the prompt below in the current workspace. This is an unattended end-to-end
@@ -175,9 +175,8 @@ class EvaluationRunner:
             location=self.settings.location,
             evidence_dir=model_dir,
             embedding_location=self.settings.embedding_location,
-            provision_embedding=(
-                self.settings.provision_embedding
-                and any(SCENARIOS[name].requires_embedding for name in selected)
+            provision_embedding=any(
+                SCENARIOS[name].requires_embedding for name in selected
             ),
             existing_embedding_endpoint=self.settings.embedding_endpoint,
             existing_embedding_deployment=self.settings.embedding_deployment,

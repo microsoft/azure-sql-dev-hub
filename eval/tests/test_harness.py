@@ -11,7 +11,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 from hub_eval.agents import AgentRequest, CopilotCli
-from hub_eval.azure import cleanup_resource_group
+from hub_eval.azure import AzureEnvironment, cleanup_resource_group, missing_permissions
 from hub_eval.command import CommandError, CommandRunner
 from hub_eval.configuration import load_validation_environment
 from hub_eval.models import AzureResources, RunSettings
@@ -58,9 +58,7 @@ class ScenarioTests(unittest.TestCase):
         self.assertIn("Microsoft Entra via DefaultAzureCredential", prompt)
         self.assertTrue(prompt.endswith("published prompt\n"))
 
-    def test_rag_prompt_uses_fixture_when_embedding_service_is_unavailable(
-        self,
-    ) -> None:
+    def test_rag_prompt_requires_embedding_service(self) -> None:
         resources = AzureResources(
             subscription_id="sub",
             resource_group="rg",
@@ -69,14 +67,16 @@ class ScenarioTests(unittest.TestCase):
             database_name="db",
             server_fqdn="server.database.windows.net",
         )
-        prompt = build_prompt(
-            "published prompt",
-            scenario="rag-app",
-            resources=resources,
-            workspace=Path("/tmp/workspace"),
-        )
-        self.assertIn("EMBED_PROVIDER=fixture", prompt)
-        self.assertIn("EMBED_DIM=8", prompt)
+        with self.assertRaisesRegex(
+            CommandError,
+            "requires a provisioned Azure OpenAI embedding deployment",
+        ):
+            build_prompt(
+                "published prompt",
+                scenario="rag-app",
+                resources=resources,
+                workspace=Path("/tmp/workspace"),
+            )
 
     def test_project_discovery_ignores_dependency_manifests(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
@@ -101,7 +101,6 @@ class ScenarioTests(unittest.TestCase):
                 agent_timeout_seconds=60,
                 validation_timeout_seconds=30,
                 keep_workspaces=False,
-                provision_embedding=False,
                 embedding_location="test-embedding-region",
                 embedding_endpoint=None,
                 embedding_deployment=None,
@@ -112,6 +111,169 @@ class ScenarioTests(unittest.TestCase):
             first = EvaluationRunner(settings)
             second = EvaluationRunner(settings)
             self.assertNotEqual(first.run_dir, second.run_dir)
+
+
+class AzurePermissionTests(unittest.TestCase):
+    """Verify Azure permission matching and mode-specific preflight requirements."""
+
+    def test_preflight_checks_context_identity_providers_and_permissions(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            environment = AzureEnvironment(
+                tenant_id="tenant",
+                subscription_id="sub",
+                location="test-region",
+                evidence_dir=Path(temporary),
+                embedding_location="embedding-region",
+                provision_embedding=True,
+                existing_resource_group="rg",
+                existing_server="server",
+            )
+            identity = {"displayName": "Test User", "id": "user-id"}
+            with (
+                patch.object(environment.az, "verify_context") as verify_context,
+                patch.object(environment.az, "json", return_value=identity) as az_json,
+                patch.object(
+                    environment,
+                    "_verify_provider_registrations",
+                ) as verify_providers,
+                patch.object(
+                    environment,
+                    "_verify_permissions",
+                ) as verify_permissions,
+            ):
+                self.assertEqual(environment.preflight(), identity)
+            verify_context.assert_called_once_with()
+            az_json.assert_called_once_with(
+                ["ad", "signed-in-user", "show"],
+                label="az-signed-in-user",
+            )
+            verify_providers.assert_called_once_with()
+            verify_permissions.assert_called_once_with()
+
+    def test_permission_matching_honors_wildcards_and_not_actions(self) -> None:
+        required = (
+            "Microsoft.Sql/servers/read",
+            "Microsoft.Sql/servers/delete",
+            "Microsoft.CognitiveServices/accounts/write",
+        )
+        permissions = [
+            {
+                "actions": ["Microsoft.Sql/*"],
+                "notActions": ["Microsoft.Sql/servers/delete"],
+            },
+            {
+                "actions": ["Microsoft.CognitiveServices/accounts/read"],
+                "notActions": [],
+            },
+        ]
+        self.assertEqual(
+            missing_permissions(required, permissions),
+            [
+                "Microsoft.Sql/servers/delete",
+                "Microsoft.CognitiveServices/accounts/write",
+            ],
+        )
+
+    def test_existing_server_rag_preflight_checks_embedding_permissions(
+        self,
+    ) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            environment = AzureEnvironment(
+                tenant_id="tenant",
+                subscription_id="sub",
+                location="test-region",
+                evidence_dir=Path(temporary),
+                embedding_location="embedding-region",
+                provision_embedding=True,
+                existing_resource_group="rg",
+                existing_server="server",
+            )
+            required = environment._required_permissions()
+            self.assertIn("Microsoft.Sql/servers/databases/write", required)
+            self.assertIn("Microsoft.CognitiveServices/accounts/write", required)
+            self.assertIn("Microsoft.Authorization/roleAssignments/write", required)
+            self.assertNotIn(
+                "Microsoft.CognitiveServices/locations/resourceGroups/"
+                "deletedAccounts/delete",
+                required,
+            )
+            self.assertNotIn(
+                "Microsoft.Resources/subscriptions/resourceGroups/write",
+                required,
+            )
+
+    def test_existing_embedding_does_not_require_provisioning_permissions(
+        self,
+    ) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            environment = AzureEnvironment(
+                tenant_id="tenant",
+                subscription_id="sub",
+                location="test-region",
+                evidence_dir=Path(temporary),
+                embedding_location="embedding-region",
+                provision_embedding=True,
+                existing_embedding_endpoint="https://example.openai.azure.com/",
+                existing_embedding_deployment="embedding",
+                existing_embedding_dimension=1536,
+                existing_resource_group="rg",
+                existing_server="server",
+            )
+            required = environment._required_permissions()
+            self.assertNotIn("Microsoft.CognitiveServices/accounts/write", required)
+            self.assertNotIn("Microsoft.Authorization/roleAssignments/write", required)
+
+    def test_provider_preflight_requires_cognitive_services_for_provisioning(
+        self,
+    ) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            environment = AzureEnvironment(
+                tenant_id="tenant",
+                subscription_id="sub",
+                location="test-region",
+                evidence_dir=Path(temporary),
+                embedding_location="embedding-region",
+                provision_embedding=True,
+                existing_resource_group="rg",
+                existing_server="server",
+            )
+            with patch.object(
+                environment.az,
+                "text",
+                side_effect=["Registered", "NotRegistered"],
+            ):
+                with self.assertRaisesRegex(
+                    CommandError,
+                    "az provider register --namespace Microsoft.CognitiveServices --wait",
+                ):
+                    environment._verify_provider_registrations()
+
+    def test_existing_server_checks_purge_permissions_at_subscription_scope(
+        self,
+    ) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            environment = AzureEnvironment(
+                tenant_id="tenant",
+                subscription_id="sub",
+                location="test-region",
+                evidence_dir=Path(temporary),
+                embedding_location="embedding-region",
+                provision_embedding=True,
+                existing_resource_group="rg",
+                existing_server="server",
+            )
+            with patch.object(
+                environment,
+                "_verify_permissions_at_scope",
+            ) as verify:
+                environment._verify_permissions()
+            self.assertEqual(verify.call_count, 2)
+            self.assertEqual(verify.call_args_list[1].args[0], "/subscriptions/sub")
+            self.assertIn(
+                "Microsoft.CognitiveServices/locations/resourceGroups/"
+                "deletedAccounts/delete",
+                verify.call_args_list[1].args[1],
+            )
 
 
 class CommandTests(unittest.TestCase):
@@ -265,7 +427,6 @@ HUB_EVAL_AZURE_LOCATION=test-region
 HUB_EVAL_EXISTING_RESOURCE_GROUP=test-group
 HUB_EVAL_EXISTING_SQL_SERVER=test-server
 HUB_EVAL_EMBEDDING_LOCATION=test-embedding-region
-HUB_EVAL_PROVISION_EMBEDDING=false
 HUB_EVAL_EMBEDDING_ENDPOINT=
 HUB_EVAL_EMBEDDING_DEPLOYMENT=
 HUB_EVAL_EMBEDDING_DIMENSION=
@@ -274,7 +435,6 @@ HUB_EVAL_EMBEDDING_DIMENSION=
             config = load_validation_environment(path)
             self.assertEqual(config.tenant_id, "tenant")
             self.assertEqual(config.existing_server, "test-server")
-            self.assertFalse(config.provision_embedding)
 
 
 if __name__ == "__main__":

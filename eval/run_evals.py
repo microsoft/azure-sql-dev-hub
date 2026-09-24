@@ -7,13 +7,15 @@ import argparse
 import json
 import signal
 import sys
+import tempfile
 from pathlib import Path
 
-from hub_eval.azure import cleanup_resource_group
+from hub_eval.azure import AzureEnvironment, cleanup_resource_group
+from hub_eval.command import CommandError
 from hub_eval.configuration import ConfigurationError, load_validation_environment
 from hub_eval.models import RunSettings
 from hub_eval.runner import EvaluationRunner, expand_scenarios
-from hub_eval.scenarios import DEFAULT_SCENARIO_ORDER
+from hub_eval.scenarios import DEFAULT_SCENARIO_ORDER, SCENARIOS
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
@@ -61,22 +63,6 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--validation-timeout-seconds", type=int, default=900)
     parser.add_argument("--output", type=Path, default=repository / "eval/runs")
     parser.add_argument("--keep-workspaces", action="store_true")
-    embedding_group = parser.add_mutually_exclusive_group()
-    embedding_group.add_argument(
-        "--provision-embedding",
-        dest="provision_embedding",
-        action="store_true",
-    )
-    embedding_group.add_argument(
-        "--skip-embedding-provision",
-        dest="provision_embedding",
-        action="store_false",
-    )
-    parser.set_defaults(
-        provision_embedding=(
-            configuration.provision_embedding if configuration else None
-        )
-    )
     parser.add_argument(
         "--embedding-endpoint",
         default=configuration.embedding_endpoint if configuration else None,
@@ -98,8 +84,10 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         "--existing-server",
         default=configuration.existing_server if configuration else None,
     )
-    parser.add_argument("--dry-run", action="store_true")
-    parser.add_argument("--cleanup-only", metavar="RESOURCE_GROUP")
+    operation = parser.add_mutually_exclusive_group()
+    operation.add_argument("--dry-run", action="store_true")
+    operation.add_argument("--preflight", action="store_true")
+    operation.add_argument("--cleanup-only", metavar="RESOURCE_GROUP")
     args = parser.parse_args(argv)
     if configuration_error:
         parser.error(str(configuration_error))
@@ -139,6 +127,45 @@ def main() -> int:
         return 0
     models = tuple(args.models or ["gpt-5.4"])
     scenarios = tuple(args.scenarios or DEFAULT_SCENARIO_ORDER)
+    selected = expand_scenarios(scenarios)
+    if args.preflight:
+        with tempfile.TemporaryDirectory(prefix="sqlhub-eval-preflight-") as temporary:
+            environment = AzureEnvironment(
+                tenant_id=args.tenant,
+                subscription_id=args.subscription,
+                location=args.location,
+                evidence_dir=Path(temporary),
+                embedding_location=args.embedding_location,
+                provision_embedding=any(
+                    SCENARIOS[name].requires_embedding for name in selected
+                ),
+                existing_embedding_endpoint=args.embedding_endpoint,
+                existing_embedding_deployment=args.embedding_deployment,
+                existing_embedding_dimension=args.embedding_dimension,
+                existing_resource_group=args.existing_resource_group,
+                existing_server=args.existing_server,
+            )
+            try:
+                identity = environment.preflight()
+            except (CommandError, OSError, ValueError, KeyError) as exc:
+                print(f"Azure preflight failed: {exc}", file=sys.stderr)
+                return 1
+        print(
+            json.dumps(
+                {
+                    "status": "PASS",
+                    "subscription": args.subscription,
+                    "identity": {
+                        "display_name": identity["displayName"],
+                        "object_id": identity["id"],
+                    },
+                    "resource_group": args.existing_resource_group,
+                    "scenarios": selected,
+                },
+                indent=2,
+            )
+        )
+        return 0
     if args.dry_run:
         print(
             json.dumps(
@@ -149,8 +176,7 @@ def main() -> int:
                     "agent": args.agent,
                     "location": args.location,
                     "models": models,
-                    "scenarios": expand_scenarios(scenarios),
-                    "provision_embedding": args.provision_embedding,
+                    "scenarios": selected,
                     "existing_resource_group": args.existing_resource_group,
                     "existing_server": args.existing_server,
                 },
@@ -169,7 +195,6 @@ def main() -> int:
         agent_timeout_seconds=args.agent_timeout_seconds,
         validation_timeout_seconds=args.validation_timeout_seconds,
         keep_workspaces=args.keep_workspaces,
-        provision_embedding=args.provision_embedding,
         embedding_location=args.embedding_location,
         embedding_endpoint=args.embedding_endpoint,
         embedding_deployment=args.embedding_deployment,
