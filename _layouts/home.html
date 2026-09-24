@@ -18,7 +18,7 @@
 .h .cp:hover{border-color:var(--accent)}.h .cp.ok{color:var(--ok);border-color:var(--ok)}.h .cp.bad,.h .chip.bad{color:#b0244a;border-color:#b0244a}
 .h .hero{padding:64px 0;text-align:left;background:linear-gradient(120deg,#fff 30%,#f0f7ff 100%)}
 .h .hero .hero-grid{max-width:1280px;display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:48px;align-items:center}
-.h .hero h1{font-size:clamp(40px,4.2vw,58px);font-weight:700;max-width:15ch;margin:0 0 22px}.h .hero h1 span{color:var(--accent);display:block}
+.h .hero h1{font-size:clamp(40px,4.2vw,58px);font-weight:700;max-width:15ch;margin:0 0 22px}
 .h .hero .sub{font-size:18px;color:var(--muted);max-width:43ch;margin:0 0 26px}
 .h .hero .tagline{font-size:21px;line-height:1.4;font-weight:600;color:var(--ink);margin:0 0 12px}
 .h .hero .ctas{justify-content:flex-start}
@@ -27,7 +27,6 @@
 .h .agentline{font-size:13px;color:var(--faint)}.h .agentline span{color:var(--muted)}
 .h .vid{width:100%;min-width:0;margin:0}
 .h .hero-art{display:block;width:100%;height:auto;border-radius:var(--r);border:1px solid var(--line)}
-.h .hero-caption{margin-top:12px;text-align:center;font-size:14px;font-weight:600;color:var(--accent-ink)}
 .h .hero-figure{margin:0}
 .h .poster img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 .h .poster .pplay{position:relative;z-index:1;box-shadow:0 4px 24px #0e1a2b33}
@@ -113,14 +112,14 @@
   <header class="hero" id="top">
     <div class="w hero-grid">
       <div class="hero-copy">
-      <h1>{{ page.hero.headline }} <span>{{ page.hero.headline_accent }}</span></h1>
+      <h1>{{ page.hero.headline }}</h1>
       {%- if page.hero.tagline %}<p class="tagline">{{ page.hero.tagline }}</p>{% endif %}
       <p class="sub">{{ page.hero.subline }}</p>
       <div class="ctas">
         <a class="btn btn-p" href="#get-running" data-event="cta_get_started">Get started</a>
         <a class="btn btn-s" href="#get-running" data-htab-go="agent" data-event="cta_install_skills">Install skills</a>
       </div>
-      <p class="agentline">Works with <span>{{ page.hero.agents | join: " · " }}</span></p>
+      <p class="agentline">Works with <span>{% for a in page.hero.agents %}{{ a }}{% unless forloop.last %}{% if forloop.rindex == 2 %}, and {% else %}, {% endif %}{% endunless %}{% endfor %}.</span></p>
       </div>
 
         <div class="vid">
@@ -148,7 +147,6 @@
           {%- elsif page.video.poster %}
           <figure class="hero-figure">
           <img class="hero-art" src="{{ page.video.poster | relative_url }}" alt="{{ page.video.poster_alt | escape }}" fetchpriority="high">
-          <figcaption class="hero-caption">{{ page.video.sub }}</figcaption>
           </figure>
           {%- endif %}
       </div>
