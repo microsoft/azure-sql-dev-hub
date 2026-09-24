@@ -31,14 +31,14 @@ Prompts here target the cloud. Prompts that target the local container live with
 ## Install the skills
 
 ```bash
-npx skills add microsoft/azure-sql-skills
+npx skills add microsoft/microsoft-sql
 ```
 
 Claude Code plugin:
 
 ```bash
-claude plugin marketplace add microsoft/azure-sql-skills
-claude plugin install azure-sql-skills@azure-sql-skills
+claude plugin marketplace add microsoft/microsoft-sql
+claude plugin install microsoft-sql@microsoft-sql
 ```
 
 Full catalog, per-tool install, and feedback at [aka.ms/azuresql-skills](https://aka.ms/azuresql-skills).

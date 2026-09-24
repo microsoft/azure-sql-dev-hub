@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // House rules for the site copy and the files around it.
 //
-// Adapted from microsoft/azure-sql-skills scripts/check-house-rules.mjs. It is a
+// Adapted from microsoft/microsoft-sql scripts/check-house-rules.mjs. It is a
 // script rather than inline workflow YAML so that `npm test` and CI run THE SAME
 // CHECK. When a gate lives only in the workflow, a contributor can run the local
 // test, see green, push, and fail CI on a rule their local run never applied.
