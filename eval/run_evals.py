@@ -7,14 +7,19 @@ import argparse
 import json
 import signal
 import sys
-import tempfile
+import time
 from pathlib import Path
 
 from hub_eval.azure import AzureEnvironment, cleanup_resource_group
 from hub_eval.command import CommandError
 from hub_eval.configuration import ConfigurationError, load_validation_environment
-from hub_eval.models import RunSettings
-from hub_eval.runner import EvaluationRunner, expand_scenarios
+from hub_eval.models import PreflightResult, RunSettings
+from hub_eval.runner import (
+    EvaluationRunner,
+    build_preflight_report,
+    create_run_id,
+    expand_scenarios,
+)
 from hub_eval.scenarios import DEFAULT_SCENARIO_ORDER, SCENARIOS
 
 
@@ -129,43 +134,7 @@ def main() -> int:
     scenarios = tuple(args.scenarios or DEFAULT_SCENARIO_ORDER)
     selected = expand_scenarios(scenarios)
     if args.preflight:
-        with tempfile.TemporaryDirectory(prefix="sqlhub-eval-preflight-") as temporary:
-            environment = AzureEnvironment(
-                tenant_id=args.tenant,
-                subscription_id=args.subscription,
-                location=args.location,
-                evidence_dir=Path(temporary),
-                embedding_location=args.embedding_location,
-                provision_embedding=any(
-                    SCENARIOS[name].requires_embedding for name in selected
-                ),
-                existing_embedding_endpoint=args.embedding_endpoint,
-                existing_embedding_deployment=args.embedding_deployment,
-                existing_embedding_dimension=args.embedding_dimension,
-                existing_resource_group=args.existing_resource_group,
-                existing_server=args.existing_server,
-            )
-            try:
-                identity = environment.preflight()
-            except (CommandError, OSError, ValueError, KeyError) as exc:
-                print(f"Azure preflight failed: {exc}", file=sys.stderr)
-                return 1
-        print(
-            json.dumps(
-                {
-                    "status": "PASS",
-                    "subscription": args.subscription,
-                    "identity": {
-                        "display_name": identity["displayName"],
-                        "object_id": identity["id"],
-                    },
-                    "resource_group": args.existing_resource_group,
-                    "scenarios": selected,
-                },
-                indent=2,
-            )
-        )
-        return 0
+        return run_preflight(args, selected)
     if args.dry_run:
         print(
             json.dumps(
@@ -207,6 +176,71 @@ def main() -> int:
         return runner.run()
     finally:
         runner.remove_workspaces()
+
+
+def run_preflight(args: argparse.Namespace, selected: tuple[str, ...]) -> int:
+    """Run preflight only and persist its result in a standard run directory."""
+    run_id = create_run_id()
+    run_dir = args.output.resolve() / run_id
+    run_dir.mkdir(parents=True, exist_ok=False)
+    environment = AzureEnvironment(
+        tenant_id=args.tenant,
+        subscription_id=args.subscription,
+        location=args.location,
+        evidence_dir=run_dir,
+        embedding_location=args.embedding_location,
+        provision_embedding=any(
+            SCENARIOS[name].requires_embedding for name in selected
+        ),
+        existing_embedding_endpoint=args.embedding_endpoint,
+        existing_embedding_deployment=args.embedding_deployment,
+        existing_embedding_dimension=args.embedding_dimension,
+        existing_resource_group=args.existing_resource_group,
+        existing_server=args.existing_server,
+    )
+    started = time.monotonic()
+    try:
+        identity = environment.preflight()
+        result = PreflightResult(
+            model=None,
+            status="PASS",
+            duration_seconds=time.monotonic() - started,
+            subscription_id=args.subscription,
+            resource_group=environment.resource_group,
+            scenarios=list(selected),
+            identity={
+                "display_name": identity["displayName"],
+                "object_id": identity["id"],
+            },
+            permission_checks=list(environment.permission_checks),
+            reason="Azure context, providers, and permissions validated",
+        )
+        exit_code = 0
+    except (CommandError, OSError, ValueError, KeyError) as exc:
+        result = PreflightResult(
+            model=None,
+            status="FAIL",
+            duration_seconds=time.monotonic() - started,
+            subscription_id=args.subscription,
+            resource_group=environment.resource_group,
+            scenarios=list(selected),
+            identity=None,
+            permission_checks=list(environment.permission_checks),
+            reason=f"{type(exc).__name__}: {exc}",
+        )
+        exit_code = 1
+    report = build_preflight_report(run_id, [result])
+    preflight_path = run_dir / "preflight.json"
+    preflight_path.write_text(
+        json.dumps(report, indent=2, default=str) + "\n",
+        encoding="utf-8",
+    )
+    output = {
+        "preflight_path": str(preflight_path),
+        **report,
+    }
+    print(json.dumps(output, indent=2), file=sys.stderr if exit_code else sys.stdout)
+    return exit_code
 
 
 def _interrupt(signum, frame) -> None:

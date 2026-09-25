@@ -14,11 +14,34 @@ from uuid import uuid4
 from .agents import AgentRequest, create_agent
 from .azure import AzureEnvironment
 from .command import CommandError
-from .models import AzureResources, RunSettings, ScenarioResult
+from .models import (
+    AzureResources,
+    EnvironmentResult,
+    PreflightResult,
+    RunSettings,
+    ScenarioResult,
+)
 from .progress import ProgressReporter
 from .scenarios import DEFAULT_SCENARIO_ORDER, SCENARIOS
 
 HANDLED_ERRORS = (CommandError, OSError, ValueError, KeyError)
+
+
+def create_run_id() -> str:
+    """Create a sortable, collision-resistant evaluation run ID."""
+    return datetime.now(UTC).strftime("%Y%m%dT%H%M%SZ") + "-" + uuid4().hex[:8]
+
+
+def build_preflight_report(
+    run_id: str,
+    results: list[PreflightResult],
+) -> dict:
+    """Build the shared standalone and aggregate preflight report."""
+    return {
+        "schema_version": 3,
+        "run_id": run_id,
+        "results": [result.to_dict() for result in results],
+    }
 
 
 def expand_scenarios(requested: tuple[str, ...]) -> tuple[str, ...]:
@@ -97,16 +120,18 @@ class EvaluationRunner:
         self.settings = settings
         self.reporter = ProgressReporter()
         self.agent = create_agent(agent_name, reporter=self.reporter)
-        self.run_id = (
-            datetime.now(UTC).strftime("%Y%m%dT%H%M%SZ") + "-" + uuid4().hex[:8]
-        )
+        self.run_id = create_run_id()
         self.run_dir = settings.output_root / self.run_id
         self.run_dir.mkdir(parents=True, exist_ok=False)
         self.results: list[ScenarioResult] = []
+        self.environments: list[EnvironmentResult] = []
+        self.preflight_results: list[PreflightResult] = []
         self.cleanup_errors: list[str] = []
+        self.duration_seconds: float | None = None
 
     def run(self) -> int:
         """Execute the matrix and return a process exit code."""
+        run_started = time.monotonic()
         selected = expand_scenarios(self.settings.scenarios)
         run_token = self.reporter.start(
             "run",
@@ -135,9 +160,11 @@ class EvaluationRunner:
         self.reporter.artifact(self.run_dir / "manifest.json", "run manifest")
         for model in self.settings.models:
             self._run_model(model, selected)
+        self.duration_seconds = time.monotonic() - run_started
         self._write_reports()
         failed = any(result.status not in {"PASS", "SKIP"} for result in self.results)
         exit_code = 1 if failed or self.cleanup_errors else 0
+        self.reporter.artifact(self.run_dir / "preflight.json", "preflight results")
         self.reporter.artifact(self.run_dir / "summary.md", "run summary")
         self.reporter.finish(
             run_token,
@@ -165,6 +192,7 @@ class EvaluationRunner:
         return exit_code
 
     def _run_model(self, model: str, selected: tuple[str, ...]) -> None:
+        model_started = time.monotonic()
         model_token = self.reporter.start("model", model)
         result_start = len(self.results)
         model_dir = self.run_dir / _slug(model)
@@ -186,10 +214,52 @@ class EvaluationRunner:
             reporter=self.reporter,
         )
         resources = None
+        setup_started = time.monotonic()
+        setup_duration: float | None = None
+        preflight_started = time.monotonic()
+        preflight_completed = False
         try:
-            resources = environment.create()
+            identity = environment.preflight()
+            preflight_duration = time.monotonic() - preflight_started
+            preflight_completed = True
+            self.preflight_results.append(
+                PreflightResult(
+                    model=model,
+                    status="PASS",
+                    duration_seconds=preflight_duration,
+                    subscription_id=self.settings.subscription_id,
+                    resource_group=environment.resource_group,
+                    scenarios=list(selected),
+                    identity={
+                        "display_name": identity["displayName"],
+                        "object_id": identity["id"],
+                    },
+                    permission_checks=list(environment.permission_checks),
+                    reason="Azure context, providers, and permissions validated",
+                )
+            )
+            self._write_preflight_report()
+            resources = environment.create(identity)
+            setup_duration = time.monotonic() - setup_started
             self._run_scenarios(model, model_dir, resources, selected)
         except HANDLED_ERRORS as exc:
+            if not preflight_completed:
+                self.preflight_results.append(
+                    PreflightResult(
+                        model=model,
+                        status="FAIL",
+                        duration_seconds=time.monotonic() - preflight_started,
+                        subscription_id=self.settings.subscription_id,
+                        resource_group=environment.resource_group,
+                        scenarios=list(selected),
+                        identity=None,
+                        permission_checks=list(environment.permission_checks),
+                        reason=f"{type(exc).__name__}: {exc}",
+                    )
+                )
+                self._write_preflight_report()
+            if setup_duration is None:
+                setup_duration = time.monotonic() - setup_started
             if resources is None:
                 result = ScenarioResult(
                     scenario="azure-setup",
@@ -201,6 +271,10 @@ class EvaluationRunner:
                 self.results.append(result)
                 self.reporter.error("model", model, result.reason)
         finally:
+            if setup_duration is None:
+                setup_duration = time.monotonic() - setup_started
+            provisioned_resource_ids = environment.provisioned_resource_ids()
+            cleanup_started = time.monotonic()
             try:
                 environment.cleanup()
             except HANDLED_ERRORS as exc:
@@ -211,8 +285,24 @@ class EvaluationRunner:
                     encoding="utf-8",
                 )
                 self.reporter.error("cleanup", model, message)
-            self._write_reports()
+            cleanup_duration = time.monotonic() - cleanup_started
+            environment_result = EnvironmentResult(
+                model=model,
+                setup_duration_seconds=setup_duration,
+                cleanup_duration_seconds=cleanup_duration,
+                provisioned_resource_ids=provisioned_resource_ids,
+            )
+            self.environments.append(environment_result)
             model_results = self.results[result_start:]
+            model_duration = time.monotonic() - model_started
+            self._write_model_report(
+                model_dir,
+                model,
+                model_duration,
+                model_results,
+                environment_result,
+            )
+            self._write_reports()
             model_failed = any(
                 result.status not in {"PASS", "SKIP"} for result in model_results
             )
@@ -252,12 +342,12 @@ class EvaluationRunner:
                     workspace=str(workspace),
                 )
                 statuses[name] = result.status
-                self.results.append(result)
+                self._record_scenario_result(scenario_dir, result)
                 self.reporter.info("scenario", name, result.reason)
                 continue
             result = self._run_scenario(model, workspace, scenario_dir, resources, name)
             statuses[name] = result.status
-            self.results.append(result)
+            self._record_scenario_result(scenario_dir, result)
 
     def _run_scenario(
         self,
@@ -355,11 +445,17 @@ class EvaluationRunner:
             return result
 
     def _write_reports(self) -> None:
+        preflight = self._write_preflight_report()
         self._write_json(
             "results.json",
             {
-                "schema_version": 1,
+                "schema_version": 6,
                 "run_id": self.run_id,
+                "duration_seconds": self.duration_seconds,
+                "preflight": preflight,
+                "environments": [
+                    environment.to_dict() for environment in self.environments
+                ],
                 "results": [result.to_dict() for result in self.results],
                 "cleanup_errors": self.cleanup_errors,
             },
@@ -380,8 +476,64 @@ class EvaluationRunner:
             )
         (self.run_dir / "summary.md").write_text("\n".join(rows) + "\n", encoding="utf-8")
 
+    def _write_model_report(
+        self,
+        model_dir: Path,
+        model: str,
+        duration_seconds: float,
+        results: list[ScenarioResult],
+        environment: EnvironmentResult,
+    ) -> None:
+        preflight = next(
+            (
+                result
+                for result in reversed(self.preflight_results)
+                if result.model == model
+            ),
+            None,
+        )
+        cleanup_errors = [
+            message
+            for message in self.cleanup_errors
+            if message.startswith(f"{model}:")
+        ]
+        result_path = model_dir / "results.json"
+        self._write_json_file(
+            result_path,
+            {
+                "schema_version": 1,
+                "run_id": self.run_id,
+                "model": model,
+                "duration_seconds": duration_seconds,
+                "preflight": preflight.to_dict() if preflight else None,
+                "environment": environment.to_dict(),
+                "results": [result.to_dict() for result in results],
+                "cleanup_errors": cleanup_errors,
+            },
+        )
+        self.reporter.artifact(result_path, f"{model} results")
+
+    def _write_preflight_report(self) -> dict:
+        preflight = build_preflight_report(self.run_id, self.preflight_results)
+        self._write_json("preflight.json", preflight)
+        return preflight
+
+    def _record_scenario_result(
+        self,
+        scenario_dir: Path,
+        result: ScenarioResult,
+    ) -> None:
+        self.results.append(result)
+        result_path = scenario_dir / "result.json"
+        self._write_json_file(result_path, result.to_dict())
+        self.reporter.artifact(result_path, f"{result.scenario} result")
+
     def _write_json(self, name: str, value) -> None:
-        (self.run_dir / name).write_text(
+        self._write_json_file(self.run_dir / name, value)
+
+    @staticmethod
+    def _write_json_file(path: Path, value) -> None:
+        path.write_text(
             json.dumps(value, indent=2, default=str) + "\n",
             encoding="utf-8",
         )

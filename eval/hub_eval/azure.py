@@ -12,7 +12,7 @@ from pathlib import Path
 from uuid import uuid4
 
 from .command import CommandError, CommandRunner
-from .models import AzureResources
+from .models import AzureResources, PermissionCheck, PermissionResult
 from .progress import ProgressReporter
 
 # Windows ships az.cmd, not az.exe; CreateProcess only appends .exe.
@@ -206,15 +206,19 @@ class AzureEnvironment:
             subscription_id=subscription_id,
         )
         self.group_created = False
+        self.server_created = False
         self.database_created = False
         self.firewall_created = False
         self.embedding_account_name: str | None = None
+        self.embedding_deployment_name: str | None = None
         self.embedding_role_assignment_id: str | None = None
         self.resources: AzureResources | None = None
+        self.permission_checks: list[PermissionCheck] = []
 
-    def create(self) -> AzureResources:
+    def create(self, identity: dict | None = None) -> AzureResources:
         """Create a logical server, Basic database, firewall rule, and optional embedding model."""
-        identity = self.preflight()
+        if identity is None:
+            identity = self.preflight()
         display_name = identity["displayName"]
         object_id = identity["id"]
         if self.existing_resource_group:
@@ -276,6 +280,7 @@ class AzureEnvironment:
                 label="az-sql-server-create",
                 timeout=1200,
             )
+            self.server_created = True
         public_ip = self._public_ip()
         self.az.json(
             [
@@ -344,6 +349,7 @@ class AzureEnvironment:
 
     def preflight(self) -> dict:
         """Verify Azure context, providers, and effective permissions without writes."""
+        self.permission_checks.clear()
         self.az.verify_context()
         identity = self.az.json(
             ["ad", "signed-in-user", "show"],
@@ -449,6 +455,19 @@ class AzureEnvironment:
             url = next_link
             page_number += 1
         missing = missing_permissions(required_permissions, permission_sets)
+        missing_set = set(missing)
+        self.permission_checks.append(
+            PermissionCheck(
+                scope=scope,
+                permissions=[
+                    PermissionResult(
+                        permission=permission,
+                        status="FAIL" if permission in missing_set else "PASS",
+                    )
+                    for permission in required_permissions
+                ],
+            )
+        )
         if missing:
             formatted = "\n- ".join(missing)
             raise CommandError(
@@ -762,6 +781,7 @@ class AzureEnvironment:
             timeout=1200,
             check=True,
         )
+        self.embedding_deployment_name = deployment
         endpoint = self.az.text(
             [
                 "cognitiveservices",
@@ -777,6 +797,41 @@ class AzureEnvironment:
             label="az-openai-endpoint",
         )
         return endpoint, deployment, 1536
+
+    def provisioned_resource_ids(self) -> list[str]:
+        """Return ARM IDs for every resource provisioned by this environment."""
+        resource_group_id = (
+            f"/subscriptions/{self.subscription_id}"
+            f"/resourceGroups/{self.resource_group}"
+        )
+        server_id = (
+            f"{resource_group_id}/providers/Microsoft.Sql"
+            f"/servers/{self.server_name}"
+        )
+        resource_ids: list[str] = []
+        if self.group_created:
+            resource_ids.append(resource_group_id)
+        if self.server_created:
+            resource_ids.append(server_id)
+        if self.firewall_created:
+            resource_ids.append(
+                f"{server_id}/firewallRules/{self.firewall_rule_name}"
+            )
+        if self.database_created:
+            resource_ids.append(f"{server_id}/databases/{self.database_name}")
+        if self.embedding_account_name:
+            account_id = (
+                f"{resource_group_id}/providers/Microsoft.CognitiveServices"
+                f"/accounts/{self.embedding_account_name}"
+            )
+            resource_ids.append(account_id)
+            if self.embedding_deployment_name:
+                resource_ids.append(
+                    f"{account_id}/deployments/{self.embedding_deployment_name}"
+                )
+        if self.embedding_role_assignment_id:
+            resource_ids.append(self.embedding_role_assignment_id)
+        return resource_ids
 
 
 def cleanup_resource_group(
