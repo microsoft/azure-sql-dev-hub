@@ -12,11 +12,13 @@
   // Event taxonomy:
   //   quickstart_start, agent_start_clicked, install_cmd_copy, copy_command,
   //   copy_prompt, copy_code, gallery_card_open, docs_deep_read, docs_outbound,
-  //   azure_outbound, md_fetch, existing_data_clicked, walkthrough_open
+  //   azure_outbound, md_fetch, existing_data_clicked, walkthrough_open.
+  // Item-level Clarity events supplement these aggregate names when configured.
   var clarityTagKeys = ["agent_id", "mode", "scenario_id", "source", "video_id"];
 
-  function track(name, props) {
+  function track(name, props, options) {
     var p = props || {};
+    var clarityEvent = options && options.clarityEvent;
     p.path = location.pathname;
     try { console.log("[telemetry]", name, p); } catch (e) {}
     try {
@@ -27,6 +29,9 @@
           }
         });
         window.clarity("event", name);
+        if (clarityEvent && clarityEvent !== name) {
+          window.clarity("event", clarityEvent);
+        }
       }
     } catch (e) {}
     try {
@@ -52,7 +57,9 @@
         var value = el.getAttribute("data-" + key);
         if (value) props[key + "_id"] = value;
       });
-      track(el.getAttribute("data-event"), props);
+      track(el.getAttribute("data-event"), props, {
+        clarityEvent: el.getAttribute("data-clarity-event")
+      });
     });
   });
 
@@ -118,9 +125,13 @@
       var isPrompt = btn.getAttribute("data-copy-kind") === "prompt";
       var text = isPrompt ? raw.trim() : normalizeCommand(raw);
       copyText(text, btn).then(function (copied) { if (!copied) return;
+      var props = { source: btn.getAttribute("data-copy-source") || "page" };
+      var scenario = btn.getAttribute("data-scenario");
+      if (scenario) props.scenario_id = scenario;
       track(
         btn.getAttribute("data-copy-event") || (isPrompt ? "copy_prompt" : commandEvent(text, null)),
-        { source: btn.getAttribute("data-copy-source") || "page" }
+        props,
+        { clarityEvent: btn.getAttribute("data-clarity-event") }
       ); });
     });
   });
