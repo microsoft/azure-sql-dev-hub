@@ -5,6 +5,7 @@ from __future__ import annotations
 import shutil
 import time
 from pathlib import Path
+from uuid import uuid4
 
 from hub_eval.command import CommandError, CommandRunner, ManagedProcess
 from hub_eval.database import DatabaseProbe
@@ -40,7 +41,7 @@ def validate(
         check=True,
     )
     log = evidence / "func-trigger.log"
-    marker = "trigger evaluation task"
+    marker = f"trigger evaluation task {uuid4().hex}"
     with ManagedProcess(
         ["azurite", "--silent", "--location", str(evidence / "azurite")],
         cwd=project,
@@ -59,15 +60,39 @@ def validate(
             label="event-driven-app",
         ) as server:
             server.wait_for_http("http://127.0.0.1:7071/api/tasks", timeout=180)
-            http_json(
+            status, _ = http_json(
                 "http://127.0.0.1:7071/api/tasks",
                 method="POST",
                 payload={"title": marker},
             )
+            if status != 201:
+                raise CommandError("Functions API did not return 201")
+            _, rows = http_json("http://127.0.0.1:7071/api/tasks")
+            inserted = [
+                row
+                for row in rows
+                if isinstance(row, dict)
+                and row.get("title") == marker
+                and row.get("id") is not None
+            ]
+            if len(inserted) != 1:
+                raise CommandError(
+                    "Functions SQL input did not return exactly one inserted task"
+                )
+            expected_log = f"Insert task {inserted[0]['id']}"
+
+            def matching_events() -> list[str]:
+                return [
+                    line
+                    for line in log.read_text(
+                        encoding="utf-8", errors="replace"
+                    ).splitlines()
+                    if line.rstrip().endswith(expected_log)
+                ]
+
             deadline = time.monotonic() + min(timeout, 300)
             while time.monotonic() < deadline:
-                text = log.read_text(encoding="utf-8", errors="replace")
-                if "Insert task" in text and marker in text:
+                if matching_events():
                     break
                 time.sleep(5)
             else:
@@ -75,15 +100,13 @@ def validate(
                     "SQL trigger did not log the inserted task within five minutes"
                 )
             time.sleep(10)
-            matching_events = [
-                line
-                for line in log.read_text(encoding="utf-8", errors="replace").splitlines()
-                if "Insert task" in line and marker in line
-            ]
-            if len(matching_events) != 1:
+            events = matching_events()
+            if len(events) != 1:
                 raise CommandError(
-                    f"expected exactly one trigger event, observed {len(matching_events)}"
+                    f"expected exactly one trigger event, observed {len(events)}"
                 )
+            if marker in log.read_text(encoding="utf-8", errors="replace"):
+                raise CommandError("SQL trigger logged task row content")
     tracking_enabled = DatabaseProbe(resources, reporter=reporter).scalar(
         """
         SELECT COUNT(*)
