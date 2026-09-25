@@ -14,6 +14,9 @@ hero:
 video:
   # Leave id empty to show the poster image. Set it to a video id to swap in the real video.
   id:
+  # The hero demo loop. Leave src empty to fall back to the poster image.
+  src: /assets/video/hero-idea-to-app.mp4
+  src_webm: /assets/video/hero-idea-to-app.webm
   title: From idea to app
   sub: Azure SQL for the agent era.
   poster: /assets/img/hero-idea-to-app.jpg

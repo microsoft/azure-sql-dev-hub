@@ -28,6 +28,8 @@
 .h .vid{width:100%;min-width:0;margin:0}
 .h .hero-art{display:block;width:100%;height:auto;border-radius:var(--r);border:1px solid var(--line)}
 .h .hero-figure{margin:0}
+.h .hero-still{display:none}
+@media (prefers-reduced-motion:reduce){.h .hero-loop{display:none}.h .hero-still{display:block}}
 .h .poster img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 .h .poster .pplay{position:relative;z-index:1;box-shadow:0 4px 24px #0e1a2b33}
 .h .vframe{position:relative;padding-top:56.25%;border-radius:var(--r) var(--r) 0 0;overflow:hidden;background:var(--dark)}
@@ -144,6 +146,16 @@
           </div>
           {%- endif %}
           {%- if page.video.note %}<p class="faint" style="margin-top:12px">{{ page.video.note }}</p>{% endif %}
+          {%- elsif page.video.src %}
+          <figure class="hero-figure">
+          <video class="hero-art hero-loop" id="hLoop" poster="{{ page.video.poster | relative_url }}" aria-label="{{ page.video.poster_alt | escape }}" autoplay muted loop playsinline preload="metadata">
+            {%- if page.video.src_webm %}
+            <source src="{{ page.video.src_webm | relative_url }}" type="video/webm">
+            {%- endif %}
+            <source src="{{ page.video.src | relative_url }}" type="video/mp4">
+          </video>
+          <img class="hero-art hero-still" src="{{ page.video.poster | relative_url }}" alt="{{ page.video.poster_alt | escape }}">
+          </figure>
           {%- elsif page.video.poster %}
           <figure class="hero-figure">
           <img class="hero-art" src="{{ page.video.poster | relative_url }}" alt="{{ page.video.poster_alt | escape }}" fetchpriority="high">
@@ -318,6 +330,8 @@
   tabs.forEach(function(t){t.addEventListener('click',function(){tabs.forEach(function(x){x.setAttribute('aria-selected','false')});panels.forEach(function(p){p.classList.remove('on')});t.setAttribute('aria-selected','true');document.querySelector('[data-hpanel="'+t.getAttribute('data-htab')+'"]').classList.add('on')})});
   var cmdEl=document.getElementById('hInstall'),noteEl=document.getElementById('hInstallNote'),copyEl=document.getElementById('hInstallCopy');
   document.querySelectorAll('.agent').forEach(function(a){a.addEventListener('click',function(){document.querySelectorAll('.agent').forEach(function(x){x.setAttribute('aria-pressed','false')});a.setAttribute('aria-pressed','true');cmdEl.textContent=a.getAttribute('data-cmd');noteEl.innerHTML=a.getAttribute('data-note');copyEl.setAttribute('data-hcopy',a.getAttribute('data-cmd'))})});
+  var loop=document.getElementById('hLoop');
+  if(loop&&window.matchMedia&&window.matchMedia('(prefers-reduced-motion:reduce)').matches){loop.removeAttribute('autoplay');loop.pause();loop.load()}
   var frame=document.getElementById('hFrame'),vid=frame&&frame.getAttribute('data-video'),player=null,mounted=false;
   function mount(){if(mounted||!vid)return;frame.innerHTML='<iframe id="hVideo" src="https://www.youtube-nocookie.com/embed/'+vid+'?rel=0&enablejsapi=1&autoplay=1" title="Hub demo" allow="accelerometer; autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>';mounted=true}
   var poster=document.getElementById('hPoster');if(poster)poster.addEventListener('click',mount);
