@@ -79,10 +79,17 @@ export function getPool() {
 Create `scripts/init.ts` and run it once with `npx tsx scripts/init.ts`:
 
 ```ts
-import { getPool } from "../src/lib/db";
+import { loadEnvFile } from "node:process";
 
-const pool = await getPool();
-await pool.request().batch(`
+async function main() {
+  // Next.js loads `.env.local` for the app, but a plain `tsx` run does not.
+  // Load it first, and import the db module after, since that module reads
+  // process.env at module scope. Requires Node 20.12+.
+  loadEnvFile(".env.local");
+  const { getPool } = await import("../src/lib/db");
+
+  const pool = await getPool();
+  await pool.request().batch(`
 IF OBJECT_ID('dbo.tasks') IS NULL
 CREATE TABLE dbo.tasks (
   id INT IDENTITY(1,1) PRIMARY KEY,
@@ -93,40 +100,49 @@ CREATE TABLE dbo.tasks (
 IF NOT EXISTS (SELECT 1 FROM dbo.tasks)
 INSERT INTO dbo.tasks (title) VALUES (N'Connect the app'), (N'Render the list'), (N'Ship it');
 `);
-console.log("schema ready");
-await pool.close();
+  console.log("schema ready");
+  await pool.close();
+}
+
+main().catch((err) => {
+  console.error(err);
+  process.exit(1);
+});
 ```
 
-### 5. Render the list
+### 5. Build the task dashboard
 
-Replace `src/app/page.tsx`:
+Create a polished, responsive task dashboard in `src/app/page.tsx`,
+styled with `src/app/globals.css`.
+
+Keep the page server-rendered with:
 
 ```tsx
-import { getPool } from "@/lib/db";
-
 export const dynamic = "force-dynamic";
-
-export default async function Home() {
-  const pool = await getPool();
-  const result = await pool.request().query<{ id: number; title: string; done: boolean }>(
-    "SELECT id, title, done FROM dbo.tasks ORDER BY created_at"
-  );
-  return (
-    <main style={{ padding: 32, fontFamily: "system-ui" }}>
-      <h1>Tasks</h1>
-      <ul>{result.recordset.map(t => <li key={t.id}>{t.done ? "✓ " : ""}{t.title}</li>)}</ul>
-    </main>
-  );
-}
 ```
 
-Run it:
+Read id, title, and done from dbo.tasks using the existing getPool().
+All displayed tasks and counts must come from this query.
 
-```bash
-npm run dev
-```
+Design:
+- Light background, white task cards, Azure-blue accents, subtle borders,
+  and generous spacing. Use the system font.
+- Header: “Task workspace”.
+- Subtitle: “Your next idea, taking shape.”
+- Small product label: “Built with Azure SQL”.
+- Summary cards: Total Tasks, In progress, Completed.
+  Calculate these from the returned rows; done=false means In progress.
+- Display each task title and its actual completion status in a clean card.
+- Keep the layout readable on desktop and mobile.
+- Use accessible contrast and text labels for statuses.
 
-Open http://localhost:3000. Three tasks should render.
+This is a read-only starter. Do not add nonfunctional buttons,
+editable checkboxes, fabricated activity, or hardcoded connection badges.
+Show an empty state when there are no tasks and a friendly error state
+if the database cannot be reached. Never substitute fake data.
+
+Run npm run dev and open the local URL.
+Confirm that the dashboard displays the tasks read from Azure SQL.
 
 ---
 
@@ -136,6 +152,9 @@ Open http://localhost:3000. Three tasks should render.
 - No password anywhere: `.env.local` holds only server and database names; authentication is `azure-active-directory-default`.
 - `encrypt` is `true` and `trustServerCertificate` is `false`. Never set `trustServerCertificate: true` against a cloud database.
 - Exactly one connection pool, created at module scope.
+- Task cards and summary counts match the actual database rows.
+- The dashboard is readable on desktop and mobile.
+- Database failures display an error, not sample data or a success badge.
 
 ## Do not
 
