@@ -58,6 +58,20 @@ class ScenarioResult:
 
 
 @dataclass(frozen=True)
+class EnvironmentResult:
+    """Azure setup, cleanup, and provisioned resources for one model."""
+
+    model: str
+    setup_duration_seconds: float
+    cleanup_duration_seconds: float
+    provisioned_resource_ids: list[str]
+
+    def to_dict(self) -> dict[str, Any]:
+        """Serialize the environment result for JSON evidence."""
+        return asdict(self)
+
+
+@dataclass(frozen=True)
 class RunSettings:
     """Validated command-line settings for one matrix run."""
 

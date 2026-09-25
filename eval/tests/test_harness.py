@@ -8,13 +8,18 @@ import tempfile
 import textwrap
 import unittest
 from pathlib import Path
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 from hub_eval.agents import AgentRequest, CopilotCli
 from hub_eval.azure import AzureEnvironment, cleanup_resource_group, missing_permissions
 from hub_eval.command import CommandError, CommandRunner
 from hub_eval.configuration import load_validation_environment
-from hub_eval.models import AzureResources, RunSettings
+from hub_eval.models import (
+    AzureResources,
+    EnvironmentResult,
+    RunSettings,
+    ScenarioResult,
+)
 from hub_eval.progress import ProgressReporter
 from hub_eval.runner import EvaluationRunner, build_prompt, expand_scenarios
 from hub_eval.validation import project_with
@@ -274,6 +279,230 @@ class AzurePermissionTests(unittest.TestCase):
                 "deletedAccounts/delete",
                 verify.call_args_list[1].args[1],
             )
+
+    def test_provisioned_resource_ids_include_only_created_resources(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            environment = AzureEnvironment(
+                tenant_id="tenant",
+                subscription_id="sub",
+                location="test-region",
+                evidence_dir=Path(temporary),
+                embedding_location="embedding-region",
+                provision_embedding=True,
+                existing_resource_group="rg",
+                existing_server="server",
+            )
+            environment.firewall_created = True
+            environment.database_created = True
+            environment.embedding_account_name = "aoai-test"
+            environment.embedding_deployment_name = "embedding"
+            environment.embedding_role_assignment_id = (
+                "/subscriptions/sub/providers/Microsoft.Authorization/"
+                "roleAssignments/assignment"
+            )
+
+            self.assertEqual(
+                environment.provisioned_resource_ids(),
+                [
+                    "/subscriptions/sub/resourceGroups/rg/providers/Microsoft.Sql/"
+                    "servers/server/firewallRules/"
+                    f"{environment.firewall_rule_name}",
+                    "/subscriptions/sub/resourceGroups/rg/providers/Microsoft.Sql/"
+                    f"servers/server/databases/{environment.database_name}",
+                    "/subscriptions/sub/resourceGroups/rg/providers/"
+                    "Microsoft.CognitiveServices/accounts/aoai-test",
+                    "/subscriptions/sub/resourceGroups/rg/providers/"
+                    "Microsoft.CognitiveServices/accounts/aoai-test/"
+                    "deployments/embedding",
+                    "/subscriptions/sub/providers/Microsoft.Authorization/"
+                    "roleAssignments/assignment",
+                ],
+            )
+
+    def test_provisioned_resource_ids_include_created_group_and_server(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            environment = AzureEnvironment(
+                tenant_id="tenant",
+                subscription_id="sub",
+                location="test-region",
+                evidence_dir=Path(temporary),
+                embedding_location="embedding-region",
+                provision_embedding=False,
+            )
+            environment.group_created = True
+            environment.server_created = True
+
+            self.assertEqual(
+                environment.provisioned_resource_ids(),
+                [
+                    f"/subscriptions/sub/resourceGroups/{environment.resource_group}",
+                    f"/subscriptions/sub/resourceGroups/{environment.resource_group}/"
+                    "providers/Microsoft.Sql/servers/"
+                    f"{environment.server_name}",
+                ],
+            )
+
+
+class ReportTests(unittest.TestCase):
+    """Verify aggregate machine-readable result output."""
+
+    def test_scenario_result_matches_aggregate_result(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            settings = RunSettings(
+                repository=root,
+                output_root=root / "runs",
+                tenant_id="tenant",
+                subscription_id="sub",
+                location="test-region",
+                models=("gpt-5.4",),
+                scenarios=("javascript-app",),
+                agent_timeout_seconds=60,
+                validation_timeout_seconds=30,
+                keep_workspaces=False,
+                embedding_location="test-embedding-region",
+                embedding_endpoint=None,
+                embedding_deployment=None,
+                embedding_dimension=None,
+                existing_resource_group=None,
+                existing_server=None,
+            )
+            runner = EvaluationRunner(settings)
+            scenario_dir = runner.run_dir / "gpt-5-4/scenarios/javascript-app"
+            scenario_dir.mkdir(parents=True)
+            result = ScenarioResult(
+                scenario="javascript-app",
+                model="gpt-5.4",
+                status="PASS",
+                reason="independent end-state validation passed",
+                workspace="/tmp/workspace",
+                agent_duration_seconds=10.0,
+                validation_duration_seconds=2.0,
+                evidence=["evidence.txt"],
+            )
+
+            runner._record_scenario_result(scenario_dir, result)
+            runner._write_reports()
+
+            scenario_result = json.loads(
+                (scenario_dir / "result.json").read_text()
+            )
+            aggregate = json.loads((runner.run_dir / "results.json").read_text())
+            self.assertEqual(scenario_result, result.to_dict())
+            self.assertEqual(aggregate["results"], [scenario_result])
+
+    def test_results_include_environment_durations_and_resource_ids(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            settings = RunSettings(
+                repository=root,
+                output_root=root / "runs",
+                tenant_id="tenant",
+                subscription_id="sub",
+                location="test-region",
+                models=("gpt-5.4",),
+                scenarios=("javascript-app",),
+                agent_timeout_seconds=60,
+                validation_timeout_seconds=30,
+                keep_workspaces=False,
+                embedding_location="test-embedding-region",
+                embedding_endpoint=None,
+                embedding_deployment=None,
+                embedding_dimension=None,
+                existing_resource_group=None,
+                existing_server=None,
+            )
+            runner = EvaluationRunner(settings)
+            runner.environments.append(
+                EnvironmentResult(
+                    model="gpt-5.4",
+                    setup_duration_seconds=12.5,
+                    cleanup_duration_seconds=3.25,
+                    provisioned_resource_ids=[
+                        "/subscriptions/sub/resourceGroups/rg"
+                    ],
+                )
+            )
+
+            runner._write_reports()
+
+            results = json.loads((runner.run_dir / "results.json").read_text())
+            self.assertEqual(results["schema_version"], 2)
+            self.assertEqual(
+                results["environments"],
+                [
+                    {
+                        "model": "gpt-5.4",
+                        "setup_duration_seconds": 12.5,
+                        "cleanup_duration_seconds": 3.25,
+                        "provisioned_resource_ids": [
+                            "/subscriptions/sub/resourceGroups/rg"
+                        ],
+                    }
+                ],
+            )
+
+    def test_model_run_records_setup_and_cleanup_durations(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            settings = RunSettings(
+                repository=root,
+                output_root=root / "runs",
+                tenant_id="tenant",
+                subscription_id="sub",
+                location="test-region",
+                models=("gpt-5.4",),
+                scenarios=("javascript-app",),
+                agent_timeout_seconds=60,
+                validation_timeout_seconds=30,
+                keep_workspaces=False,
+                embedding_location="test-embedding-region",
+                embedding_endpoint=None,
+                embedding_deployment=None,
+                embedding_dimension=None,
+                existing_resource_group=None,
+                existing_server=None,
+            )
+            runner = EvaluationRunner(settings)
+            runner.reporter = Mock()
+            resources = AzureResources(
+                subscription_id="sub",
+                resource_group="rg",
+                location="test-region",
+                server_name="server",
+                database_name="db",
+                server_fqdn="server.database.windows.net",
+            )
+            environment = Mock()
+            environment.create.return_value = resources
+            environment.provisioned_resource_ids.return_value = [
+                "/subscriptions/sub/resourceGroups/rg"
+            ]
+
+            with (
+                patch("hub_eval.runner.AzureEnvironment", return_value=environment),
+                patch.object(runner, "_run_scenarios"),
+                patch(
+                    "hub_eval.runner.time.monotonic",
+                    side_effect=[10.0, 12.5, 20.0, 23.25],
+                ),
+            ):
+                runner._run_model("gpt-5.4", ("javascript-app",))
+
+            self.assertEqual(
+                runner.environments,
+                [
+                    EnvironmentResult(
+                        model="gpt-5.4",
+                        setup_duration_seconds=2.5,
+                        cleanup_duration_seconds=3.25,
+                        provisioned_resource_ids=[
+                            "/subscriptions/sub/resourceGroups/rg"
+                        ],
+                    )
+                ],
+            )
+            environment.cleanup.assert_called_once_with()
 
 
 class CommandTests(unittest.TestCase):

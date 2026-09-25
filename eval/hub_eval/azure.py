@@ -206,9 +206,11 @@ class AzureEnvironment:
             subscription_id=subscription_id,
         )
         self.group_created = False
+        self.server_created = False
         self.database_created = False
         self.firewall_created = False
         self.embedding_account_name: str | None = None
+        self.embedding_deployment_name: str | None = None
         self.embedding_role_assignment_id: str | None = None
         self.resources: AzureResources | None = None
 
@@ -276,6 +278,7 @@ class AzureEnvironment:
                 label="az-sql-server-create",
                 timeout=1200,
             )
+            self.server_created = True
         public_ip = self._public_ip()
         self.az.json(
             [
@@ -762,6 +765,7 @@ class AzureEnvironment:
             timeout=1200,
             check=True,
         )
+        self.embedding_deployment_name = deployment
         endpoint = self.az.text(
             [
                 "cognitiveservices",
@@ -777,6 +781,41 @@ class AzureEnvironment:
             label="az-openai-endpoint",
         )
         return endpoint, deployment, 1536
+
+    def provisioned_resource_ids(self) -> list[str]:
+        """Return ARM IDs for every resource provisioned by this environment."""
+        resource_group_id = (
+            f"/subscriptions/{self.subscription_id}"
+            f"/resourceGroups/{self.resource_group}"
+        )
+        server_id = (
+            f"{resource_group_id}/providers/Microsoft.Sql"
+            f"/servers/{self.server_name}"
+        )
+        resource_ids: list[str] = []
+        if self.group_created:
+            resource_ids.append(resource_group_id)
+        if self.server_created:
+            resource_ids.append(server_id)
+        if self.firewall_created:
+            resource_ids.append(
+                f"{server_id}/firewallRules/{self.firewall_rule_name}"
+            )
+        if self.database_created:
+            resource_ids.append(f"{server_id}/databases/{self.database_name}")
+        if self.embedding_account_name:
+            account_id = (
+                f"{resource_group_id}/providers/Microsoft.CognitiveServices"
+                f"/accounts/{self.embedding_account_name}"
+            )
+            resource_ids.append(account_id)
+            if self.embedding_deployment_name:
+                resource_ids.append(
+                    f"{account_id}/deployments/{self.embedding_deployment_name}"
+                )
+        if self.embedding_role_assignment_id:
+            resource_ids.append(self.embedding_role_assignment_id)
+        return resource_ids
 
 
 def cleanup_resource_group(

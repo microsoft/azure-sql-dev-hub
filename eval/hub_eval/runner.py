@@ -14,7 +14,7 @@ from uuid import uuid4
 from .agents import AgentRequest, create_agent
 from .azure import AzureEnvironment
 from .command import CommandError
-from .models import AzureResources, RunSettings, ScenarioResult
+from .models import AzureResources, EnvironmentResult, RunSettings, ScenarioResult
 from .progress import ProgressReporter
 from .scenarios import DEFAULT_SCENARIO_ORDER, SCENARIOS
 
@@ -103,6 +103,7 @@ class EvaluationRunner:
         self.run_dir = settings.output_root / self.run_id
         self.run_dir.mkdir(parents=True, exist_ok=False)
         self.results: list[ScenarioResult] = []
+        self.environments: list[EnvironmentResult] = []
         self.cleanup_errors: list[str] = []
 
     def run(self) -> int:
@@ -186,10 +187,15 @@ class EvaluationRunner:
             reporter=self.reporter,
         )
         resources = None
+        setup_started = time.monotonic()
+        setup_duration: float | None = None
         try:
             resources = environment.create()
+            setup_duration = time.monotonic() - setup_started
             self._run_scenarios(model, model_dir, resources, selected)
         except HANDLED_ERRORS as exc:
+            if setup_duration is None:
+                setup_duration = time.monotonic() - setup_started
             if resources is None:
                 result = ScenarioResult(
                     scenario="azure-setup",
@@ -201,6 +207,10 @@ class EvaluationRunner:
                 self.results.append(result)
                 self.reporter.error("model", model, result.reason)
         finally:
+            if setup_duration is None:
+                setup_duration = time.monotonic() - setup_started
+            provisioned_resource_ids = environment.provisioned_resource_ids()
+            cleanup_started = time.monotonic()
             try:
                 environment.cleanup()
             except HANDLED_ERRORS as exc:
@@ -211,6 +221,15 @@ class EvaluationRunner:
                     encoding="utf-8",
                 )
                 self.reporter.error("cleanup", model, message)
+            cleanup_duration = time.monotonic() - cleanup_started
+            self.environments.append(
+                EnvironmentResult(
+                    model=model,
+                    setup_duration_seconds=setup_duration,
+                    cleanup_duration_seconds=cleanup_duration,
+                    provisioned_resource_ids=provisioned_resource_ids,
+                )
+            )
             self._write_reports()
             model_results = self.results[result_start:]
             model_failed = any(
@@ -252,12 +271,12 @@ class EvaluationRunner:
                     workspace=str(workspace),
                 )
                 statuses[name] = result.status
-                self.results.append(result)
+                self._record_scenario_result(scenario_dir, result)
                 self.reporter.info("scenario", name, result.reason)
                 continue
             result = self._run_scenario(model, workspace, scenario_dir, resources, name)
             statuses[name] = result.status
-            self.results.append(result)
+            self._record_scenario_result(scenario_dir, result)
 
     def _run_scenario(
         self,
@@ -358,8 +377,11 @@ class EvaluationRunner:
         self._write_json(
             "results.json",
             {
-                "schema_version": 1,
+                "schema_version": 2,
                 "run_id": self.run_id,
+                "environments": [
+                    environment.to_dict() for environment in self.environments
+                ],
                 "results": [result.to_dict() for result in self.results],
                 "cleanup_errors": self.cleanup_errors,
             },
@@ -380,8 +402,22 @@ class EvaluationRunner:
             )
         (self.run_dir / "summary.md").write_text("\n".join(rows) + "\n", encoding="utf-8")
 
+    def _record_scenario_result(
+        self,
+        scenario_dir: Path,
+        result: ScenarioResult,
+    ) -> None:
+        self.results.append(result)
+        result_path = scenario_dir / "result.json"
+        self._write_json_file(result_path, result.to_dict())
+        self.reporter.artifact(result_path, f"{result.scenario} result")
+
     def _write_json(self, name: str, value) -> None:
-        (self.run_dir / name).write_text(
+        self._write_json_file(self.run_dir / name, value)
+
+    @staticmethod
+    def _write_json_file(path: Path, value) -> None:
+        path.write_text(
             json.dumps(value, indent=2, default=str) + "\n",
             encoding="utf-8",
         )

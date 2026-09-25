@@ -272,7 +272,11 @@ Runs are written under `eval/runs/<UTC timestamp>-<unique suffix>/`. Each run co
 - `prompt.md`: the complete prompt sent to the agent
 - Copilot JSONL, stderr, and local Copilot logs
 - Validator command output and server logs
-- `results.json` and `summary.md`
+- `results.json`: aggregate scenario results plus per-model Azure setup/cleanup
+  durations and full ARM IDs for resources provisioned by the harness
+- `summary.md`: human-readable scenario results and cleanup errors
+- Each model's `scenarios/<scenario>/result.json`: the scenario's exact result
+  object from the aggregate `results.json`
 
 Generated workspaces are removed after the run by default. Add
 `--keep-workspaces` when debugging an implementation failure. Azure resources are
