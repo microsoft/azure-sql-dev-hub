@@ -72,6 +72,45 @@ class EnvironmentResult:
 
 
 @dataclass(frozen=True)
+class PermissionResult:
+    """Outcome for one required Azure permission."""
+
+    permission: str
+    status: str
+
+
+@dataclass(frozen=True)
+class PermissionCheck:
+    """Permission outcomes evaluated at one Azure resource scope."""
+
+    scope: str
+    permissions: list[PermissionResult]
+
+    def to_dict(self) -> dict[str, Any]:
+        """Serialize the permission check for JSON evidence."""
+        return asdict(self)
+
+
+@dataclass(frozen=True)
+class PreflightResult:
+    """Azure preflight outcome for one model environment."""
+
+    model: str | None
+    status: str
+    duration_seconds: float
+    subscription_id: str
+    resource_group: str
+    scenarios: list[str]
+    identity: dict[str, str] | None
+    permission_checks: list[PermissionCheck]
+    reason: str
+
+    def to_dict(self) -> dict[str, Any]:
+        """Serialize the preflight result for JSON evidence."""
+        return asdict(self)
+
+
+@dataclass(frozen=True)
 class RunSettings:
     """Validated command-line settings for one matrix run."""
 

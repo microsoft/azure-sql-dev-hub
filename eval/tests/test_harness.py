@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import argparse
 import io
 import json
 import tempfile
@@ -17,12 +18,16 @@ from hub_eval.configuration import load_validation_environment
 from hub_eval.models import (
     AzureResources,
     EnvironmentResult,
+    PermissionCheck,
+    PermissionResult,
+    PreflightResult,
     RunSettings,
     ScenarioResult,
 )
 from hub_eval.progress import ProgressReporter
 from hub_eval.runner import EvaluationRunner, build_prompt, expand_scenarios
 from hub_eval.validation import project_with
+from run_evals import run_preflight
 
 
 class ScenarioTests(unittest.TestCase):
@@ -178,6 +183,57 @@ class AzurePermissionTests(unittest.TestCase):
                 "Microsoft.CognitiveServices/accounts/write",
             ],
         )
+
+    def test_permission_check_records_scope_and_required_permissions(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            environment = AzureEnvironment(
+                tenant_id="tenant",
+                subscription_id="sub",
+                location="test-region",
+                evidence_dir=Path(temporary),
+                embedding_location="embedding-region",
+                provision_embedding=False,
+                existing_resource_group="rg",
+                existing_server="server",
+            )
+            scope = "/subscriptions/sub/resourceGroups/rg"
+            required = (
+                "Microsoft.Sql/servers/read",
+                "Microsoft.Sql/servers/delete",
+            )
+            with patch.object(
+                environment.az,
+                "json",
+                return_value={
+                    "value": [
+                        {
+                            "actions": ["Microsoft.Sql/*"],
+                            "notActions": ["Microsoft.Sql/servers/delete"],
+                        }
+                    ]
+                },
+            ):
+                with self.assertRaisesRegex(CommandError, "servers/delete"):
+                    environment._verify_permissions_at_scope(scope, required)
+
+            self.assertEqual(
+                environment.permission_checks,
+                [
+                    PermissionCheck(
+                        scope=scope,
+                        permissions=[
+                            PermissionResult(
+                                permission="Microsoft.Sql/servers/read",
+                                status="PASS",
+                            ),
+                            PermissionResult(
+                                permission="Microsoft.Sql/servers/delete",
+                                status="FAIL",
+                            ),
+                        ],
+                    )
+                ],
+            )
 
     def test_existing_server_rag_preflight_checks_embedding_permissions(
         self,
@@ -427,7 +483,7 @@ class ReportTests(unittest.TestCase):
             runner._write_reports()
 
             results = json.loads((runner.run_dir / "results.json").read_text())
-            self.assertEqual(results["schema_version"], 2)
+            self.assertEqual(results["schema_version"], 5)
             self.assertEqual(
                 results["environments"],
                 [
@@ -474,27 +530,84 @@ class ReportTests(unittest.TestCase):
                 server_fqdn="server.database.windows.net",
             )
             environment = Mock()
-            environment.create.return_value = resources
+            identity = {"displayName": "Test User", "id": "user-id"}
+            environment.preflight.return_value = identity
+            environment.resource_group = "rg"
+            environment.permission_checks = [
+                PermissionCheck(
+                    scope="/subscriptions/sub/resourceGroups/rg",
+                    permissions=[
+                        PermissionResult(
+                            permission="Microsoft.Sql/servers/read",
+                            status="PASS",
+                        )
+                    ],
+                )
+            ]
             environment.provisioned_resource_ids.return_value = [
                 "/subscriptions/sub/resourceGroups/rg"
             ]
+
+            def create_after_preflight(preflight_identity):
+                preflight = json.loads(
+                    (runner.run_dir / "preflight.json").read_text()
+                )
+                self.assertEqual(
+                    preflight["results"][0]["status"],
+                    "PASS",
+                )
+                self.assertEqual(preflight_identity, identity)
+                return resources
+
+            environment.create.side_effect = create_after_preflight
 
             with (
                 patch("hub_eval.runner.AzureEnvironment", return_value=environment),
                 patch.object(runner, "_run_scenarios"),
                 patch(
                     "hub_eval.runner.time.monotonic",
-                    side_effect=[10.0, 12.5, 20.0, 23.25],
+                    side_effect=[10.0, 11.0, 12.0, 14.0, 20.0, 23.25],
                 ),
             ):
                 runner._run_model("gpt-5.4", ("javascript-app",))
 
             self.assertEqual(
+                runner.preflight_results,
+                [
+                    PreflightResult(
+                        model="gpt-5.4",
+                        status="PASS",
+                        duration_seconds=1.0,
+                        subscription_id="sub",
+                        resource_group="rg",
+                        scenarios=["javascript-app"],
+                        identity={
+                            "display_name": "Test User",
+                            "object_id": "user-id",
+                        },
+                        permission_checks=[
+                            PermissionCheck(
+                                scope="/subscriptions/sub/resourceGroups/rg",
+                                permissions=[
+                                    PermissionResult(
+                                        permission="Microsoft.Sql/servers/read",
+                                        status="PASS",
+                                    )
+                                ],
+                            )
+                        ],
+                        reason=(
+                            "Azure context, providers, and permissions validated"
+                        ),
+                    )
+                ],
+            )
+            self.assertEqual(
                 runner.environments,
                 [
                     EnvironmentResult(
                         model="gpt-5.4",
-                        setup_duration_seconds=2.5,
+                        setup_duration_seconds=4.0,
                         cleanup_duration_seconds=3.25,
                         provisioned_resource_ids=[
                             "/subscriptions/sub/resourceGroups/rg"
@@ -502,7 +615,192 @@ class ReportTests(unittest.TestCase):
                     )
                 ],
             )
+            environment.create.assert_called_once_with(identity)
             environment.cleanup.assert_called_once_with()
+
+    def test_preflight_file_matches_aggregate_preflight(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            settings = RunSettings(
+                repository=root,
+                output_root=root / "runs",
+                tenant_id="tenant",
+                subscription_id="sub",
+                location="test-region",
+                models=("gpt-5.4",),
+                scenarios=("javascript-app",),
+                agent_timeout_seconds=60,
+                validation_timeout_seconds=30,
+                keep_workspaces=False,
+                embedding_location="test-embedding-region",
+                embedding_endpoint=None,
+                embedding_deployment=None,
+                embedding_dimension=None,
+                existing_resource_group=None,
+                existing_server=None,
+            )
+            runner = EvaluationRunner(settings)
+            runner.preflight_results.append(
+                PreflightResult(
+                    model="gpt-5.4",
+                    status="PASS",
+                    duration_seconds=1.5,
+                    subscription_id="sub",
+                    resource_group="rg",
+                    scenarios=["javascript-app"],
+                    identity={
+                        "display_name": "Test User",
+                        "object_id": "user-id",
+                    },
+                    permission_checks=[
+                        PermissionCheck(
+                            scope="/subscriptions/sub/resourceGroups/rg",
+                            permissions=[
+                                PermissionResult(
+                                    permission="Microsoft.Sql/servers/read",
+                                    status="PASS",
+                                )
+                            ],
+                        )
+                    ],
+                    reason="Azure context, providers, and permissions validated",
+                )
+            )
+
+            runner._write_reports()
+
+            preflight = json.loads((runner.run_dir / "preflight.json").read_text())
+            results = json.loads((runner.run_dir / "results.json").read_text())
+            self.assertEqual(preflight["schema_version"], 3)
+            self.assertEqual(results["preflight"], preflight)
+
+    def test_failed_preflight_is_written_before_provisioning(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            settings = RunSettings(
+                repository=root,
+                output_root=root / "runs",
+                tenant_id="tenant",
+                subscription_id="sub",
+                location="test-region",
+                models=("gpt-5.4",),
+                scenarios=("javascript-app",),
+                agent_timeout_seconds=60,
+                validation_timeout_seconds=30,
+                keep_workspaces=False,
+                embedding_location="test-embedding-region",
+                embedding_endpoint=None,
+                embedding_deployment=None,
+                embedding_dimension=None,
+                existing_resource_group=None,
+                existing_server=None,
+            )
+            runner = EvaluationRunner(settings)
+            runner.reporter = Mock()
+            environment = Mock()
+            environment.preflight.side_effect = CommandError("missing permissions")
+            environment.resource_group = "rg"
+            environment.permission_checks = [
+                PermissionCheck(
+                    scope="/subscriptions/sub/resourceGroups/rg",
+                    permissions=[
+                        PermissionResult(
+                            permission="Microsoft.Sql/servers/read",
+                            status="FAIL",
+                        )
+                    ],
+                )
+            ]
+            environment.provisioned_resource_ids.return_value = []
+
+            with (
+                patch("hub_eval.runner.AzureEnvironment", return_value=environment),
+                patch(
+                    "hub_eval.runner.time.monotonic",
+                    side_effect=[10.0, 11.0, 12.0, 14.0, 20.0, 21.0],
+                ),
+            ):
+                runner._run_model("gpt-5.4", ("javascript-app",))
+
+            preflight = json.loads((runner.run_dir / "preflight.json").read_text())
+            results = json.loads((runner.run_dir / "results.json").read_text())
+            self.assertEqual(preflight["results"][0]["status"], "FAIL")
+            self.assertEqual(
+                preflight["results"][0]["reason"],
+                "CommandError: missing permissions",
+            )
+            self.assertEqual(
+                preflight["results"][0]["permission_checks"],
+                [
+                    {
+                        "scope": "/subscriptions/sub/resourceGroups/rg",
+                        "permissions": [
+                            {
+                                "permission": "Microsoft.Sql/servers/read",
+                                "status": "FAIL",
+                            }
+                        ],
+                    }
+                ],
+            )
+            self.assertEqual(results["preflight"], preflight)
+            self.assertEqual(results["results"][0]["scenario"], "azure-setup")
+            environment.create.assert_not_called()
+
+    def test_standalone_preflight_creates_run_folder_and_result(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            output = Path(temporary) / "runs"
+            args = argparse.Namespace(
+                output=output,
+                tenant="tenant",
+                subscription="sub",
+                location="test-region",
+                embedding_location="embedding-region",
+                embedding_endpoint=None,
+                embedding_deployment=None,
+                embedding_dimension=None,
+                existing_resource_group="rg",
+                existing_server="server",
+            )
+            identity = {"displayName": "Test User", "id": "user-id"}
+            environment = Mock()
+            environment.preflight.return_value = identity
+            environment.resource_group = "rg"
+            environment.permission_checks = [
+                PermissionCheck(
+                    scope="/subscriptions/sub/resourceGroups/rg",
+                    permissions=[
+                        PermissionResult(
+                            permission="Microsoft.Sql/servers/read",
+                            status="PASS",
+                        )
+                    ],
+                )
+            ]
+
+            with (
+                patch("run_evals.AzureEnvironment", return_value=environment),
+                patch("run_evals.create_run_id", return_value="test-run"),
+                patch("run_evals.time.monotonic", side_effect=[10.0, 12.0]),
+                patch("builtins.print"),
+            ):
+                exit_code = run_preflight(args, ("javascript-app",))
+
+            preflight_path = output / "test-run/preflight.json"
+            self.assertEqual(exit_code, 0)
+            self.assertTrue(preflight_path.is_file())
+            preflight = json.loads(preflight_path.read_text())
+            self.assertEqual(preflight["run_id"], "test-run")
+            self.assertEqual(preflight["results"][0]["model"], None)
+            self.assertEqual(
+                preflight["results"][0]["permission_checks"][0]["permissions"],
+                [
+                    {
+                        "permission": "Microsoft.Sql/servers/read",
+                        "status": "PASS",
+                    }
+                ],
+            )
 
 
 class CommandTests(unittest.TestCase):

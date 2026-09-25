@@ -14,11 +14,34 @@ from uuid import uuid4
 from .agents import AgentRequest, create_agent
 from .azure import AzureEnvironment
 from .command import CommandError
-from .models import AzureResources, EnvironmentResult, RunSettings, ScenarioResult
+from .models import (
+    AzureResources,
+    EnvironmentResult,
+    PreflightResult,
+    RunSettings,
+    ScenarioResult,
+)
 from .progress import ProgressReporter
 from .scenarios import DEFAULT_SCENARIO_ORDER, SCENARIOS
 
 HANDLED_ERRORS = (CommandError, OSError, ValueError, KeyError)
+
+
+def create_run_id() -> str:
+    """Create a sortable, collision-resistant evaluation run ID."""
+    return datetime.now(UTC).strftime("%Y%m%dT%H%M%SZ") + "-" + uuid4().hex[:8]
+
+
+def build_preflight_report(
+    run_id: str,
+    results: list[PreflightResult],
+) -> dict:
+    """Build the shared standalone and aggregate preflight report."""
+    return {
+        "schema_version": 3,
+        "run_id": run_id,
+        "results": [result.to_dict() for result in results],
+    }
 
 
 def expand_scenarios(requested: tuple[str, ...]) -> tuple[str, ...]:
@@ -97,13 +120,12 @@ class EvaluationRunner:
         self.settings = settings
         self.reporter = ProgressReporter()
         self.agent = create_agent(agent_name, reporter=self.reporter)
-        self.run_id = (
-            datetime.now(UTC).strftime("%Y%m%dT%H%M%SZ") + "-" + uuid4().hex[:8]
-        )
+        self.run_id = create_run_id()
         self.run_dir = settings.output_root / self.run_id
         self.run_dir.mkdir(parents=True, exist_ok=False)
         self.results: list[ScenarioResult] = []
         self.environments: list[EnvironmentResult] = []
+        self.preflight_results: list[PreflightResult] = []
         self.cleanup_errors: list[str] = []
 
     def run(self) -> int:
@@ -139,6 +161,7 @@ class EvaluationRunner:
         self._write_reports()
         failed = any(result.status not in {"PASS", "SKIP"} for result in self.results)
         exit_code = 1 if failed or self.cleanup_errors else 0
+        self.reporter.artifact(self.run_dir / "preflight.json", "preflight results")
         self.reporter.artifact(self.run_dir / "summary.md", "run summary")
         self.reporter.finish(
             run_token,
@@ -189,11 +212,48 @@ class EvaluationRunner:
         resources = None
         setup_started = time.monotonic()
         setup_duration: float | None = None
+        preflight_started = time.monotonic()
+        preflight_completed = False
         try:
-            resources = environment.create()
+            identity = environment.preflight()
+            preflight_duration = time.monotonic() - preflight_started
+            preflight_completed = True
+            self.preflight_results.append(
+                PreflightResult(
+                    model=model,
+                    status="PASS",
+                    duration_seconds=preflight_duration,
+                    subscription_id=self.settings.subscription_id,
+                    resource_group=environment.resource_group,
+                    scenarios=list(selected),
+                    identity={
+                        "display_name": identity["displayName"],
+                        "object_id": identity["id"],
+                    },
+                    permission_checks=list(environment.permission_checks),
+                    reason="Azure context, providers, and permissions validated",
+                )
+            )
+            self._write_preflight_report()
+            resources = environment.create(identity)
             setup_duration = time.monotonic() - setup_started
             self._run_scenarios(model, model_dir, resources, selected)
         except HANDLED_ERRORS as exc:
+            if not preflight_completed:
+                self.preflight_results.append(
+                    PreflightResult(
+                        model=model,
+                        status="FAIL",
+                        duration_seconds=time.monotonic() - preflight_started,
+                        subscription_id=self.settings.subscription_id,
+                        resource_group=environment.resource_group,
+                        scenarios=list(selected),
+                        identity=None,
+                        permission_checks=list(environment.permission_checks),
+                        reason=f"{type(exc).__name__}: {exc}",
+                    )
+                )
+                self._write_preflight_report()
             if setup_duration is None:
                 setup_duration = time.monotonic() - setup_started
             if resources is None:
@@ -374,11 +434,13 @@ class EvaluationRunner:
             return result
 
     def _write_reports(self) -> None:
+        preflight = self._write_preflight_report()
         self._write_json(
             "results.json",
             {
-                "schema_version": 2,
+                "schema_version": 5,
                 "run_id": self.run_id,
+                "preflight": preflight,
                 "environments": [
                     environment.to_dict() for environment in self.environments
                 ],
@@ -401,6 +463,11 @@ class EvaluationRunner:
                 + [f"- {message}" for message in self.cleanup_errors]
             )
         (self.run_dir / "summary.md").write_text("\n".join(rows) + "\n", encoding="utf-8")
+
+    def _write_preflight_report(self) -> dict:
+        preflight = build_preflight_report(self.run_id, self.preflight_results)
+        self._write_json("preflight.json", preflight)
+        return preflight
 
     def _record_scenario_result(
         self,

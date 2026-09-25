@@ -109,6 +109,12 @@ PYTHONPATH=eval eval/.venv/bin/python -m run_evals \
   --preflight
 ```
 
+Preflight-only runs create a normal `eval/runs/<run-id>/` directory containing
+`preflight.json` and the underlying Azure CLI command evidence. During a full
+evaluation, `preflight.json` is written immediately after each model's preflight
+completes, before resource provisioning begins. Each scoped permission entry
+contains the individual permission and its `PASS` or `FAIL` status.
+
 Copilot CLI noninteractive mode requires an authenticated Copilot session. The
 harness disables the built-in GitHub MCP server and grants unattended local tool
 execution inside each generated workspace.
@@ -272,8 +278,12 @@ Runs are written under `eval/runs/<UTC timestamp>-<unique suffix>/`. Each run co
 - `prompt.md`: the complete prompt sent to the agent
 - Copilot JSONL, stderr, and local Copilot logs
 - Validator command output and server logs
+- `preflight.json`: per-model Azure context, provider, and permission-check
+  outcomes, including duration, identity, and a `PASS` or `FAIL` result for each
+  permission evaluated at each Azure resource scope
 - `results.json`: aggregate scenario results plus per-model Azure setup/cleanup
-  durations and full ARM IDs for resources provisioned by the harness
+  durations, full ARM IDs for resources provisioned by the harness, and the
+  same preflight data as `preflight.json`
 - `summary.md`: human-readable scenario results and cleanup errors
 - Each model's `scenarios/<scenario>/result.json`: the scenario's exact result
   object from the aggregate `results.json`

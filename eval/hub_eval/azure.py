@@ -12,7 +12,7 @@ from pathlib import Path
 from uuid import uuid4
 
 from .command import CommandError, CommandRunner
-from .models import AzureResources
+from .models import AzureResources, PermissionCheck, PermissionResult
 from .progress import ProgressReporter
 
 # Windows ships az.cmd, not az.exe; CreateProcess only appends .exe.
@@ -213,10 +213,12 @@ class AzureEnvironment:
         self.embedding_deployment_name: str | None = None
         self.embedding_role_assignment_id: str | None = None
         self.resources: AzureResources | None = None
+        self.permission_checks: list[PermissionCheck] = []
 
-    def create(self) -> AzureResources:
+    def create(self, identity: dict | None = None) -> AzureResources:
         """Create a logical server, Basic database, firewall rule, and optional embedding model."""
-        identity = self.preflight()
+        if identity is None:
+            identity = self.preflight()
         display_name = identity["displayName"]
         object_id = identity["id"]
         if self.existing_resource_group:
@@ -347,6 +349,7 @@ class AzureEnvironment:
 
     def preflight(self) -> dict:
         """Verify Azure context, providers, and effective permissions without writes."""
+        self.permission_checks.clear()
         self.az.verify_context()
         identity = self.az.json(
             ["ad", "signed-in-user", "show"],
@@ -452,6 +455,19 @@ class AzureEnvironment:
             url = next_link
             page_number += 1
         missing = missing_permissions(required_permissions, permission_sets)
+        missing_set = set(missing)
+        self.permission_checks.append(
+            PermissionCheck(
+                scope=scope,
+                permissions=[
+                    PermissionResult(
+                        permission=permission,
+                        status="FAIL" if permission in missing_set else "PASS",
+                    )
+                    for permission in required_permissions
+                ],
+            )
+        )
         if missing:
             formatted = "\n- ".join(missing)
             raise CommandError(
