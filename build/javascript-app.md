@@ -11,11 +11,12 @@ validated: false
 
 **Role:** You are an expert full-stack engineer scaffolding a small web application in the current project, using Azure SQL Database in the cloud as the only data store.
 
-**Purpose:** Stand up a Next.js task-tracking app that connects to an existing Azure SQL Database with Microsoft Entra, creates the schema, seeds a few rows, and renders them on one page. No passwords in code or config.
+**Purpose:** Stand up a Next.js task list that connects to an existing Azure SQL Database with Microsoft Entra, creates the schema, seeds a few rows when the table is empty, and renders them as a read-only page. One heading, one card per task, one status label. No passwords in code or config.
 
 **Scope:**
 - Assumes Node.js 20+ and an Azure SQL Database that already exists (free tier is fine). The person running this has signed in with `az login` and their identity can connect to the database.
 - Uses the `mssql` package, which wraps `tedious`. That is the only place the name `tedious` should appear.
+- The page is read-only. It displays what the database holds and offers no way to change it.
 - If the project already has code, add to it. Do not replace an existing framework.
 
 Read the entire instruction set before executing.
@@ -76,13 +77,24 @@ export function getPool() {
 
 ### 4. Create the schema and seed data
 
-Create `scripts/init.ts` and run it once with `npx tsx scripts/init.ts`:
+Create `scripts/init.ts` and run it once with `npx tsx scripts/init.ts`.
+
+Two details matter here. Next.js loads `.env.local` for the dev server, but a script run through `tsx` is a plain Node process and gets nothing, so the script loads the file itself with `loadEnvFile` from `node:process`, which needs no dependency and requires Node 20.12 or newer. And because `src/lib/db.ts` reads `process.env` at module scope, a static `import` of it would be hoisted and evaluated before that call ever ran. Import it dynamically, after the environment is loaded, from inside an async `main`.
 
 ```ts
-import { getPool } from "../src/lib/db";
+import { loadEnvFile } from "node:process";
 
-const pool = await getPool();
-await pool.request().batch(`
+async function main() {
+  // Load .env.local before anything reads process.env. Requires Node 20.12+.
+  loadEnvFile(".env.local");
+
+  // Dynamic import: db.ts builds its config at module scope, so it must not be
+  // evaluated until after loadEnvFile has run.
+  const { getPool } = await import("../src/lib/db");
+
+  const pool = await getPool();
+  try {
+    await pool.request().batch(`
 IF OBJECT_ID('dbo.tasks') IS NULL
 CREATE TABLE dbo.tasks (
   id INT IDENTITY(1,1) PRIMARY KEY,
@@ -91,30 +103,100 @@ CREATE TABLE dbo.tasks (
   created_at DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME()
 );
 IF NOT EXISTS (SELECT 1 FROM dbo.tasks)
-INSERT INTO dbo.tasks (title) VALUES (N'Connect the app'), (N'Render the list'), (N'Ship it');
+INSERT INTO dbo.tasks (title) VALUES (N'Plan a weekend trip'), (N'Book a dentist appointment'), (N'Pick up groceries');
 `);
-console.log("schema ready");
-await pool.close();
+    console.log("schema ready");
+  } finally {
+    await pool.close();
+  }
+}
+
+main().catch((err) => {
+  console.error(err);
+  process.exit(1);
+});
 ```
+
+The seed runs only when `dbo.tasks` is empty. If the table already holds rows, the insert is skipped and nothing existing is changed.
 
 ### 5. Render the list
 
-Replace `src/app/page.tsx`:
+Replace `src/app/page.tsx`. The page reads from Azure SQL and displays it. Nothing on it changes data.
 
 ```tsx
 import { getPool } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
 
+type Task = { id: number; title: string; done: boolean };
+
 export default async function Home() {
   const pool = await getPool();
-  const result = await pool.request().query<{ id: number; title: string; done: boolean }>(
+  const result = await pool.request().query<Task>(
     "SELECT id, title, done FROM dbo.tasks ORDER BY created_at"
   );
+
   return (
-    <main style={{ padding: 32, fontFamily: "system-ui" }}>
-      <h1>Tasks</h1>
-      <ul>{result.recordset.map(t => <li key={t.id}>{t.done ? "✓ " : ""}{t.title}</li>)}</ul>
+    <main
+      style={{
+        minHeight: "100vh",
+        background: "#f4f7fb",
+        color: "#16212e",
+        fontFamily: "system-ui, -apple-system, Segoe UI, sans-serif",
+        padding: "clamp(24px, 5vw, 56px) 16px",
+      }}
+    >
+      <div style={{ maxWidth: 640, margin: "0 auto" }}>
+        <h1
+          style={{
+            fontSize: "clamp(24px, 4vw, 32px)",
+            fontWeight: 600,
+            margin: "0 0 24px",
+            paddingLeft: 12,
+            borderLeft: "4px solid #0067b8",
+          }}
+        >
+          My Tasks
+        </h1>
+
+        <ul style={{ listStyle: "none", margin: 0, padding: 0, display: "grid", gap: 12 }}>
+          {result.recordset.map((t) => (
+            <li
+              key={t.id}
+              style={{
+                background: "#fff",
+                border: "1px solid #dde3ec",
+                borderRadius: 10,
+                padding: "16px 18px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                gap: 16,
+                flexWrap: "wrap",
+              }}
+            >
+              <span style={{ fontSize: 16 }}>{t.title}</span>
+              <span
+                style={{
+                  fontSize: 12,
+                  fontWeight: 600,
+                  padding: "4px 10px",
+                  borderRadius: 999,
+                  whiteSpace: "nowrap",
+                  background: t.done ? "#e7f4ec" : "#eef2f7",
+                  color: t.done ? "#0b5c2e" : "#3f4b5c",
+                }}
+              >
+                {t.done ? "Completed" : "To do"}
+              </span>
+            </li>
+          ))}
+        </ul>
+
+        <footer style={{ marginTop: 32, fontSize: 13, color: "#5b6676" }}>
+          Built with Azure SQL
+        </footer>
+      </div>
     </main>
   );
 }
@@ -126,13 +208,22 @@ Run it:
 npm run dev
 ```
 
-Open http://localhost:3000. Three tasks should render.
+Open http://localhost:3000. Three tasks should render, each with a status label.
 
 ---
 
 ## Validation rules
 
 - The app starts and the page renders rows read from `dbo.tasks` on Azure SQL Database.
+- The heading is `My Tasks`. There is no other headline, subtitle, or marketing copy.
+- Each task is one white card on a light background, showing the title and exactly one status label: `To do` when `done` is false, `Completed` when `done` is true.
+- The page is read-only. It contains no checkbox, button, form, or any other control that could change a row.
+- There are no counters, totals, percentages, or progress bars.
+- The footer reads `Built with Azure SQL`.
+- Text meets WCAG AA contrast against its own background, including both status labels.
+- The layout holds at 360px wide with no horizontal scrolling, and stays readable on a wide screen.
+- `scripts/init.ts` loads `.env.local` explicitly and does its work inside an async `main`, exiting non-zero on failure.
+- Seeding happens only when `dbo.tasks` is empty. Running the script against a table that already has rows leaves every row unchanged.
 - No password anywhere: `.env.local` holds only server and database names; authentication is `azure-active-directory-default`.
 - `encrypt` is `true` and `trustServerCertificate` is `false`. Never set `trustServerCertificate: true` against a cloud database.
 - Exactly one connection pool, created at module scope.
@@ -142,3 +233,7 @@ Open http://localhost:3000. Three tasks should render.
 - Do not create the database. It exists; ask for its name.
 - Do not fall back to SQL authentication or `ActiveDirectoryPassword`.
 - Do not open a new pool per request or per component.
+- Do not add checkboxes, buttons, forms, or any control that edits, completes, adds, or deletes a task.
+- Do not add a celebratory headline, a marketing subtitle, summary counters, or a progress bar. This is an everyday task list, not a dashboard.
+- Do not update or delete rows that already exist. The seed applies only to an empty table.
+- Do not hardcode the task list in the component. Titles and statuses come from Azure SQL on every request.
