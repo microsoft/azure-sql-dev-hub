@@ -12,9 +12,10 @@ hero:
   - Codex
   - Cursor
 video:
-  # Leave id empty to show the poster image. Set it to a video id to swap in the real video.
+  # Optional YouTube id; leave empty to use the local demo below.
   id:
-  # The hero demo loop. Leave src empty to fall back to the poster image.
+  # Hero demo. The thumbnail holds for two seconds once the hero is in view, then
+  # the demo plays through once. Leave src empty for a static image.
   src: /assets/video/hero-idea-to-app.mp4
   src_webm: /assets/video/hero-idea-to-app.webm
   title: From idea to app

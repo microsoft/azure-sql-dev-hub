@@ -1,5 +1,6 @@
 # Decisions
 
+- 2026-09-25: Hold the branded hero thumbnail for two seconds once the hero is in view, then play the demo silently one time with controls available, and return to the thumbnail behind a Replay button. Reduced-motion visitors, and any browser that refuses playback it did not see asked for, keep the thumbnail and a Play demo button.
 - 2026-09-16: Keep validation tracking and agent-file documentation in repository docs; remove the For agents page from publishing and human navigation while retaining machine-readable files and alternate links.
 - 2026-09-16: Use visual links to existing SQL videos without auto-playing or embedding a player; retain a complete hero without a demo placeholder.
 
