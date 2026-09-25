@@ -127,9 +127,11 @@ class EvaluationRunner:
         self.environments: list[EnvironmentResult] = []
         self.preflight_results: list[PreflightResult] = []
         self.cleanup_errors: list[str] = []
+        self.duration_seconds: float | None = None
 
     def run(self) -> int:
         """Execute the matrix and return a process exit code."""
+        run_started = time.monotonic()
         selected = expand_scenarios(self.settings.scenarios)
         run_token = self.reporter.start(
             "run",
@@ -158,6 +160,7 @@ class EvaluationRunner:
         self.reporter.artifact(self.run_dir / "manifest.json", "run manifest")
         for model in self.settings.models:
             self._run_model(model, selected)
+        self.duration_seconds = time.monotonic() - run_started
         self._write_reports()
         failed = any(result.status not in {"PASS", "SKIP"} for result in self.results)
         exit_code = 1 if failed or self.cleanup_errors else 0
@@ -189,6 +192,7 @@ class EvaluationRunner:
         return exit_code
 
     def _run_model(self, model: str, selected: tuple[str, ...]) -> None:
+        model_started = time.monotonic()
         model_token = self.reporter.start("model", model)
         result_start = len(self.results)
         model_dir = self.run_dir / _slug(model)
@@ -282,16 +286,23 @@ class EvaluationRunner:
                 )
                 self.reporter.error("cleanup", model, message)
             cleanup_duration = time.monotonic() - cleanup_started
-            self.environments.append(
-                EnvironmentResult(
-                    model=model,
-                    setup_duration_seconds=setup_duration,
-                    cleanup_duration_seconds=cleanup_duration,
-                    provisioned_resource_ids=provisioned_resource_ids,
-                )
+            environment_result = EnvironmentResult(
+                model=model,
+                setup_duration_seconds=setup_duration,
+                cleanup_duration_seconds=cleanup_duration,
+                provisioned_resource_ids=provisioned_resource_ids,
+            )
+            self.environments.append(environment_result)
+            model_results = self.results[result_start:]
+            model_duration = time.monotonic() - model_started
+            self._write_model_report(
+                model_dir,
+                model,
+                model_duration,
+                model_results,
+                environment_result,
             )
             self._write_reports()
-            model_results = self.results[result_start:]
             model_failed = any(
                 result.status not in {"PASS", "SKIP"} for result in model_results
             )
@@ -438,8 +449,9 @@ class EvaluationRunner:
         self._write_json(
             "results.json",
             {
-                "schema_version": 5,
+                "schema_version": 6,
                 "run_id": self.run_id,
+                "duration_seconds": self.duration_seconds,
                 "preflight": preflight,
                 "environments": [
                     environment.to_dict() for environment in self.environments
@@ -463,6 +475,43 @@ class EvaluationRunner:
                 + [f"- {message}" for message in self.cleanup_errors]
             )
         (self.run_dir / "summary.md").write_text("\n".join(rows) + "\n", encoding="utf-8")
+
+    def _write_model_report(
+        self,
+        model_dir: Path,
+        model: str,
+        duration_seconds: float,
+        results: list[ScenarioResult],
+        environment: EnvironmentResult,
+    ) -> None:
+        preflight = next(
+            (
+                result
+                for result in reversed(self.preflight_results)
+                if result.model == model
+            ),
+            None,
+        )
+        cleanup_errors = [
+            message
+            for message in self.cleanup_errors
+            if message.startswith(f"{model}:")
+        ]
+        result_path = model_dir / "results.json"
+        self._write_json_file(
+            result_path,
+            {
+                "schema_version": 1,
+                "run_id": self.run_id,
+                "model": model,
+                "duration_seconds": duration_seconds,
+                "preflight": preflight.to_dict() if preflight else None,
+                "environment": environment.to_dict(),
+                "results": [result.to_dict() for result in results],
+                "cleanup_errors": cleanup_errors,
+            },
+        )
+        self.reporter.artifact(result_path, f"{model} results")
 
     def _write_preflight_report(self) -> dict:
         preflight = build_preflight_report(self.run_id, self.preflight_results)

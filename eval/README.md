@@ -285,6 +285,8 @@ Runs are written under `eval/runs/<UTC timestamp>-<unique suffix>/`. Each run co
   durations, full ARM IDs for resources provisioned by the harness, and the
   same preflight data as `preflight.json`
 - `summary.md`: human-readable scenario results and cleanup errors
+- Each model's `results.json`: that model's preflight, environment, scenario
+  results, cleanup errors, and total setup-through-cleanup `duration_seconds`
 - Each model's `scenarios/<scenario>/result.json`: the scenario's exact result
   object from the aggregate `results.json`
 

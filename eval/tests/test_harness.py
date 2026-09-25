@@ -479,11 +479,13 @@ class ReportTests(unittest.TestCase):
                     ],
                 )
             )
+            runner.duration_seconds = 20.5
 
             runner._write_reports()
 
             results = json.loads((runner.run_dir / "results.json").read_text())
-            self.assertEqual(results["schema_version"], 5)
+            self.assertEqual(results["schema_version"], 6)
+            self.assertEqual(results["duration_seconds"], 20.5)
             self.assertEqual(
                 results["environments"],
                 [
@@ -566,7 +568,16 @@ class ReportTests(unittest.TestCase):
                 patch.object(runner, "_run_scenarios"),
                 patch(
                     "hub_eval.runner.time.monotonic",
-                    side_effect=[10.0, 11.0, 12.0, 14.0, 20.0, 23.25],
+                    side_effect=[
+                        5.0,
+                        10.0,
+                        11.0,
+                        12.0,
+                        14.0,
+                        20.0,
+                        23.25,
+                        25.0,
+                    ],
                 ),
             ):
                 runner._run_model("gpt-5.4", ("javascript-app",))
@@ -617,6 +628,59 @@ class ReportTests(unittest.TestCase):
             )
             environment.create.assert_called_once_with(identity)
             environment.cleanup.assert_called_once_with()
+            model_results = json.loads(
+                (runner.run_dir / "gpt-5-4/results.json").read_text()
+            )
+            self.assertEqual(model_results["schema_version"], 1)
+            self.assertEqual(model_results["model"], "gpt-5.4")
+            self.assertEqual(model_results["duration_seconds"], 20.0)
+            self.assertEqual(
+                model_results["environment"],
+                runner.environments[0].to_dict(),
+            )
+            self.assertEqual(
+                model_results["preflight"],
+                runner.preflight_results[0].to_dict(),
+            )
+            self.assertEqual(model_results["results"], [])
+            self.assertEqual(model_results["cleanup_errors"], [])
+
+    def test_run_records_total_execution_duration(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            settings = RunSettings(
+                repository=root,
+                output_root=root / "runs",
+                tenant_id="tenant",
+                subscription_id="sub",
+                location="test-region",
+                models=("gpt-5.4",),
+                scenarios=("javascript-app",),
+                agent_timeout_seconds=60,
+                validation_timeout_seconds=30,
+                keep_workspaces=False,
+                embedding_location="test-embedding-region",
+                embedding_endpoint=None,
+                embedding_deployment=None,
+                embedding_dimension=None,
+                existing_resource_group=None,
+                existing_server=None,
+            )
+            runner = EvaluationRunner(settings)
+            runner.reporter = Mock()
+
+            with (
+                patch.object(runner, "_run_model"),
+                patch(
+                    "hub_eval.runner.time.monotonic",
+                    side_effect=[10.0, 25.0],
+                ),
+            ):
+                exit_code = runner.run()
+
+            results = json.loads((runner.run_dir / "results.json").read_text())
+            self.assertEqual(exit_code, 0)
+            self.assertEqual(results["duration_seconds"], 15.0)
 
     def test_preflight_file_matches_aggregate_preflight(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
@@ -717,7 +781,16 @@ class ReportTests(unittest.TestCase):
                 patch("hub_eval.runner.AzureEnvironment", return_value=environment),
                 patch(
                     "hub_eval.runner.time.monotonic",
-                    side_effect=[10.0, 11.0, 12.0, 14.0, 20.0, 21.0],
+                    side_effect=[
+                        5.0,
+                        10.0,
+                        11.0,
+                        12.0,
+                        14.0,
+                        20.0,
+                        21.0,
+                        25.0,
+                    ],
                 ),
             ):
                 runner._run_model("gpt-5.4", ("javascript-app",))
@@ -745,6 +818,14 @@ class ReportTests(unittest.TestCase):
             )
             self.assertEqual(results["preflight"], preflight)
             self.assertEqual(results["results"][0]["scenario"], "azure-setup")
+            model_results = json.loads(
+                (runner.run_dir / "gpt-5-4/results.json").read_text()
+            )
+            self.assertEqual(model_results["duration_seconds"], 20.0)
+            self.assertEqual(
+                model_results["results"][0]["scenario"],
+                "azure-setup",
+            )
             environment.create.assert_not_called()
 
     def test_standalone_preflight_creates_run_folder_and_result(self) -> None:
