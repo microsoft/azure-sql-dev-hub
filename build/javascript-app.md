@@ -117,7 +117,10 @@ main().catch((err) => {
 });
 ```
 
-The seed runs only when `dbo.tasks` is empty. If the table already holds rows, the insert is skipped and nothing existing is changed.
+The seed runs only when `dbo.tasks` is empty, so the starting state decides what you see:
+
+- **Empty table, or no table yet.** The three sample tasks are inserted and the page shows them: Plan a weekend trip, Book a dentist appointment, and Pick up groceries.
+- **Table already has rows.** The insert is skipped and the page shows whatever is already there. No existing row is added to, changed, or removed, and running the script again is a no-op.
 
 ### 5. Render the list
 
@@ -215,6 +218,8 @@ Open http://localhost:3000. Three tasks should render, each with a status label.
 ## Validation rules
 
 - The app starts and the page renders rows read from `dbo.tasks` on Azure SQL Database.
+- Against a database where `dbo.tasks` is absent or empty, the page shows exactly three cards: Plan a weekend trip, Book a dentist appointment, and Pick up groceries.
+- Against a database where `dbo.tasks` already has rows, the page shows those rows and no sample task is inserted.
 - The heading is `My Tasks`. There is no other headline, subtitle, or marketing copy.
 - Each task is one white card on a light background, showing the title and exactly one status label: `To do` when `done` is false, `Completed` when `done` is true.
 - The page is read-only. It contains no checkbox, button, form, or any other control that could change a row.
@@ -224,6 +229,7 @@ Open http://localhost:3000. Three tasks should render, each with a status label.
 - The layout holds at 360px wide with no horizontal scrolling, and stays readable on a wide screen.
 - `scripts/init.ts` loads `.env.local` explicitly and does its work inside an async `main`, exiting non-zero on failure.
 - Seeding happens only when `dbo.tasks` is empty. Running the script against a table that already has rows leaves every row unchanged.
+- Running `scripts/init.ts` a second time changes nothing: the same three rows, the same ids, the same statuses, and no duplicates.
 - No password anywhere: `.env.local` holds only server and database names; authentication is `azure-active-directory-default`.
 - `encrypt` is `true` and `trustServerCertificate` is `false`. Never set `trustServerCertificate: true` against a cloud database.
 - Exactly one connection pool, created at module scope.
