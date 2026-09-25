@@ -17,7 +17,6 @@ validated: false
 - Assumes Node.js 20+ and an Azure SQL Database that already exists (free tier is fine). The person running this has signed in with `az login` and their identity can connect to the database.
 - Uses the `mssql` package, which wraps `tedious`. That is the only place the name `tedious` should appear.
 - The page is read-only. It displays what the database holds and offers no way to change it.
-- This scenario owns one table, `dbo.hub_demo_tasks`. It is created if missing and never dropped. Any other table in the database, including `dbo.tasks`, is out of scope and must not be read, altered, or deleted.
 - If the project already has code, add to it. Do not replace an existing framework.
 
 Read the entire instruction set before executing.
@@ -96,15 +95,15 @@ async function main() {
   const pool = await getPool();
   try {
     await pool.request().batch(`
-IF OBJECT_ID('dbo.hub_demo_tasks') IS NULL
-CREATE TABLE dbo.hub_demo_tasks (
+IF OBJECT_ID('dbo.tasks') IS NULL
+CREATE TABLE dbo.tasks (
   id INT IDENTITY(1,1) PRIMARY KEY,
   title NVARCHAR(200) NOT NULL,
   done BIT NOT NULL DEFAULT 0,
   created_at DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME()
 );
-IF NOT EXISTS (SELECT 1 FROM dbo.hub_demo_tasks)
-INSERT INTO dbo.hub_demo_tasks (title) VALUES (N'Plan a weekend trip'), (N'Book a dentist appointment'), (N'Pick up groceries');
+IF NOT EXISTS (SELECT 1 FROM dbo.tasks)
+INSERT INTO dbo.tasks (title) VALUES (N'Plan a weekend trip'), (N'Book a dentist appointment'), (N'Pick up groceries');
 `);
     console.log("schema ready");
   } finally {
@@ -118,7 +117,10 @@ main().catch((err) => {
 });
 ```
 
-The seed runs only when `dbo.hub_demo_tasks` is empty. If the table already holds rows, the insert is skipped and nothing existing is changed.
+The seed runs only when `dbo.tasks` is empty, so the starting state decides what you see:
+
+- **Empty table, or no table yet.** The three sample tasks are inserted and the page shows them: Plan a weekend trip, Book a dentist appointment, and Pick up groceries.
+- **Table already has rows.** The insert is skipped and the page shows whatever is already there. No existing row is added to, changed, or removed, and running the script again is a no-op.
 
 ### 5. Render the list
 
@@ -134,7 +136,7 @@ type Task = { id: number; title: string; done: boolean };
 export default async function Home() {
   const pool = await getPool();
   const result = await pool.request().query<Task>(
-    "SELECT id, title, done FROM dbo.hub_demo_tasks ORDER BY created_at"
+    "SELECT id, title, done FROM dbo.tasks ORDER BY created_at"
   );
 
   return (
@@ -215,8 +217,9 @@ Open http://localhost:3000. Three tasks should render, each with a status label.
 
 ## Validation rules
 
-- The app starts and the page renders rows read from `dbo.hub_demo_tasks` on Azure SQL Database.
-- Against a database that did not have `dbo.hub_demo_tasks`, the page shows exactly three cards: Plan a weekend trip, Book a dentist appointment, and Pick up groceries.
+- The app starts and the page renders rows read from `dbo.tasks` on Azure SQL Database.
+- Against a database where `dbo.tasks` is absent or empty, the page shows exactly three cards: Plan a weekend trip, Book a dentist appointment, and Pick up groceries.
+- Against a database where `dbo.tasks` already has rows, the page shows those rows and no sample task is inserted.
 - The heading is `My Tasks`. There is no other headline, subtitle, or marketing copy.
 - Each task is one white card on a light background, showing the title and exactly one status label: `To do` when `done` is false, `Completed` when `done` is true.
 - The page is read-only. It contains no checkbox, button, form, or any other control that could change a row.
@@ -225,9 +228,8 @@ Open http://localhost:3000. Three tasks should render, each with a status label.
 - Text meets WCAG AA contrast against its own background, including both status labels.
 - The layout holds at 360px wide with no horizontal scrolling, and stays readable on a wide screen.
 - `scripts/init.ts` loads `.env.local` explicitly and does its work inside an async `main`, exiting non-zero on failure.
-- Seeding happens only when `dbo.hub_demo_tasks` is empty. Running the script against a table that already has rows leaves every row unchanged.
+- Seeding happens only when `dbo.tasks` is empty. Running the script against a table that already has rows leaves every row unchanged.
 - Running `scripts/init.ts` a second time changes nothing: the same three rows, the same ids, the same statuses, and no duplicates.
-- `dbo.tasks` is never created, read, altered, or dropped by this scenario.
 - No password anywhere: `.env.local` holds only server and database names; authentication is `azure-active-directory-default`.
 - `encrypt` is `true` and `trustServerCertificate` is `false`. Never set `trustServerCertificate: true` against a cloud database.
 - Exactly one connection pool, created at module scope.
@@ -240,5 +242,4 @@ Open http://localhost:3000. Three tasks should render, each with a status label.
 - Do not add checkboxes, buttons, forms, or any control that edits, completes, adds, or deletes a task.
 - Do not add a celebratory headline, a marketing subtitle, summary counters, or a progress bar. This is an everyday task list, not a dashboard.
 - Do not update or delete rows that already exist. The seed applies only to an empty table.
-- Do not touch `dbo.tasks`. Other scenarios own it. This one reads and writes `dbo.hub_demo_tasks` and nothing else.
 - Do not hardcode the task list in the component. Titles and statuses come from Azure SQL on every request.
