@@ -79,17 +79,17 @@ export function getPool() {
 
 Create `scripts/init.ts` and run it once with `npx tsx scripts/init.ts`.
 
-Two details matter here. Next.js loads `.env.local` for the dev server, but a script run through `tsx` is a plain Node process and gets nothing, so the script loads the file itself with `loadEnvConfig` from `@next/env`, which Next already installs. And because `src/lib/db.ts` reads `process.env` at module scope, a static `import` of it would be hoisted and evaluated before that call ever ran. Import it dynamically, after the environment is loaded, from inside an async `main`.
+Two details matter here. Next.js loads `.env.local` for the dev server, but a script run through `tsx` is a plain Node process and gets nothing, so the script loads the file itself with `loadEnvFile` from `node:process`, which needs no dependency and requires Node 20.12 or newer. And because `src/lib/db.ts` reads `process.env` at module scope, a static `import` of it would be hoisted and evaluated before that call ever ran. Import it dynamically, after the environment is loaded, from inside an async `main`.
 
 ```ts
-import { loadEnvConfig } from "@next/env";
+import { loadEnvFile } from "node:process";
 
 async function main() {
-  // Load .env.local before anything reads process.env.
-  loadEnvConfig(process.cwd());
+  // Load .env.local before anything reads process.env. Requires Node 20.12+.
+  loadEnvFile(".env.local");
 
   // Dynamic import: db.ts builds its config at module scope, so it must not be
-  // evaluated until after loadEnvConfig has run.
+  // evaluated until after loadEnvFile has run.
   const { getPool } = await import("../src/lib/db");
 
   const pool = await getPool();
@@ -156,7 +156,7 @@ export default async function Home() {
             borderLeft: "4px solid #0067b8",
           }}
         >
-          My tasks
+          My Tasks
         </h1>
 
         <ul style={{ listStyle: "none", margin: 0, padding: 0, display: "grid", gap: 12 }}>
@@ -215,7 +215,7 @@ Open http://localhost:3000. Three tasks should render, each with a status label.
 ## Validation rules
 
 - The app starts and the page renders rows read from `dbo.tasks` on Azure SQL Database.
-- The heading is `My tasks`. There is no other headline, subtitle, or marketing copy.
+- The heading is `My Tasks`. There is no other headline, subtitle, or marketing copy.
 - Each task is one white card on a light background, showing the title and exactly one status label: `To do` when `done` is false, `Completed` when `done` is true.
 - The page is read-only. It contains no checkbox, button, form, or any other control that could change a row.
 - There are no counters, totals, percentages, or progress bars.

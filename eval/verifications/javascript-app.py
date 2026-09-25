@@ -44,7 +44,7 @@ def validate(
         label="javascript-app-api",
     ) as server:
         body = server.wait_for_http("http://127.0.0.1:3000", timeout=180)
-    if "Tasks" not in body or "Connect the app" not in body:
+    if "Tasks" not in body or "Plan a weekend trip" not in body:
         raise CommandError("Next.js page did not render the expected seeded task list")
     return [str(runner.evidence_dir), str(log)]
 
