@@ -72,16 +72,20 @@ section[id],footer[id],.alias-anchor,.prose h2[id],.prose h3[id]{scroll-margin-t
 .navlinks{display:flex;gap:26px;align-items:center;color:#475467;font-size:15px;font-weight:500}
 .navlinks a:hover{color:var(--text)}
 .navright{display:flex;gap:10px;align-items:center}
-/* Nav actions read as buttons, not as more nav links: feedback is the neutral
-   secondary, the star is tinted blue so the two are told apart at a glance. */
+/* Nav actions read as buttons, not as more nav links. Both are the same neutral
+   white pill: the GitHub mark, not a colour, is what tells them apart. The
+   explicit line-height matches the mark's 17px box, so the two are the same
+   height whether or not a button carries an icon. */
 .utility{
   display:inline-flex;align-items:center;gap:6px;
   border:1px solid var(--line2);background:#fff;border-radius:8px;padding:8px 14px;
-  font-size:13px;font-weight:600;color:var(--text);white-space:nowrap
+  font-size:13px;line-height:17px;font-weight:600;color:var(--text);white-space:nowrap
 }
 .utility:hover{background:var(--surface2);border-color:#c3ccd8}
-.utility.star{background:var(--blueSoft);border-color:#bcdcfb;color:var(--blue)}
-.utility.star:hover{background:#e3f0fd;border-color:var(--blue);color:var(--blue2)}
+.utility.github{background:#fff;border-color:var(--line2);color:var(--text)}
+.utility.github:hover{background:var(--surface2);border-color:#c3ccd8;color:var(--text)}
+.github-mark{display:inline-flex;width:17px;height:17px;align-items:center;justify-content:center}
+.github-mark svg{display:block;width:17px;height:17px;fill:currentColor}
 
 /* ---------- hero ---------- */
 .hero{padding:92px 0 92px}
