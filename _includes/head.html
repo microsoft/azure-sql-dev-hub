@@ -17,9 +17,22 @@
   <meta property="og:description" content="{{ page.description | default: site.description }}">
   <meta property="og:type" content="website">
   <meta property="og:url" content="{{ page.url | absolute_url }}">
-  <meta name="twitter:card" content="summary">
+{%- comment -%}
+  Link preview card. Absolute URLs, because the crawlers that read these tags do
+  not resolve relative paths. The deploy workflow fills `url` from the Pages API
+  at build time, so this resolves to the published origin rather than to the
+  localhost default in _config.yml. The image is a 1200x630 crop of the hero,
+  kept wide enough to hold the headline.
+{%- endcomment -%}
+  <meta property="og:image" content="{{ '/assets/img/hero-idea-to-app-og.jpg' | absolute_url }}">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="From idea to app: a prompt builds a task app on Azure SQL.">
+  <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="{{ page.title | default: site.title }}">
   <meta name="twitter:description" content="{{ page.description | default: site.description }}">
+  <meta name="twitter:image" content="{{ '/assets/img/hero-idea-to-app-og.jpg' | absolute_url }}">
+  <meta name="twitter:image:alt" content="From idea to app: a prompt builds a task app on Azure SQL.">
   <link rel="alternate" type="text/markdown" href="{{ md_path | relative_url }}" title="Markdown version">
   <link rel="alternate" type="text/plain" href="{{ '/llms.txt' | relative_url }}" title="LLM index">
   <link rel="alternate" type="text/plain" href="{{ '/llms-full.txt' | relative_url }}" title="Full LLM corpus">
