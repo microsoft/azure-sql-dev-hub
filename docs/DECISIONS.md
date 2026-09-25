@@ -1,5 +1,6 @@
 # Decisions
 
+- 2026-09-25: Add the Microsoft open source root files (LICENSE, CONTRIBUTING.md, CODE_OF_CONDUCT.md, SECURITY.md, SUPPORT.md, NOTICE.txt), modelled on `microsoft/microsoft-sql` and adapted to this site. The privacy document stays as the published `privacy.md` page rather than a root `PRIVACY.md`: the two names differ only in case, so a case insensitive checkout cannot hold both, and separating them would move this page's markdown twin off its URL. `privacy.md` now carries the Clarity disclosure and the Microsoft data collection notice.
 - 2026-09-25: Hold the branded hero thumbnail for two seconds once the hero is in view, then play the demo silently one time with controls available, and return to the thumbnail behind a Replay button. Reduced-motion visitors, and any browser that refuses playback it did not see asked for, keep the thumbnail and a Play demo button.
 - 2026-09-16: Keep validation tracking and agent-file documentation in repository docs; remove the For agents page from publishing and human navigation while retaining machine-readable files and alternate links.
 - 2026-09-16: Use visual links to existing SQL videos without auto-playing or embedding a player; retain a complete hero without a demo placeholder.

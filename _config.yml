@@ -57,6 +57,11 @@ defaults:
 exclude:
   - README.md
   - CONTRIBUTING.md
+  - CODE_OF_CONDUCT.md
+  - SECURITY.md
+  - SUPPORT.md
+  - LICENSE
+  - NOTICE.txt
   - docs
   - scripts
   - node_modules

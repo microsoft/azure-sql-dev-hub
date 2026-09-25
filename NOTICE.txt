@@ -1,0 +1,12 @@
+THIRD-PARTY SOFTWARE NOTICES AND INFORMATION
+
+The Azure SQL Developer Hub does not redistribute third-party software in this repository.
+
+The site is built with Jekyll through the github-pages gem, and the build scripts use js-yaml.
+Those packages are fetched from their own registries at build time and remain subject to their
+own license terms. They are not vendored here.
+
+The published site loads Microsoft Clarity in the browser for behavioral analytics. The
+documentation and build prompts refer to separately distributed tools, libraries, agent hosts,
+and Microsoft services. Those products are not included in this repository and remain subject to
+their own license terms and privacy statements.
