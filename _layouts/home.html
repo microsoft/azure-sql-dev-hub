@@ -28,8 +28,15 @@
 .h .vid{width:100%;min-width:0;margin:0}
 .h .hero-art{display:block;width:100%;height:auto;border-radius:var(--r);border:1px solid var(--line)}
 .h .hero-figure{margin:0}
-.h .hero-still{display:none}
-@media (prefers-reduced-motion:reduce){.h .hero-loop{display:none}.h .hero-still{display:block}}
+.h .hero-player{position:relative;aspect-ratio:16/9;overflow:hidden;border-radius:var(--r)}
+.h .hero-player .hero-art{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:var(--r)}
+.h .hero-play{position:absolute;inset:0;width:100%;height:100%;padding:24px;border:0;border-radius:var(--r);background:transparent;cursor:pointer;display:flex;align-items:flex-end;justify-content:flex-start;font:inherit}
+.h .hero-play[hidden]{display:none}
+.h .hero-play > span{display:inline-flex;align-items:center;gap:10px;padding:12px 18px;border-radius:999px;background:#fff;color:var(--accent-ink);box-shadow:0 3px 18px #0e1a2b33;font-weight:600}
+.h .hero-play:hover > span{background:var(--tint)}
+.h .hero-play:focus-visible{outline:3px solid var(--accent);outline-offset:4px}
+.h .hero-play i{font-style:normal}
+.h .hero-error{margin-top:8px;font-size:14px;color:var(--muted)}
 .h .poster img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 .h .poster .pplay{position:relative;z-index:1;box-shadow:0 4px 24px #0e1a2b33}
 .h .vframe{position:relative;padding-top:56.25%;border-radius:var(--r) var(--r) 0 0;overflow:hidden;background:var(--dark)}
@@ -148,13 +155,16 @@
           {%- if page.video.note %}<p class="faint" style="margin-top:12px">{{ page.video.note }}</p>{% endif %}
           {%- elsif page.video.src %}
           <figure class="hero-figure">
-          <video class="hero-art hero-loop" id="hLoop" poster="{{ page.video.poster | relative_url }}" aria-label="{{ page.video.poster_alt | escape }}" autoplay muted loop playsinline preload="metadata">
+          <div class="hero-player">
+          <video class="hero-art" id="hDemo" poster="{{ page.video.poster | relative_url }}" aria-label="{{ page.video.title | escape }} demo" muted playsinline preload="metadata">
             {%- if page.video.src_webm %}
             <source src="{{ page.video.src_webm | relative_url }}" type="video/webm">
             {%- endif %}
             <source src="{{ page.video.src | relative_url }}" type="video/mp4">
           </video>
-          <img class="hero-art hero-still" src="{{ page.video.poster | relative_url }}" alt="{{ page.video.poster_alt | escape }}">
+          <button class="hero-play" id="hDemoPlay" type="button" aria-label="Play demo: {{ page.video.title | escape }}" aria-controls="hDemo" data-title="{{ page.video.title | escape }}" data-event="hero_video_play" hidden><span><i aria-hidden="true">&#9654;</i> <span class="hero-play-label" id="hDemoPlayLabel">Play demo</span></span></button>
+          </div>
+          <p class="hero-error" id="hDemoError" role="status" hidden>Could not play the demo. Please try again.</p>
           </figure>
           {%- elsif page.video.poster %}
           <figure class="hero-figure">
@@ -330,8 +340,52 @@
   tabs.forEach(function(t){t.addEventListener('click',function(){tabs.forEach(function(x){x.setAttribute('aria-selected','false')});panels.forEach(function(p){p.classList.remove('on')});t.setAttribute('aria-selected','true');document.querySelector('[data-hpanel="'+t.getAttribute('data-htab')+'"]').classList.add('on')})});
   var cmdEl=document.getElementById('hInstall'),noteEl=document.getElementById('hInstallNote'),copyEl=document.getElementById('hInstallCopy');
   document.querySelectorAll('.agent').forEach(function(a){a.addEventListener('click',function(){document.querySelectorAll('.agent').forEach(function(x){x.setAttribute('aria-pressed','false')});a.setAttribute('aria-pressed','true');cmdEl.textContent=a.getAttribute('data-cmd');noteEl.innerHTML=a.getAttribute('data-note');copyEl.setAttribute('data-hcopy',a.getAttribute('data-cmd'))})});
-  var loop=document.getElementById('hLoop');
-  if(loop&&window.matchMedia&&window.matchMedia('(prefers-reduced-motion:reduce)').matches){loop.removeAttribute('autoplay');loop.pause();loop.load()}
+  var demo=document.getElementById('hDemo'),demoPlay=document.getElementById('hDemoPlay'),
+      demoLabel=document.getElementById('hDemoPlayLabel'),demoError=document.getElementById('hDemoError');
+  if(demo&&demoPlay){
+    // The poster is the cover. Controls belong to the running demo only, so the
+    // cover stays one target to click rather than two that overlap.
+    var AUTO_DELAY=2000,started=false,timer=null,io=null,title=demoPlay.getAttribute('data-title')||'';
+    demo.controls=false;demo.tabIndex=-1;demoPlay.hidden=false;
+    function demoCover(text){
+      var hadFocus=document.activeElement===demo;
+      demo.pause();demo.controls=false;demo.tabIndex=-1;demo.load();
+      demoLabel.textContent=text;demoPlay.setAttribute('aria-label',text+': '+title);
+      demoPlay.hidden=false;if(hadFocus)demoPlay.focus({preventScroll:true});
+    }
+    function demoStart(byUser){
+      demoError.hidden=true;demoPlay.hidden=true;demo.controls=true;demo.tabIndex=0;
+      return demo.play().then(function(){if(byUser)demo.focus({preventScroll:true})}).catch(function(){
+        // A browser is entitled to refuse playback it did not see asked for. That
+        // is an ordinary outcome, so the cover comes back without an error: the
+        // visitor starts the demo when they want it. A refusal of their own click
+        // is worth saying out loud, because they asked and nothing happened.
+        demoCover('Play demo');
+        if(byUser){demoError.hidden=false;demoPlay.focus({preventScroll:true})}
+      });
+    }
+    function demoCancel(){if(timer){clearTimeout(timer);timer=null}}
+    function demoSettle(){demoCancel();if(io){io.disconnect();io=null}}
+    demoPlay.addEventListener('click',function(){started=true;demoSettle();demoStart(true)});
+    demo.addEventListener('ended',function(){demoCover('Replay')});
+    // Reduced motion keeps the thumbnail and waits to be asked.
+    var demoReduce=window.matchMedia&&window.matchMedia('(prefers-reduced-motion:reduce)').matches;
+    if(!demoReduce&&window.IntersectionObserver){
+      io=new IntersectionObserver(function(entries){
+        for(var i=0;i<entries.length;i++){
+          if(entries[i].isIntersecting){
+            if(!started&&!timer)timer=setTimeout(function(){
+              timer=null;if(started)return;started=true;demoSettle();demoStart(false);
+            },AUTO_DELAY);
+          }else{
+            // Scrolled out of view before the hold elapsed, so the count starts over.
+            demoCancel();
+          }
+        }
+      },{threshold:.5});
+      io.observe(demo);
+    }
+  }
   var frame=document.getElementById('hFrame'),vid=frame&&frame.getAttribute('data-video'),player=null,mounted=false;
   function mount(){if(mounted||!vid)return;frame.innerHTML='<iframe id="hVideo" src="https://www.youtube-nocookie.com/embed/'+vid+'?rel=0&enablejsapi=1&autoplay=1" title="Hub demo" allow="accelerometer; autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>';mounted=true}
   var poster=document.getElementById('hPoster');if(poster)poster.addEventListener('click',mount);
