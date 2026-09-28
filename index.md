@@ -23,7 +23,7 @@ video:
   poster: /assets/img/hero-idea-to-app.jpg
   poster_alt: 'From idea to app: a prompt builds a task app on Azure SQL.'
 quickstart_heading: Power your next app with Azure SQL.
-quickstart_text: Get your development database ready, then build with your coding agent.
+quickstart_text: 'Choose your starting point: the cloud, local development, or your coding agent.'
 quickstart:
 - key: cloud
   name: Cloud, free tier
