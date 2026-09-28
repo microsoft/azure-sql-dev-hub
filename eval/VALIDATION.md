@@ -1,14 +1,5 @@
 # Evaluation status
 
-The harness implementation and live-run findings are recorded here.
-
-## Criteria source
-
-The attached `Hub-Prompt-Validation.docx` is Microsoft Office DRM-protected and
-could not be opened by the available headless Word session. The criteria were
-subsequently supplied as a table and have been implemented directly, with
-additional compatible assertions from each prompt's validation section.
-
 ## Model smoke tests
 
 GitHub Copilot CLI 1.0.85 successfully completed noninteractive smoke tests with:
