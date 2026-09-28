@@ -442,5 +442,5 @@ outputs/
 # Prompt evaluation evidence and generated workspaces
 eval/runs/
 eval/.venv/
-eval/validation.env
+eval/*.env
 !eval/validation.EXAMPLE.env

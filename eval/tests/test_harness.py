@@ -12,9 +12,16 @@ from pathlib import Path
 from unittest.mock import Mock, patch
 
 from hub_eval.agents import AgentRequest, CopilotCli
-from hub_eval.azure import AzureEnvironment, cleanup_resource_group, missing_permissions
+from hub_eval.azure import (
+    AZURE_OPENAI_EMBEDDINGS_PERMISSION,
+    AZURE_SQL_DATABASE_MANAGER_PERMISSION,
+    AzureEnvironment,
+    cleanup_resource_group,
+    missing_permissions,
+)
 from hub_eval.command import CommandError, CommandRunner
 from hub_eval.configuration import load_validation_environment
+from hub_eval.database import DatabaseProbe
 from hub_eval.models import (
     AzureResources,
     EnvironmentResult,
@@ -150,6 +157,10 @@ class AzurePermissionTests(unittest.TestCase):
                     environment,
                     "_verify_permissions",
                 ) as verify_permissions,
+                patch.object(
+                    environment,
+                    "_verify_data_plane_permissions",
+                ) as verify_data_plane_permissions,
             ):
                 self.assertEqual(environment.preflight(), identity)
             verify_context.assert_called_once_with()
@@ -159,6 +170,201 @@ class AzurePermissionTests(unittest.TestCase):
             )
             verify_providers.assert_called_once_with()
             verify_permissions.assert_called_once_with()
+            verify_data_plane_permissions.assert_called_once_with()
+
+    def test_data_plane_preflight_records_all_failures(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            environment = AzureEnvironment(
+                tenant_id="tenant",
+                subscription_id="sub",
+                location="test-region",
+                evidence_dir=Path(temporary),
+                embedding_location="embedding-region",
+                provision_embedding=True,
+                existing_embedding_endpoint="https://example.openai.azure.com/",
+                existing_embedding_deployment="embedding",
+                existing_embedding_dimension=1536,
+                existing_resource_group="rg",
+                existing_server="server",
+            )
+            with (
+                patch.object(
+                    environment,
+                    "_verify_existing_sql_database_manager",
+                    side_effect=CommandError("SQL database manager missing"),
+                ),
+                patch.object(
+                    environment,
+                    "_verify_existing_embedding_access",
+                    side_effect=CommandError("embedding access denied"),
+                ),
+            ):
+                with self.assertRaisesRegex(
+                    CommandError,
+                    "data-plane preflight failed",
+                ):
+                    environment._verify_data_plane_permissions()
+
+            self.assertEqual(
+                environment.permission_checks,
+                [
+                    PermissionCheck(
+                        scope=(
+                            "/subscriptions/sub/resourceGroups/rg/providers/"
+                            "Microsoft.Sql/servers/server"
+                        ),
+                        permissions=[
+                            PermissionResult(
+                                permission=AZURE_SQL_DATABASE_MANAGER_PERMISSION,
+                                status="FAIL",
+                            )
+                        ],
+                    ),
+                    PermissionCheck(
+                        scope="https://example.openai.azure.com/",
+                        permissions=[
+                            PermissionResult(
+                                permission=AZURE_OPENAI_EMBEDDINGS_PERMISSION,
+                                status="FAIL",
+                            )
+                        ],
+                    ),
+                ],
+            )
+
+    def test_existing_sql_database_manager_membership_passes(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            environment = AzureEnvironment(
+                tenant_id="tenant",
+                subscription_id="sub",
+                location="test-region",
+                evidence_dir=Path(temporary),
+                embedding_location="embedding-region",
+                provision_embedding=False,
+                existing_resource_group="rg",
+                existing_server="server",
+            )
+            probe = Mock()
+            probe.scalar.return_value = 1
+            with patch.object(
+                environment,
+                "_database_probe",
+                return_value=probe,
+            ) as database_probe:
+                environment._verify_existing_sql_database_manager()
+
+            database_probe.assert_called_once_with("master")
+            probe.scalar.assert_called_once_with(
+                "SELECT IS_SRVROLEMEMBER(N'##MS_DatabaseManager##');",
+                attempts=1,
+                label="sql-database-manager-role",
+            )
+
+    def test_existing_sql_database_manager_membership_fails(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            environment = AzureEnvironment(
+                tenant_id="tenant",
+                subscription_id="sub",
+                location="test-region",
+                evidence_dir=Path(temporary),
+                embedding_location="embedding-region",
+                provision_embedding=False,
+                existing_resource_group="rg",
+                existing_server="server",
+            )
+            probe = Mock()
+            probe.scalar.return_value = 0
+            with patch.object(
+                environment,
+                "_database_probe",
+                return_value=probe,
+            ):
+                with self.assertRaisesRegex(
+                    CommandError,
+                    "not a member of ##MS_DatabaseManager##",
+                ):
+                    environment._verify_existing_sql_database_manager()
+
+    def test_existing_embedding_access_validates_output_dimension(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            environment = AzureEnvironment(
+                tenant_id="tenant",
+                subscription_id="sub",
+                location="test-region",
+                evidence_dir=Path(temporary),
+                embedding_location="embedding-region",
+                provision_embedding=True,
+                existing_embedding_endpoint="https://example.openai.azure.com/",
+                existing_embedding_deployment="embedding deployment",
+                existing_embedding_dimension=3,
+                existing_resource_group="rg",
+                existing_server="server",
+            )
+            response = Mock()
+            response.read.return_value = json.dumps(
+                {"data": [{"embedding": [0.1, 0.2, 0.3]}]}
+            ).encode()
+            response.__enter__ = Mock(return_value=response)
+            response.__exit__ = Mock(return_value=False)
+            with (
+                patch(
+                    "hub_eval.azure.AzureEnvironment._azure_openai_access_token",
+                    return_value="access-token",
+                ),
+                patch(
+                    "hub_eval.azure.urlopen",
+                    return_value=response,
+                ) as urlopen_mock,
+            ):
+                environment._verify_existing_embedding_access()
+
+            request = urlopen_mock.call_args.args[0]
+            self.assertIn(
+                "/deployments/embedding%20deployment/embeddings",
+                request.full_url,
+            )
+            self.assertEqual(
+                json.loads(request.data),
+                {"input": "Azure SQL evaluation preflight"},
+            )
+            self.assertEqual(
+                request.get_header("Authorization"),
+                "Bearer access-token",
+            )
+
+    def test_existing_embedding_access_rejects_wrong_dimension(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            environment = AzureEnvironment(
+                tenant_id="tenant",
+                subscription_id="sub",
+                location="test-region",
+                evidence_dir=Path(temporary),
+                embedding_location="embedding-region",
+                provision_embedding=True,
+                existing_embedding_endpoint="https://example.openai.azure.com/",
+                existing_embedding_deployment="embedding",
+                existing_embedding_dimension=3,
+                existing_resource_group="rg",
+                existing_server="server",
+            )
+            response = Mock()
+            response.read.return_value = json.dumps(
+                {"data": [{"embedding": [0.1, 0.2]}]}
+            ).encode()
+            response.__enter__ = Mock(return_value=response)
+            response.__exit__ = Mock(return_value=False)
+            with (
+                patch(
+                    "hub_eval.azure.AzureEnvironment._azure_openai_access_token",
+                    return_value="access-token",
+                ),
+                patch("hub_eval.azure.urlopen", return_value=response),
+            ):
+                with self.assertRaisesRegex(
+                    CommandError,
+                    "returned 2 dimensions; expected 3",
+                ):
+                    environment._verify_existing_embedding_access()
 
     def test_permission_matching_honors_wildcards_and_not_actions(self) -> None:
         required = (
@@ -250,7 +456,7 @@ class AzurePermissionTests(unittest.TestCase):
                 existing_server="server",
             )
             required = environment._required_permissions()
-            self.assertIn("Microsoft.Sql/servers/databases/write", required)
+            self.assertNotIn("Microsoft.Sql/servers/databases/write", required)
             self.assertIn("Microsoft.CognitiveServices/accounts/write", required)
             self.assertIn("Microsoft.Authorization/roleAssignments/write", required)
             self.assertNotIn(
@@ -261,6 +467,39 @@ class AzurePermissionTests(unittest.TestCase):
             self.assertNotIn(
                 "Microsoft.Resources/subscriptions/resourceGroups/write",
                 required,
+            )
+
+    def test_existing_server_database_is_created_through_sql(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            environment = AzureEnvironment(
+                tenant_id="tenant",
+                subscription_id="sub",
+                location="test-region",
+                evidence_dir=Path(temporary),
+                embedding_location="embedding-region",
+                provision_embedding=False,
+                existing_resource_group="rg",
+                existing_server="server",
+            )
+            probe = Mock()
+            with patch.object(
+                environment,
+                "_database_probe",
+                return_value=probe,
+            ) as database_probe:
+                environment._create_database()
+
+            database_probe.assert_called_once_with("master")
+            statement = probe.execute.call_args.args[0]
+            self.assertIn(
+                f"CREATE DATABASE [{environment.database_name}]",
+                statement,
+            )
+            self.assertIn("EDITION = 'Basic'", statement)
+            self.assertIn("SERVICE_OBJECTIVE = 'Basic'", statement)
+            probe.execute.assert_called_once_with(
+                statement,
+                label="sql-database-create",
             )
 
     def test_existing_embedding_does_not_require_provisioning_permissions(
@@ -397,6 +636,55 @@ class AzurePermissionTests(unittest.TestCase):
                     f"{environment.server_name}",
                 ],
             )
+
+
+class DatabaseProbeTests(unittest.TestCase):
+    """Verify read and autocommit execution behavior for SQL probes."""
+
+    def test_execute_uses_autocommit_without_fetching_rows(self) -> None:
+        resources = AzureResources(
+            subscription_id="sub",
+            resource_group="rg",
+            location="test-region",
+            server_name="server",
+            database_name="master",
+            server_fqdn="server.database.windows.net",
+        )
+        credential = Mock()
+        connection = Mock()
+        cursor = connection.cursor.return_value
+        with (
+            patch(
+                "hub_eval.database.AzureCliCredential",
+                return_value=credential,
+            ),
+            patch(
+                "hub_eval.database.mssql_python.connect",
+                return_value=connection,
+            ) as connect,
+        ):
+            probe = DatabaseProbe(resources)
+            probe.execute(
+                "CREATE DATABASE [evaluation];",
+                label="sql-database-create",
+            )
+
+        connect.assert_called_once_with(
+            (
+                "Server=tcp:server.database.windows.net,1433;"
+                "Database=master;"
+                "Encrypt=yes;TrustServerCertificate=no;"
+            ),
+            autocommit=True,
+            token_provider=credential,
+            timeout=30,
+        )
+        cursor.execute.assert_called_once_with(
+            "CREATE DATABASE [evaluation];"
+        )
+        cursor.fetchall.assert_not_called()
+        cursor.close.assert_called_once_with()
+        connection.close.assert_called_once_with()
 
 
 class ReportTests(unittest.TestCase):
