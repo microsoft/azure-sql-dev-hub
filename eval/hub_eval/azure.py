@@ -5,13 +5,20 @@ from __future__ import annotations
 import json
 import re
 import shutil
+import ssl
+import subprocess
 import time
 from datetime import UTC, datetime, timedelta
 from fnmatch import fnmatchcase
+from importlib.metadata import PackageNotFoundError, distribution
 from pathlib import Path
+from urllib.error import HTTPError, URLError
+from urllib.parse import quote
+from urllib.request import Request, urlopen
 from uuid import uuid4
 
 from .command import CommandError, CommandRunner
+from .database import DatabaseProbe
 from .models import AzureResources, PermissionCheck, PermissionResult
 from .progress import ProgressReporter
 
@@ -21,6 +28,13 @@ _AZ = shutil.which("az") or "az"
 PURPOSE_TAG = "azure-sql-dev-hub-prompt-eval"
 PUBLIC_AZURE_CLOUD = "AzureCloud"
 AUTHORIZATION_API_VERSION = "2022-04-01"
+AZURE_OPENAI_API_VERSION = "2024-10-21"
+AZURE_SQL_DATABASE_MANAGER_PERMISSION = (
+    "Connect to virtual master as a ##MS_DatabaseManager## member"
+)
+AZURE_OPENAI_EMBEDDINGS_PERMISSION = (
+    "Microsoft.CognitiveServices/accounts/OpenAI/deployments/embeddings/action"
+)
 
 RESOURCE_GROUP_PERMISSIONS = (
     "Microsoft.Resources/subscriptions/resourceGroups/read",
@@ -28,7 +42,6 @@ RESOURCE_GROUP_PERMISSIONS = (
 EXISTING_SQL_PERMISSIONS = (
     "Microsoft.Sql/servers/read",
     "Microsoft.Sql/servers/databases/read",
-    "Microsoft.Sql/servers/databases/write",
     "Microsoft.Sql/servers/databases/delete",
     "Microsoft.Sql/servers/firewallRules/write",
     "Microsoft.Sql/servers/firewallRules/delete",
@@ -302,27 +315,7 @@ class AzureEnvironment:
             label="az-sql-firewall-create",
         )
         self.firewall_created = True
-        self.az.json(
-            [
-                "sql",
-                "db",
-                "create",
-                "--resource-group",
-                self.resource_group,
-                "--server",
-                self.server_name,
-                "--name",
-                self.database_name,
-                "--edition",
-                "Basic",
-                "--service-objective",
-                "Basic",
-                "--backup-storage-redundancy",
-                "Local",
-            ],
-            label="az-sql-db-create",
-            timeout=1800,
-        )
+        self._create_database()
         self.database_created = True
         self._wait_for_database()
         endpoint, deployment, dimension = self._embedding(identity)
@@ -361,6 +354,7 @@ class AzureEnvironment:
             raise CommandError("could not resolve the signed-in Entra user")
         self._verify_provider_registrations()
         self._verify_permissions()
+        self._verify_data_plane_permissions()
         return identity
 
     def _required_permissions(self) -> tuple[str, ...]:
@@ -423,6 +417,231 @@ class AzureEnvironment:
                 subscription_scope,
                 EMBEDDING_PURGE_PERMISSIONS,
             )
+
+    def _verify_data_plane_permissions(self) -> None:
+        """Verify existing-resource data-plane access and record every outcome."""
+        failures: list[str] = []
+        if self.existing_server:
+            sql_scope = (
+                f"/subscriptions/{self.subscription_id}"
+                f"/resourceGroups/{self.resource_group}"
+                f"/providers/Microsoft.Sql/servers/{self.server_name}"
+            )
+            try:
+                self._verify_existing_sql_database_manager()
+                status = "PASS"
+            except CommandError as exc:
+                status = "FAIL"
+                failures.append(str(exc))
+            self.permission_checks.append(
+                PermissionCheck(
+                    scope=sql_scope,
+                    permissions=[
+                        PermissionResult(
+                            permission=AZURE_SQL_DATABASE_MANAGER_PERMISSION,
+                            status=status,
+                        )
+                    ],
+                )
+            )
+
+        if self.provision_embedding and self.existing_embedding_endpoint:
+            try:
+                self._verify_existing_embedding_access()
+                status = "PASS"
+            except CommandError as exc:
+                status = "FAIL"
+                failures.append(str(exc))
+            self.permission_checks.append(
+                PermissionCheck(
+                    scope=self.existing_embedding_endpoint,
+                    permissions=[
+                        PermissionResult(
+                            permission=AZURE_OPENAI_EMBEDDINGS_PERMISSION,
+                            status=status,
+                        )
+                    ],
+                )
+            )
+
+        if failures:
+            raise CommandError(
+                "data-plane preflight failed:\n- " + "\n- ".join(failures)
+            )
+
+    def _verify_existing_sql_database_manager(self) -> None:
+        membership = self._database_probe("master").scalar(
+            "SELECT IS_SRVROLEMEMBER(N'##MS_DatabaseManager##');",
+            attempts=1,
+            label="sql-database-manager-role",
+        )
+        if membership == 1:
+            return
+        raise CommandError(
+            "signed-in user is not a member of ##MS_DatabaseManager## "
+            f"on SQL server {self.server_name}"
+        )
+
+    def _database_probe(self, database_name: str) -> DatabaseProbe:
+        return DatabaseProbe(
+            AzureResources(
+                subscription_id=self.subscription_id,
+                resource_group=self.resource_group,
+                location=self.location,
+                server_name=self.server_name,
+                database_name=database_name,
+                server_fqdn=f"{self.server_name}.database.windows.net",
+            ),
+            reporter=self.reporter,
+        )
+
+    def _create_database(self) -> None:
+        if self.existing_server:
+            self._database_probe("master").execute(
+                f"""
+                CREATE DATABASE [{self.database_name}]
+                (
+                    EDITION = 'Basic',
+                    SERVICE_OBJECTIVE = 'Basic'
+                );
+                """,
+                label="sql-database-create",
+            )
+            return
+        self.az.json(
+            [
+                "sql",
+                "db",
+                "create",
+                "--resource-group",
+                self.resource_group,
+                "--server",
+                self.server_name,
+                "--name",
+                self.database_name,
+                "--edition",
+                "Basic",
+                "--service-objective",
+                "Basic",
+                "--backup-storage-redundancy",
+                "Local",
+            ],
+            label="az-sql-db-create",
+            timeout=1800,
+        )
+
+    def _verify_existing_embedding_access(self) -> None:
+        if (
+            not self.existing_embedding_endpoint
+            or not self.existing_embedding_deployment
+            or not self.existing_embedding_dimension
+        ):
+            raise CommandError(
+                "existing embedding endpoint requires deployment and dimension"
+            )
+        access_token = self._azure_openai_access_token()
+        deployment = quote(self.existing_embedding_deployment, safe="")
+        endpoint = self.existing_embedding_endpoint.rstrip("/")
+        url = (
+            f"{endpoint}/openai/deployments/{deployment}/embeddings"
+            f"?api-version={AZURE_OPENAI_API_VERSION}"
+        )
+        request = Request(
+            url,
+            data=json.dumps(
+                {"input": "Azure SQL evaluation preflight"}
+            ).encode("utf-8"),
+            headers={
+                "Authorization": f"Bearer {access_token}",
+                "Content-Type": "application/json",
+            },
+            method="POST",
+        )
+        try:
+            with urlopen(
+                request,
+                timeout=30,
+                context=self._https_context(),
+            ) as response:
+                content = response.read(1_000_001)
+        except HTTPError as exc:
+            detail = exc.read(4096).decode("utf-8", errors="replace").strip()
+            raise CommandError(
+                "existing Azure OpenAI embedding deployment rejected the "
+                f"signed-in user with HTTP {exc.code}"
+                + (f": {detail}" if detail else "")
+            ) from exc
+        except (URLError, TimeoutError, OSError) as exc:
+            raise CommandError(
+                "could not reach the existing Azure OpenAI embedding deployment: "
+                f"{exc}"
+            ) from exc
+        if len(content) > 1_000_000:
+            raise CommandError(
+                "existing Azure OpenAI embedding response exceeded 1 MB"
+            )
+        try:
+            payload = json.loads(content)
+            embedding = payload["data"][0]["embedding"]
+        except (json.JSONDecodeError, KeyError, IndexError, TypeError) as exc:
+            raise CommandError(
+                "existing Azure OpenAI embedding response had an invalid shape"
+            ) from exc
+        if not isinstance(embedding, list):
+            raise CommandError(
+                "existing Azure OpenAI embedding response did not contain a vector"
+            )
+        if len(embedding) != self.existing_embedding_dimension:
+            raise CommandError(
+                "existing Azure OpenAI embedding deployment returned "
+                f"{len(embedding)} dimensions; expected "
+                f"{self.existing_embedding_dimension}"
+            )
+
+    def _azure_openai_access_token(self) -> str:
+        result = subprocess.run(
+            [
+                _AZ,
+                "account",
+                "get-access-token",
+                "--resource",
+                "https://cognitiveservices.azure.com/",
+                "--only-show-errors",
+                "--output",
+                "json",
+            ],
+            capture_output=True,
+            text=True,
+            timeout=30,
+            check=False,
+        )
+        if result.returncode != 0:
+            detail = result.stderr.strip()
+            raise CommandError(
+                "could not acquire an Azure OpenAI access token from Azure CLI"
+                + (f": {detail}" if detail else "")
+            )
+        try:
+            access_token = json.loads(result.stdout)["accessToken"]
+        except (json.JSONDecodeError, KeyError, TypeError) as exc:
+            raise CommandError(
+                "Azure CLI returned an invalid Azure OpenAI access token response"
+            ) from exc
+        if not isinstance(access_token, str) or not access_token:
+            raise CommandError("Azure CLI returned an empty Azure OpenAI access token")
+        return access_token
+
+    @staticmethod
+    def _https_context() -> ssl.SSLContext:
+        try:
+            certificate = distribution("certifi").locate_file(
+                "certifi/cacert.pem"
+            )
+        except PackageNotFoundError:
+            certificate = None
+        if certificate is not None and certificate.is_file():
+            return ssl.create_default_context(cafile=str(certificate))
+        return ssl.create_default_context()
 
     def _verify_permissions_at_scope(
         self,

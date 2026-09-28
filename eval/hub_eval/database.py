@@ -16,7 +16,7 @@ from .progress import ProgressReporter
 
 
 class DatabaseProbe:
-    """Execute bounded read-only validation queries against the disposable database."""
+    """Execute bounded SQL operations using the signed-in Azure CLI identity."""
 
     def __init__(
         self,
@@ -37,6 +37,43 @@ class DatabaseProbe:
         label: str = "database-probe",
     ) -> list[tuple]:
         """Run a query with retries for new-server identity and firewall propagation."""
+        return self._run(
+            statement,
+            parameters,
+            attempts=attempts,
+            label=label,
+            fetch_rows=True,
+            autocommit=False,
+        )
+
+    def execute(
+        self,
+        statement: str,
+        parameters: Sequence[Any] = (),
+        *,
+        attempts: int = 1,
+        label: str = "database-operation",
+    ) -> None:
+        """Execute an autocommit statement without fetching rows."""
+        self._run(
+            statement,
+            parameters,
+            attempts=attempts,
+            label=label,
+            fetch_rows=False,
+            autocommit=True,
+        )
+
+    def _run(
+        self,
+        statement: str,
+        parameters: Sequence[Any],
+        *,
+        attempts: int,
+        label: str,
+        fetch_rows: bool,
+        autocommit: bool,
+    ) -> list[tuple]:
         token = self.reporter.start("sql", label) if self.reporter else None
         errors: list[str] = []
         for attempt in range(1, attempts + 1):
@@ -49,12 +86,17 @@ class DatabaseProbe:
                         f"Database={self.resources.database_name};"
                         "Encrypt=yes;TrustServerCertificate=no;"
                     ),
+                    autocommit=autocommit,
                     token_provider=self.credential,
                     timeout=30,
                 )
                 cursor = connection.cursor()
                 cursor.execute(statement, *parameters)
-                rows = [tuple(row) for row in cursor.fetchall()]
+                rows = (
+                    [tuple(row) for row in cursor.fetchall()]
+                    if fetch_rows
+                    else []
+                )
                 if token and self.reporter:
                     self.reporter.finish(
                         token, detail=f"rows={len(rows)} attempts={attempt}"
@@ -86,10 +128,16 @@ class DatabaseProbe:
         statement: str,
         parameters: Sequence[Any] = (),
         *,
+        attempts: int = 5,
         label: str = "database-probe",
     ) -> Any:
         """Return the first column of the first validation row."""
-        rows = self.query(statement, parameters, label=label)
+        rows = self.query(
+            statement,
+            parameters,
+            attempts=attempts,
+            label=label,
+        )
         if not rows:
             raise CommandError("database validation query returned no rows")
         return rows[0][0]

@@ -81,7 +81,7 @@ class PermissionResult:
 
 @dataclass(frozen=True)
 class PermissionCheck:
-    """Permission outcomes evaluated at one Azure resource scope."""
+    """Permission outcomes evaluated at one Azure resource or data-plane scope."""
 
     scope: str
     permissions: list[PermissionResult]

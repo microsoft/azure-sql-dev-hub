@@ -1,32 +1,33 @@
 # Prompt end-to-end evaluation
 
-This harness gives each build prompt to GitHub Copilot CLI, lets the agent create
-the example in an isolated local workspace, and independently checks the result.
-It creates a disposable Azure resource group for each model and deletes that
-resource group at the end, including when a prompt, validator, or agent fails. A
-configured existing-server mode instead creates and deletes only uniquely named
-evaluation resources.
+This harness sends Azure SQL Developer Hub build prompts to GitHub Copilot CLI
+and validates the resulting applications against Azure SQL Database.
 
-The harness uses `mssql-python` and `azure-identity` for independent SQL
-assertions. Create an isolated environment and install the pinned dependencies:
+## Set up
+
+Run the evaluation commands from this directory:
 
 ```bash
-python3 -m venv eval/.venv
-eval/.venv/bin/python -m pip install -r eval/requirements.txt
+cd eval
 ```
 
-On Windows the virtualenv layout differs and the interpreter is at
-`eval/.venv/Scripts/python.exe`. Substitute that path for
-`eval/.venv/bin/python` in every command below.
+Create and activate a virtual environment, then install the pinned dependencies:
 
-On Windows ARM64, pip may select the `cryptography` sdist and fail trying to
-compile it with Rust. Prebuilt ARM64 wheels exist, so force them:
+### macOS and Linux
 
 ```bash
-eval/.venv/Scripts/python.exe -m pip install --only-binary=:all: -r eval/requirements.txt
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install -r requirements.txt
 ```
 
-## Before you run it
+### Windows
+
+```powershell
+py -m venv .venv
+.venv\Scripts\Activate.ps1
+python -m pip install -r requirements.txt
+```
 
 Install and sign in to:
 
@@ -38,7 +39,7 @@ Install and sign in to:
 6. [Azure Functions Core Tools v4](https://learn.microsoft.com/azure/azure-functions/functions-run-local)
 7. [Azurite](https://learn.microsoft.com/azure/storage/common/storage-use-azurite)
 
-On macOS, the missing Functions tools can be installed with:
+On macOS:
 
 ```bash
 brew tap azure/functions
@@ -46,92 +47,79 @@ brew install azure-functions-core-tools@4
 npm install -g azurite
 ```
 
+## Configure Azure
+
 Create the local configuration file:
 
 ```bash
-cp eval/validation.EXAMPLE.env eval/validation.env
+cp validation.EXAMPLE.env validation.env
 ```
 
-Edit `eval/validation.env` with the tenant, subscription, regions, and optional
-existing SQL server or embedding deployment. The file is ignored by Git. The
-harness always selects the public `AzureCloud`; every account-specific Azure
-default is loaded from this file. Command-line options only override its values
-for a single run.
+`validation.env` is ignored by Git and supports these settings:
 
-Verify the authenticated account before running:
+| Setting | Description |
+|---|---|
+| `HUB_EVAL_AZURE_TENANT_ID` | Microsoft Entra tenant ID for the authenticated Azure CLI account. |
+| `HUB_EVAL_AZURE_SUBSCRIPTION_ID` | Azure subscription used by the evaluation. |
+| `HUB_EVAL_AZURE_LOCATION` | Region for Azure SQL resources. |
+| `HUB_EVAL_EXISTING_RESOURCE_GROUP` | Existing resource group to use, or blank for a harness-provisioned group. |
+| `HUB_EVAL_EXISTING_SQL_SERVER` | Existing Azure SQL logical server to use, or blank for a harness-provisioned server. |
+| `HUB_EVAL_EMBEDDING_LOCATION` | Region for an Azure OpenAI resource. |
+| `HUB_EVAL_EMBEDDING_ENDPOINT` | Existing Azure OpenAI endpoint, or blank for harness provisioning. |
+| `HUB_EVAL_EMBEDDING_DEPLOYMENT` | Existing embedding deployment name. |
+| `HUB_EVAL_EMBEDDING_DIMENSION` | Existing embedding deployment output dimension. |
+
+Set both existing SQL values or leave both blank. Set all three existing
+embedding values or leave all three blank.
+
+Verify the Azure CLI context:
 
 ```bash
 az cloud show --query name --output tsv
-az account show --query '{tenant:tenantId,subscription:id,state:state}' --output table
+az account show \
+  --query '{tenant:tenantId,subscription:id,state:state}' \
+  --output table
 ```
 
-### Required Resource Providers (run as Contributor at subscription scope)
+### Required resource providers
 
-- `Microsoft.Sql` — Run `az provider register --namespace Microsoft.Sql --wait`
-  so the harness can create Azure SQL resources.
-- `Microsoft.CognitiveServices` — Run
-  `az provider register --namespace Microsoft.CognitiveServices --wait` when
-  `rag-app` provisions Azure OpenAI.
+- `Microsoft.Sql`
+- `Microsoft.CognitiveServices` when `rag-app` requires a harness-provisioned
+  Azure OpenAI resource
 
-### Required Permissions for Disposable Resource Group
-
-- **Contributor** at subscription scope — Allows the harness to create and delete
-  the resource group, SQL server, database, firewall rule, and optional Azure
-  OpenAI account.
-- **Role Based Access Control Administrator** at subscription scope — Allows
-  `rag-app` to grant and remove `Cognitive Services OpenAI User` when it
-  provisions Azure OpenAI.
-- **Cognitive Services OpenAI User** on an existing Azure OpenAI account — Allows
-  `rag-app` to call a supplied embedding endpoint instead of provisioning one.
-
-### Required Permissions for Specified Resource Group and Server
-
-- **SQL Server Contributor** at resource-group scope — Allows the harness to read
-  the existing server and create and delete its evaluation database and firewall
-  rule.
-- **Cognitive Services Contributor** at subscription scope — Allows `rag-app`
-  to create Azure OpenAI resources and permanently purge their soft-deleted
-  accounts after the evaluation.
-- **Role Based Access Control Administrator** at resource-group scope — Allows
-  `rag-app` to grant and remove `Cognitive Services OpenAI User` when it
-  provisions Azure OpenAI.
-- **Microsoft Entra administrator** on the specified SQL server — Allows the
-  signed-in user to connect to the evaluation database for data-plane setup and
-  validation.
-- **Cognitive Services OpenAI User** on an existing Azure OpenAI account — Allows
-  `rag-app` to call a supplied embedding endpoint instead of provisioning one.
-
-Run all provider and effective-permission checks without creating resources:
+Register providers when needed:
 
 ```bash
-PYTHONPATH=eval eval/.venv/bin/python -m run_evals \
-  --scenario rag-app \
-  --preflight
+az provider register --namespace Microsoft.Sql --wait
+az provider register --namespace Microsoft.CognitiveServices --wait
 ```
 
-Preflight-only runs create a normal `eval/runs/<run-id>/` directory containing
-`preflight.json` and the underlying Azure CLI command evidence. During a full
-evaluation, `preflight.json` is written immediately after each model's preflight
-completes, before resource provisioning begins. Each scoped permission entry
-contains the individual permission and its `PASS` or `FAIL` status.
+### Required permissions
 
-Copilot CLI noninteractive mode requires an authenticated Copilot session. The
-harness disables the built-in GitHub MCP server and grants unattended local tool
-execution inside each generated workspace.
+#### Harness-provisioned resource group and SQL server
 
-Check that Copilot CLI is installed:
+- **Contributor** at subscription scope.
+- For a harness-provisioned Azure OpenAI resource: **Role Based Access Control
+  Administrator** at subscription scope.
+- For an existing Azure OpenAI deployment: **Cognitive Services OpenAI User**
+  on that Azure OpenAI account.
+
+#### Existing resource group and SQL server
+
+- **SQL Server Contributor** at resource-group scope.
+- A Microsoft Entra server login and mapped user in virtual `master`, with the
+  login assigned to `##MS_DatabaseManager##`.
+- An existing server firewall rule that permits the client IP.
+- For a harness-provisioned Azure OpenAI resource: **Cognitive Services
+  Contributor** at subscription scope and **Role Based Access Control
+  Administrator** at resource-group scope.
+- For an existing Azure OpenAI deployment: **Cognitive Services OpenAI User**
+  on that Azure OpenAI account.
+
+## Verify Copilot CLI
 
 ```bash
-command -v copilot
 copilot --version
-```
-
-Both commands should print a path/version. If `command -v` prints nothing,
-install Copilot CLI using the linked GitHub instructions above.
-
-Check authentication with a minimal noninteractive request:
-
-```bash
 copilot -p "Reply with exactly AUTHENTICATED." \
   --model gpt-5.4 \
   --silent \
@@ -140,64 +128,59 @@ copilot -p "Reply with exactly AUTHENTICATED." \
   --allow-all-tools
 ```
 
-The command should print `AUTHENTICATED` and exit zero. If it reports an
-authentication error or opens an authentication flow, run:
+Use `copilot login` if authentication is required.
+
+## Commands
+
+### Preview a run
+
+Shows the selected models and scenarios without running them:
 
 ```bash
-copilot login
+python run_evals.py --dry-run
 ```
 
-## Check the plan without creating anything
+### Run preflight
 
-From the repository root:
+Checks the Azure configuration and permissions required by the selected
+scenarios:
 
 ```bash
-eval/.venv/bin/python eval/run_evals.py --dry-run
+python run_evals.py \
+  --scenario rag-app \
+  --preflight
 ```
 
-## Run with a GPT model
+The result is written to `runs/<run-id>/preflight.json`.
+
+### Run all scenarios with one model
 
 ```bash
-eval/.venv/bin/python eval/run_evals.py --model gpt-5.4
+python run_evals.py --model gpt-5.4
 ```
 
-## Run with a Claude model through Copilot CLI
-
 ```bash
-eval/.venv/bin/python eval/run_evals.py --model claude-sonnet-5
+python run_evals.py --model claude-sonnet-5
 ```
 
-Both model identifiers were verified with GitHub Copilot CLI 1.0.85. To run the
-same scenario matrix with both:
+### Run all scenarios with both models
 
 ```bash
-eval/.venv/bin/python eval/run_evals.py \
+python run_evals.py \
   --model gpt-5.4 \
   --model claude-sonnet-5
 ```
 
-The default agent timeout is 45 minutes per prompt. Independent validation gets
-15 minutes. Override them when needed:
-
-```bash
-eval/.venv/bin/python eval/run_evals.py \
-  --agent-timeout-seconds 3600 \
-  --validation-timeout-seconds 1200
-```
-
-## Run selected scenarios
+### Run selected scenarios
 
 Repeat `--scenario` to select more than one:
 
 ```bash
-eval/.venv/bin/python eval/run_evals.py \
+python run_evals.py \
   --model gpt-5.4 \
   --scenario javascript-app \
-  --scenario multi-tenant
+  --scenario rag-app
 ```
-
-Dependencies are automatic. Selecting `multi-tenant` also runs
-`javascript-app`; selecting `event-driven-app` also runs `serverless-api`.
 
 Available scenarios:
 
@@ -208,145 +191,69 @@ Available scenarios:
 - `event-driven-app`
 - `multi-tenant`
 
-## RAG embedding deployment
+Scenario dependencies are included automatically. `multi-tenant` includes
+`javascript-app`; `event-driven-app` includes `serverless-api`.
 
-When `rag-app` is selected, the harness first tries to create an Azure OpenAI Service
-account and a `text-embedding-3-small` deployment in the disposable resource
-group. It uses Microsoft Entra authentication and does not retrieve or record an
-API key.
-
-Model availability and quota vary by subscription. The RAG scenario fails during
-Azure setup if automatic provisioning is unavailable; it does not fall back to
-fixture vectors. An existing deployment can be supplied without putting a key on
-the command line:
+### Run with longer timeouts
 
 ```bash
-eval/.venv/bin/python eval/run_evals.py \
-  --model gpt-5.4 \
-  --embedding-endpoint https://example.openai.azure.com/ \
-  --embedding-deployment text-embedding-3-small \
-  --embedding-dimension 1536
+python run_evals.py \
+  --agent-timeout-seconds 3600 \
+  --validation-timeout-seconds 1200
 ```
 
-## Cleanup behavior
-
-By default, each model gets a uniquely named resource group with the prefix
-`rg-sqlhub-eval-`. The runner:
-
-1. Creates the group before any prompt runs.
-2. Executes all requested scenarios inside that group.
-3. Calls blocking `az group delete` in a `finally` block.
-4. Retries deletion up to three times.
-5. Verifies `az group exists` returns `false`.
-
-Do not use `kill -9` or power off the machine during a run. No process can
-guarantee cleanup after an uncatchable termination. If a machine or process is
-forcibly terminated, use the exact group name from `resources.json`:
+### Retain generated workspaces
 
 ```bash
-eval/.venv/bin/python eval/run_evals.py --cleanup-only rg-sqlhub-eval-0123456789
+python run_evals.py --keep-workspaces
 ```
 
-The cleanup command refuses resource groups outside the evaluation prefix.
+## Scenario coverage
 
-## Results
+| Scenario | Validated result |
+|---|---|
+| `javascript-app` | A Next.js application returns rows from an Azure SQL table. |
+| `python-api` | A Python API lists, creates, and completes task rows. |
+| `rag-app` | Azure SQL stores native vectors and returns ranked similarity results. |
+| `serverless-api` | An Azure Function returns rows through an Azure SQL binding. |
+| `event-driven-app` | A database insert triggers the expected function invocation. |
+| `multi-tenant` | Row-level security isolates data between tenants. |
 
-The terminal prints timestamped, flushed lifecycle events while the detailed
-stdout and stderr continue to be written to evidence files. Output includes:
+## Run artifacts
 
-- START and END for the complete run, each model, and each prompt scenario
-- elapsed duration and PASS/FAIL status for every END event
-- Azure resource create/delete commands
-- Copilot CLI, build, test, and validation commands
-- local API, Function, and Azurite process start/stop events
-- independent SQL probes
-- safely redacted error summaries and exact evidence paths
-
-After cleanup, the final console block prints the result for each
-scenario/harness/model combo:
+Runs are written under `runs/<UTC timestamp>-<unique suffix>/`:
 
 ```text
-✅ PASS | scenario=javascript-app | harness=copilot | model=gpt-5.4
-⚠️ BLOCKED | scenario=multi-tenant | harness=copilot | model=gpt-5.4 | details=dependencies did not pass: javascript-app
-❌ FAIL | scenario=python-api | harness=copilot | model=claude-sonnet-5 | details=validation failed: ...
+runs/<run-id>/
+├── manifest.json                         // Selected models, scenarios, and limits
+├── preflight.json                        // Azure context and permission results
+├── results.json                          // Complete run result rollup
+├── summary.md                            // Human-readable result summary
+└── <model>/
+    ├── azure/                            // Azure command metadata, stdout, and stderr
+    ├── resources.json                    // Azure resource names and identifiers
+    ├── results.json                      // Result rollup for this model
+    ├── scenarios/
+    │   └── <scenario>/
+    │       ├── prompt.md                 // Exact prompt sent to the agent
+    │       ├── result.json               // Result for this scenario and model
+    │       ├── agent/
+    │       │   ├── *.json                // Copilot command metadata
+    │       │   ├── *.stdout.txt          // Copilot JSONL event stream
+    │       │   ├── *.stderr.txt          // Copilot stderr
+    │       │   └── copilot-logs/         // Copilot session logs
+    │       └── validation/
+    │           ├── *.json                // Validator command metadata
+    │           ├── *.stdout.txt          // Validator output and server logs
+    │           └── *.stderr.txt          // Validator stderr
+    └── workspaces/                       // Present when --keep-workspaces is used
+        └── <scenario>/                   // Agent-generated application
 ```
 
-Runs are written under `eval/runs/<UTC timestamp>-<unique suffix>/`. Each run contains:
+## Run the harness tests
 
-- `manifest.json`: exact models, scenarios, timeouts, and source limitation
-- `resources.json`: disposable resource names, never credentials
-- `prompt.md`: the complete prompt sent to the agent
-- Copilot JSONL, stderr, and local Copilot logs
-- Validator command output and server logs
-- `preflight.json`: per-model Azure context, provider, and permission-check
-  outcomes, including duration, identity, and a `PASS` or `FAIL` result for each
-  permission evaluated at each Azure resource scope
-- `results.json`: aggregate scenario results plus per-model Azure setup/cleanup
-  durations, full ARM IDs for resources provisioned by the harness, and the
-  same preflight data as `preflight.json`
-- `summary.md`: human-readable scenario results and cleanup errors
-- Each model's `results.json`: that model's preflight, environment, scenario
-  results, cleanup errors, and total setup-through-cleanup `duration_seconds`
-- Each model's `scenarios/<scenario>/result.json`: the scenario's exact result
-  object from the aggregate `results.json`
-
-Generated workspaces are removed after the run by default. Add
-`--keep-workspaces` when debugging an implementation failure. Azure resources are
-still deleted.
-
-## Prompt-specific verification files
-
-Each prompt has one verification file with the exact same filename stem:
-
-| Prompt | Verification |
-|---|---|
-| `build/javascript-app.md` | `eval/verifications/javascript-app.py` |
-| `build/python-api.md` | `eval/verifications/python-api.py` |
-| `build/rag-app.md` | `eval/verifications/rag-app.py` |
-| `build/serverless-api.md` | `eval/verifications/serverless-api.py` |
-| `build/event-driven-app.md` | `eval/verifications/event-driven-app.py` |
-| `build/multi-tenant.md` | `eval/verifications/multi-tenant.py` |
-
-`hub_eval/scenarios.py` loads these modules and refuses a filename/prompt-stem
-mismatch.
-
-## Local harness tests
-
-These tests do not create Azure resources or invoke a real agent:
+The harness tests do not invoke Copilot CLI or create Azure resources:
 
 ```bash
-PYTHONPATH=eval eval/.venv/bin/python -m unittest discover -s eval/tests -v
+python -m unittest discover -s tests -v
 ```
-
-## Adding Codex CLI or Claude Code
-
-Agent invocation is isolated behind the `AgentCli` protocol in
-`hub_eval/agents.py`. To add another CLI:
-
-1. Implement `name` and `run(AgentRequest)`.
-2. Use `CommandRunner` so timeouts and process-group cleanup remain consistent.
-3. Produce immutable stdout, stderr, and command metadata in the supplied
-   evidence directory.
-4. Register the adapter in `create_agent`.
-5. Run it with `--agent <registered-name>` after the adapter has unit coverage.
-
-The Azure lifecycle and all end-state validators are provider-independent.
-
-## Validation source limitation
-
-`Hub-Prompt-Validation.docx` was supplied as a DRM-protected Office document. The
-headless environment could identify `DRMEncryptedDataSpace` but could not decrypt
-its text. The criteria were subsequently supplied as a table and are implemented
-as follows:
-
-| Scenario | Required end state |
-|---|---|
-| JavaScript app | Next.js app starts and one HTTP request returns rows from the agent-created table. |
-| Python API | `GET /tasks` returns 200 with JSON rows and `POST /tasks` creates one row. |
-| RAG | A native `VECTOR` column exists and one `VECTOR_DISTANCE` query returns ranked rows. |
-| Serverless API | The Function runs locally and one HTTP GET returns rows through the SQL binding. |
-| Event-driven app | Change Tracking is enabled and one insert triggers the function exactly once. |
-| Multi-tenant app | The RLS policy exists and the isolation test proves tenant A cannot read tenant B rows. |
-
-The validators also retain compatible checks from each published prompt's
-`Validation rules` section.
