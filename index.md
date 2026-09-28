@@ -22,8 +22,8 @@ video:
   sub: Azure SQL for the agent era.
   poster: /assets/img/hero-idea-to-app.jpg
   poster_alt: 'From idea to app: a prompt builds a task app on Azure SQL.'
-quickstart_heading: Get a database running
-quickstart_text: Pick your path. The same engine everywhere, so what you build here ships unchanged.
+quickstart_heading: Power your next app with Azure SQL.
+quickstart_text: Get your development database ready, then build with your coding agent.
 quickstart:
 - key: cloud
   name: Cloud, free tier
