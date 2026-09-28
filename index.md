@@ -208,10 +208,14 @@ skills:
     code: npx skills add microsoft/microsoft-sql
     note: Or <code>gh skill install microsoft/microsoft-sql --all --agent cursor</code>. Confirm with <code>ls .cursor/skills</code>.
   chips:
-  - Connect my Node app to Azure SQL Database without a password
-  - Scaffold the schema, migrations, and data layer for this app
-  - Add vector search to this table and make it use the index
-  - Why does my first query after idle fail with 40613
+  - key: connect_node_passwordless
+    text: Connect my Node app to Azure SQL Database without a password
+  - key: scaffold_data_layer
+    text: Scaffold the schema, migrations, and data layer for this app
+  - key: add_vector_search
+    text: Add vector search to this table and make it use the index
+  - key: troubleshoot_40613
+    text: Why does my first query after idle fail with 40613
   note: Full catalog, every skill's source, and the feedback form at aka.ms/azuresql-skills. Skills teach your agent the engine; they do not grant access to the Preview container.
 videos_heading: See it in action
 videos_text: Longer walkthroughs from the Microsoft SQL team. Scroll for more.

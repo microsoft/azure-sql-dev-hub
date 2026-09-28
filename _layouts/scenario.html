@@ -5,6 +5,7 @@
 {% include nav.html %}
 
 <main id="main">
+  {%- assign scenario_id = page.name | remove: '.md' | remove: '.html' -%}
   <div class="scenarioPage">
     <div class="wrap">
       <div class="scenarioHead">
@@ -23,6 +24,8 @@
                 <span id="scenario-prompt">{{ page.prompt }}</span>
                 <button class="promptCopy" type="button" data-copy="#scenario-prompt"
                         data-copy-kind="prompt" data-copy-source="scenario"
+                        data-scenario="{{ scenario_id }}"
+                        data-clarity-event="copy_prompt_{{ scenario_id }}"
                         aria-label="Copy the scenario prompt">Copy prompt</button>
               </div>
             </div>
@@ -66,7 +69,9 @@
               <a class="actionLink primary" href="{{ page.docs.href }}" rel="noopener"
                  data-event="docs_deep_read" data-event-source="scenario">{{ page.docs.label }} <span aria-hidden="true">→</span></a>
               <a class="actionLink" href="{{ page.url | replace: '.html', '.md' | relative_url }}"
-                 data-event="md_fetch" data-event-source="scenario">View as Markdown <span class="hint">.md</span></a>
+                 data-event="md_fetch" data-event-source="scenario"
+                 data-event-scenario-id="{{ scenario_id }}"
+                 data-clarity-event="view_prompt_{{ scenario_id }}">View as Markdown <span class="hint">.md</span></a>
             </div>
           </div>
         </aside>

@@ -226,8 +226,8 @@
             <h3>{{ s.title }}</h3>
             <p>{{ s.blurb }}</p>
             <div class="cact">
-              <button class="cp" type="button" data-hprompt="{{ '/build/' | append: s.slug | append: '.md' | relative_url }}" data-event="copy_prompt" data-scenario="{{ s.slug }}">Copy prompt</button>
-              <a href="{{ hub_repo }}/blob/main/build/{{ s.slug }}.md" target="_blank" rel="noopener" data-event="open_scenario" data-scenario="{{ s.slug }}">View prompt</a>
+              <button class="cp" type="button" data-hprompt="{{ '/build/' | append: s.slug | append: '.md' | relative_url }}" data-event="copy_prompt" data-clarity-event="copy_prompt_{{ s.slug }}" data-scenario="{{ s.slug }}">Copy prompt</button>
+              <a href="{{ hub_repo }}/blob/main/build/{{ s.slug }}.md" target="_blank" rel="noopener" data-event="open_scenario" data-clarity-event="view_prompt_{{ s.slug }}" data-scenario="{{ s.slug }}">View prompt</a>
             </div>
           </div>
         </article>
@@ -260,20 +260,20 @@
       </div>
       <div class="install">
         {%- assign a0 = page.skills.agents[0] %}
-        <div class="cmd"><code id="hInstall">{{ a0.code }}</code><button class="cp" type="button" id="hInstallCopy" data-hcopy="{{ a0.code | escape }}" data-event="copy_skill_install">Copy</button></div>
+        <div class="cmd"><code id="hInstall">{{ a0.code }}</code><button class="cp" type="button" id="hInstallCopy" data-hcopy="{{ a0.code | escape }}" data-event="copy_skill_install" data-clarity-event="copy_skill_install_{{ a0.key }}" data-agent="{{ a0.key }}">Copy</button></div>
         <p class="inote" id="hInstallNote">{{ a0.note }}</p>
       </div>
       <div class="ask">
         <p class="asklabel">Then just ask:</p>
         <div class="chips">
           {%- for c in page.skills.chips %}
-          <button class="chip" type="button" data-hcopy="{{ c | escape }}" data-event="copy_ask">{{ c }}</button>
+          <button class="chip" type="button" data-hcopy="{{ c.text | escape }}" data-event="copy_ask" data-clarity-event="copy_ask_{{ c.key }}" data-prompt="{{ c.key }}">{{ c.text }}</button>
           {%- endfor %}
         </div>
         <p class="faint">Click to copy. Paste into your agent.</p>
       </div>
       <div class="ctas" style="margin-top:24px">
-        <a class="btn btn-s" href="{{ skills_site }}" data-event="link_skills_site">Browse the skills</a>
+        <a class="btn btn-s" href="{{ skills_site }}" data-event="link_skills_site" data-clarity-event="browse_skills">Browse the skills</a>
         <a class="btn btn-s" href="{{ skills_site }}#installation" data-event="link_skills_install">Per-tool install guide</a>
       </div>
       <p class="faint" style="margin-top:14px">{{ page.skills.note }}</p>
@@ -332,14 +332,14 @@
   function copyText(t,cb){function legacy(){var ta=document.createElement('textarea');ta.value=t;ta.setAttribute('readonly','');ta.style.position='fixed';ta.style.top='-1000px';document.body.appendChild(ta);ta.select();var ok=false;try{ok=document.execCommand('copy')}catch(e){}document.body.removeChild(ta);cb(ok)}
     if(navigator.clipboard&&window.isSecureContext){navigator.clipboard.writeText(t).then(function(){cb(true)},legacy)}else{legacy()}}
   function flash(b,ok){if(b.classList.contains('chip')){b.classList.add(ok?'ok':'bad');setTimeout(function(){b.classList.remove('ok','bad')},1600);return}var t=b.textContent;b.textContent=ok?'Copied':'Select and copy';b.classList.add(ok?'ok':'bad');setTimeout(function(){b.textContent=t;b.classList.remove('ok','bad')},1600)}
-  function trackCopy(b,ok){if(!ok||typeof window.trackHubEvent!=='function')return;var p={source:'home'};var scenario=b.getAttribute('data-scenario');if(scenario)p.scenario_id=scenario;window.trackHubEvent(b.getAttribute('data-event'),p)}
+  function trackCopy(b,ok){if(!ok||typeof window.trackHubEvent!=='function')return;var p={source:'home'};var scenario=b.getAttribute('data-scenario'),agent=b.getAttribute('data-agent'),prompt=b.getAttribute('data-prompt');if(scenario)p.scenario_id=scenario;if(agent)p.agent_id=agent;if(prompt)p.prompt_id=prompt;window.trackHubEvent(b.getAttribute('data-event'),p,{clarityEvent:b.getAttribute('data-clarity-event')})}
   document.querySelectorAll('[data-hcopy]').forEach(function(b){b.addEventListener('click',function(){copyText(b.getAttribute('data-hcopy'),function(ok){flash(b,ok);trackCopy(b,ok)})})});
   document.querySelectorAll('[data-hprompt]').forEach(function(b){b.addEventListener('click',function(){fetch(b.getAttribute('data-hprompt')).then(function(r){if(!r.ok)throw 0;return r.text()}).then(function(t){copyText(t,function(ok){flash(b,ok);trackCopy(b,ok)})}).catch(function(){window.open(b.getAttribute('data-hprompt'),'_blank')})})});
   document.querySelectorAll('[data-htab-go]').forEach(function(b){b.addEventListener('click',function(){var t=document.querySelector('[data-htab="'+b.getAttribute('data-htab-go')+'"]');if(t)t.click()})});
   var tabs=document.querySelectorAll('[data-htab]'),panels=document.querySelectorAll('[data-hpanel]');
   tabs.forEach(function(t){t.addEventListener('click',function(){tabs.forEach(function(x){x.setAttribute('aria-selected','false')});panels.forEach(function(p){p.classList.remove('on')});t.setAttribute('aria-selected','true');document.querySelector('[data-hpanel="'+t.getAttribute('data-htab')+'"]').classList.add('on')})});
   var cmdEl=document.getElementById('hInstall'),noteEl=document.getElementById('hInstallNote'),copyEl=document.getElementById('hInstallCopy');
-  document.querySelectorAll('.agent').forEach(function(a){a.addEventListener('click',function(){document.querySelectorAll('.agent').forEach(function(x){x.setAttribute('aria-pressed','false')});a.setAttribute('aria-pressed','true');cmdEl.textContent=a.getAttribute('data-cmd');noteEl.innerHTML=a.getAttribute('data-note');copyEl.setAttribute('data-hcopy',a.getAttribute('data-cmd'))})});
+  document.querySelectorAll('.agent').forEach(function(a){a.addEventListener('click',function(){var agent=a.getAttribute('data-agent');document.querySelectorAll('.agent').forEach(function(x){x.setAttribute('aria-pressed','false')});a.setAttribute('aria-pressed','true');cmdEl.textContent=a.getAttribute('data-cmd');noteEl.innerHTML=a.getAttribute('data-note');copyEl.setAttribute('data-hcopy',a.getAttribute('data-cmd'));copyEl.setAttribute('data-agent',agent);copyEl.setAttribute('data-clarity-event','copy_skill_install_'+agent)})});
   var demo=document.getElementById('hDemo'),demoPlay=document.getElementById('hDemoPlay'),
       demoLabel=document.getElementById('hDemoPlayLabel'),demoError=document.getElementById('hDemoError');
   if(demo&&demoPlay){
