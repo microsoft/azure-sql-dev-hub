@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import json
-import re
 import shutil
 import time
 from dataclasses import asdict
@@ -17,9 +16,11 @@ from .command import CommandError
 from .models import (
     AzureResources,
     EnvironmentResult,
+    EvaluationTarget,
     PreflightResult,
     RunSettings,
     ScenarioResult,
+    output_slug,
 )
 from .progress import ProgressReporter
 from .scenarios import DEFAULT_SCENARIO_ORDER, SCENARIOS
@@ -38,7 +39,7 @@ def build_preflight_report(
 ) -> dict:
     """Build the shared standalone and aggregate preflight report."""
     return {
-        "schema_version": 3,
+        "schema_version": 4,
         "run_id": run_id,
         "results": [result.to_dict() for result in results],
     }
@@ -114,12 +115,11 @@ evaluation, not a request for an explanation.
 
 
 class EvaluationRunner:
-    """Run requested scenarios for each model in isolated Azure environments."""
+    """Run requested scenarios for each target in isolated Azure environments."""
 
-    def __init__(self, settings: RunSettings, *, agent_name: str = "copilot"):
+    def __init__(self, settings: RunSettings):
         self.settings = settings
         self.reporter = ProgressReporter()
-        self.agent = create_agent(agent_name, reporter=self.reporter)
         self.run_id = create_run_id()
         self.run_dir = settings.output_root / self.run_id
         self.run_dir.mkdir(parents=True, exist_ok=False)
@@ -136,11 +136,23 @@ class EvaluationRunner:
         run_token = self.reporter.start(
             "run",
             self.run_id,
-            f"models={','.join(self.settings.models)} scenarios={','.join(selected)}",
+            "targets="
+            + ",".join(
+                f"{target.harness}:{target.model}" for target in self.settings.targets
+            )
+            + f" scenarios={','.join(selected)}",
         )
         self.reporter.artifact(self.run_dir, "run evidence directory")
+        if self.settings.configuration_path is not None:
+            shutil.copyfile(
+                self.settings.configuration_path,
+                self.run_dir / "configuration.yml",
+            )
+            self.reporter.artifact(
+                self.run_dir / "configuration.yml", "source run configuration"
+            )
         manifest = {
-            "schema_version": 1,
+            "schema_version": 2,
             "run_id": self.run_id,
             "started_at": datetime.now(UTC).isoformat(),
             "settings": {
@@ -149,7 +161,11 @@ class EvaluationRunner:
                 "output_root": str(self.settings.output_root),
             },
             "expanded_scenarios": selected,
-            "agent": self.agent.name,
+            "source_configuration": (
+                str(self.settings.configuration_path)
+                if self.settings.configuration_path is not None
+                else None
+            ),
             "source_note": (
                 "Criteria were transcribed from the user-supplied validation table after "
                 "Hub-Prompt-Validation.docx proved DRM-protected. Detailed assertions also "
@@ -158,8 +174,8 @@ class EvaluationRunner:
         }
         self._write_json("manifest.json", manifest)
         self.reporter.artifact(self.run_dir / "manifest.json", "run manifest")
-        for model in self.settings.models:
-            self._run_model(model, selected)
+        for target in self.settings.targets:
+            self._run_target(target, selected)
         self.duration_seconds = time.monotonic() - run_started
         self._write_reports()
         failed = any(result.status not in {"PASS", "SKIP"} for result in self.results)
@@ -176,32 +192,55 @@ class EvaluationRunner:
             self.reporter.result(
                 status=result.status,
                 scenario=result.scenario,
-                harness=self.agent.name,
+                harness=result.harness,
                 model=result.model,
                 details=result.reason,
             )
         for message in self.cleanup_errors:
-            model, _, details = message.partition(":")
+            target = max(
+                (
+                    candidate
+                    for candidate in self.settings.targets
+                    if message.startswith(
+                        f"{candidate.harness}:{candidate.model}:"
+                    )
+                ),
+                key=lambda candidate: len(candidate.model),
+                default=None,
+            )
+            details = (
+                message[len(f"{target.harness}:{target.model}:") :].strip()
+                if target
+                else message
+            )
             self.reporter.result(
                 status="ERROR",
                 scenario="cleanup",
-                harness=self.agent.name,
-                model=model or "unknown",
-                details=details or message,
+                harness=target.harness if target else "unknown",
+                model=target.model if target else "unknown",
+                details=details,
             )
         return exit_code
 
-    def _run_model(self, model: str, selected: tuple[str, ...]) -> None:
-        model_started = time.monotonic()
-        model_token = self.reporter.start("model", model)
+    def _run_target(
+        self, target: EvaluationTarget, selected: tuple[str, ...]
+    ) -> None:
+        target_started = time.monotonic()
+        target_label = f"{target.harness}:{target.model}"
+        target_token = self.reporter.start("target", target_label)
         result_start = len(self.results)
-        model_dir = self.run_dir / _slug(model)
-        model_dir.mkdir()
+        target_dir = (
+            self.run_dir
+            / output_slug(target.harness)
+            / output_slug(target.model)
+        )
+        target_dir.mkdir(parents=True)
+        agent = create_agent(target.harness, reporter=self.reporter)
         environment = AzureEnvironment(
             tenant_id=self.settings.tenant_id,
             subscription_id=self.settings.subscription_id,
             location=self.settings.location,
-            evidence_dir=model_dir,
+            evidence_dir=target_dir,
             embedding_location=self.settings.embedding_location,
             provision_embedding=any(
                 SCENARIOS[name].requires_embedding for name in selected
@@ -224,7 +263,8 @@ class EvaluationRunner:
             preflight_completed = True
             self.preflight_results.append(
                 PreflightResult(
-                    model=model,
+                    harness=target.harness,
+                    model=target.model,
                     status="PASS",
                     duration_seconds=preflight_duration,
                     subscription_id=self.settings.subscription_id,
@@ -241,12 +281,13 @@ class EvaluationRunner:
             self._write_preflight_report()
             resources = environment.create(identity)
             setup_duration = time.monotonic() - setup_started
-            self._run_scenarios(model, model_dir, resources, selected)
+            self._run_scenarios(target, agent, target_dir, resources, selected)
         except HANDLED_ERRORS as exc:
             if not preflight_completed:
                 self.preflight_results.append(
                     PreflightResult(
-                        model=model,
+                        harness=target.harness,
+                        model=target.model,
                         status="FAIL",
                         duration_seconds=time.monotonic() - preflight_started,
                         subscription_id=self.settings.subscription_id,
@@ -263,13 +304,14 @@ class EvaluationRunner:
             if resources is None:
                 result = ScenarioResult(
                     scenario="azure-setup",
-                    model=model,
+                    harness=target.harness,
+                    model=target.model,
                     status="ERROR",
                     reason=f"{type(exc).__name__}: {exc}",
                     workspace="",
                 )
                 self.results.append(result)
-                self.reporter.error("model", model, result.reason)
+                self.reporter.error("target", target_label, result.reason)
         finally:
             if setup_duration is None:
                 setup_duration = time.monotonic() - setup_started
@@ -278,55 +320,60 @@ class EvaluationRunner:
             try:
                 environment.cleanup()
             except HANDLED_ERRORS as exc:
-                message = f"{model}: {type(exc).__name__}: {exc}"
+                message = (
+                    f"{target.harness}:{target.model}: "
+                    f"{type(exc).__name__}: {exc}"
+                )
                 self.cleanup_errors.append(message)
-                (model_dir / "CLEANUP_REQUIRED.txt").write_text(
+                (target_dir / "CLEANUP_REQUIRED.txt").write_text(
                     f"Manual cleanup required for {environment.resource_group}\n{message}\n",
                     encoding="utf-8",
                 )
-                self.reporter.error("cleanup", model, message)
+                self.reporter.error("cleanup", target_label, message)
             cleanup_duration = time.monotonic() - cleanup_started
             environment_result = EnvironmentResult(
-                model=model,
+                harness=target.harness,
+                model=target.model,
                 setup_duration_seconds=setup_duration,
                 cleanup_duration_seconds=cleanup_duration,
                 provisioned_resource_ids=provisioned_resource_ids,
             )
             self.environments.append(environment_result)
-            model_results = self.results[result_start:]
-            model_duration = time.monotonic() - model_started
-            self._write_model_report(
-                model_dir,
-                model,
-                model_duration,
-                model_results,
+            target_results = self.results[result_start:]
+            target_duration = time.monotonic() - target_started
+            self._write_target_report(
+                target_dir,
+                target,
+                target_duration,
+                target_results,
                 environment_result,
             )
             self._write_reports()
-            model_failed = any(
-                result.status not in {"PASS", "SKIP"} for result in model_results
+            target_failed = any(
+                result.status not in {"PASS", "SKIP"} for result in target_results
             )
             self.reporter.finish(
-                model_token,
-                status="FAIL" if model_failed or self.cleanup_errors else "PASS",
-                detail=f"results={len(model_results)}",
+                target_token,
+                status="FAIL" if target_failed or self.cleanup_errors else "PASS",
+                detail=f"results={len(target_results)}",
             )
 
     def _run_scenarios(
         self,
-        model: str,
-        model_dir: Path,
+        target: EvaluationTarget,
+        agent,
+        target_dir: Path,
         resources: AzureResources,
         selected: tuple[str, ...],
     ) -> None:
         statuses: dict[str, str] = {}
-        workspace_root = model_dir / "workspaces"
+        workspace_root = target_dir / "workspaces"
         workspace_root.mkdir()
         for name in selected:
             spec = SCENARIOS[name]
             workspace = workspace_root / spec.workspace
             workspace.mkdir(exist_ok=True)
-            scenario_dir = model_dir / "scenarios" / name
+            scenario_dir = target_dir / "scenarios" / name
             scenario_dir.mkdir(parents=True)
             failed_dependencies = [
                 dependency
@@ -336,7 +383,8 @@ class EvaluationRunner:
             if failed_dependencies:
                 result = ScenarioResult(
                     scenario=name,
-                    model=model,
+                    harness=target.harness,
+                    model=target.model,
                     status="BLOCKED",
                     reason="dependencies did not pass: " + ", ".join(failed_dependencies),
                     workspace=str(workspace),
@@ -345,13 +393,16 @@ class EvaluationRunner:
                 self._record_scenario_result(scenario_dir, result)
                 self.reporter.info("scenario", name, result.reason)
                 continue
-            result = self._run_scenario(model, workspace, scenario_dir, resources, name)
+            result = self._run_scenario(
+                target, agent, workspace, scenario_dir, resources, name
+            )
             statuses[name] = result.status
             self._record_scenario_result(scenario_dir, result)
 
     def _run_scenario(
         self,
-        model: str,
+        target: EvaluationTarget,
+        agent,
         workspace: Path,
         scenario_dir: Path,
         resources: AzureResources,
@@ -359,7 +410,9 @@ class EvaluationRunner:
     ) -> ScenarioResult:
         spec = SCENARIOS[name]
         scenario_token = self.reporter.start(
-            "scenario", name, f"model={model} workspace={workspace}"
+            "scenario",
+            name,
+            f"harness={target.harness} model={target.model} workspace={workspace}",
         )
         prompt_path = self.settings.repository / spec.prompt_file
         prompt_text = prompt_path.read_text(encoding="utf-8")
@@ -373,21 +426,25 @@ class EvaluationRunner:
         self.reporter.artifact(scenario_dir / "prompt.md", f"{name} agent prompt")
         started = time.monotonic()
         try:
-            agent_result = self.agent.run(
+            agent_result = agent.run(
                 AgentRequest(
                     prompt=prompt,
-                    model=model,
+                    model=target.model,
                     workspace=workspace,
                     evidence_dir=scenario_dir / "agent",
                     timeout_seconds=self.settings.agent_timeout_seconds,
-                    session_name=f"sqlhub-{_slug(model)}-{name}-{self.run_id}",
+                    session_name=(
+                        f"sqlhub-{output_slug(target.harness)}-"
+                        f"{output_slug(target.model)}-{name}-{self.run_id}"
+                    ),
                 )
             )
             agent_duration = time.monotonic() - started
         except HANDLED_ERRORS as exc:
             result = ScenarioResult(
                 scenario=name,
-                model=model,
+                harness=target.harness,
+                model=target.model,
                 status="FAIL",
                 reason=f"agent failed: {type(exc).__name__}: {exc}",
                 workspace=str(workspace),
@@ -408,7 +465,8 @@ class EvaluationRunner:
             )
             result = ScenarioResult(
                 scenario=name,
-                model=model,
+                harness=target.harness,
+                model=target.model,
                 status="PASS",
                 reason="independent end-state validation passed",
                 workspace=str(workspace),
@@ -431,7 +489,8 @@ class EvaluationRunner:
         except HANDLED_ERRORS as exc:
             result = ScenarioResult(
                 scenario=name,
-                model=model,
+                harness=target.harness,
+                model=target.model,
                 status="FAIL",
                 reason=f"validation failed: {type(exc).__name__}: {exc}",
                 workspace=str(workspace),
@@ -449,7 +508,7 @@ class EvaluationRunner:
         self._write_json(
             "results.json",
             {
-                "schema_version": 6,
+                "schema_version": 7,
                 "run_id": self.run_id,
                 "duration_seconds": self.duration_seconds,
                 "preflight": preflight,
@@ -461,13 +520,14 @@ class EvaluationRunner:
             },
         )
         rows = [
-            "| Model | Scenario | Status | Reason |",
-            "|---|---|---|---|",
+            "| Harness | Model | Scenario | Status | Reason |",
+            "|---|---|---|---|---|",
         ]
         for result in self.results:
             reason = result.reason.replace("|", "\\|").replace("\n", " ")
             rows.append(
-                f"| {result.model} | {result.scenario} | {result.status} | {reason} |"
+                f"| {result.harness} | {result.model} | {result.scenario} | "
+                f"{result.status} | {reason} |"
             )
         if self.cleanup_errors:
             rows.extend(
@@ -476,10 +536,10 @@ class EvaluationRunner:
             )
         (self.run_dir / "summary.md").write_text("\n".join(rows) + "\n", encoding="utf-8")
 
-    def _write_model_report(
+    def _write_target_report(
         self,
-        model_dir: Path,
-        model: str,
+        target_dir: Path,
+        target: EvaluationTarget,
         duration_seconds: float,
         results: list[ScenarioResult],
         environment: EnvironmentResult,
@@ -488,22 +548,23 @@ class EvaluationRunner:
             (
                 result
                 for result in reversed(self.preflight_results)
-                if result.model == model
+                if result.harness == target.harness and result.model == target.model
             ),
             None,
         )
         cleanup_errors = [
             message
             for message in self.cleanup_errors
-            if message.startswith(f"{model}:")
+            if message.startswith(f"{target.harness}:{target.model}:")
         ]
-        result_path = model_dir / "results.json"
+        result_path = target_dir / "results.json"
         self._write_json_file(
             result_path,
             {
-                "schema_version": 1,
+                "schema_version": 2,
                 "run_id": self.run_id,
-                "model": model,
+                "harness": target.harness,
+                "model": target.model,
                 "duration_seconds": duration_seconds,
                 "preflight": preflight.to_dict() if preflight else None,
                 "environment": environment.to_dict(),
@@ -511,7 +572,9 @@ class EvaluationRunner:
                 "cleanup_errors": cleanup_errors,
             },
         )
-        self.reporter.artifact(result_path, f"{model} results")
+        self.reporter.artifact(
+            result_path, f"{target.harness}:{target.model} results"
+        )
 
     def _write_preflight_report(self) -> dict:
         preflight = build_preflight_report(self.run_id, self.preflight_results)
@@ -542,11 +605,12 @@ class EvaluationRunner:
         """Remove generated workspaces after reports are complete when requested."""
         if self.settings.keep_workspaces:
             return
-        for model in self.settings.models:
-            path = self.run_dir / _slug(model) / "workspaces"
+        for target in self.settings.targets:
+            path = (
+                self.run_dir
+                / output_slug(target.harness)
+                / output_slug(target.model)
+                / "workspaces"
+            )
             if path.is_dir():
                 shutil.rmtree(path)
-
-
-def _slug(value: str) -> str:
-    return re.sub(r"[^a-z0-9]+", "-", value.lower()).strip("-")

@@ -1,0 +1,25 @@
+schema_version: 1
+
+scenarios:
+  - javascript-app
+  - python-api
+  - rag-app
+  - serverless-api
+  - event-driven-app
+  - multi-tenant
+
+agent_timeout_seconds: 2700
+validation_timeout_seconds: 900
+keep_workspaces: false
+
+harnesses:
+  - name: copilot
+    models:
+      - gpt-5.4
+      - claude-sonnet-5
+  - name: claude
+    models:
+      - claude-sonnet-5
+  - name: codex
+    models:
+      - gpt-6-sol
