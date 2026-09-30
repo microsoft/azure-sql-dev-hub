@@ -1,7 +1,8 @@
 # Prompt end-to-end evaluation
 
-This harness sends Azure SQL Developer Hub build prompts to GitHub Copilot CLI
-and validates the resulting applications against Azure SQL Database.
+This harness sends Azure SQL Developer Hub build prompts to GitHub Copilot CLI,
+Claude Code, or Codex CLI and validates the resulting applications against
+Azure SQL Database.
 
 ## Set up
 
@@ -33,11 +34,16 @@ Install and sign in to:
 
 1. [Azure CLI](https://learn.microsoft.com/cli/azure/install-azure-cli)
 2. [GitHub Copilot CLI](https://docs.github.com/copilot/how-tos/set-up/install-copilot-cli)
-3. Node.js 20 or newer and npm
-4. Python 3.10 or newer
-5. .NET SDK 8 or newer
-6. [Azure Functions Core Tools v4](https://learn.microsoft.com/azure/azure-functions/functions-run-local)
-7. [Azurite](https://learn.microsoft.com/azure/storage/common/storage-use-azurite)
+3. [Claude Code](https://docs.anthropic.com/en/docs/claude-code/setup)
+4. [Codex CLI](https://developers.openai.com/codex/cli)
+5. Node.js 20 or newer and npm
+6. Python 3.10 or newer
+7. .NET SDK 8 or newer
+8. [Azure Functions Core Tools v4](https://learn.microsoft.com/azure/azure-functions/functions-run-local)
+9. [Azurite](https://learn.microsoft.com/azure/storage/common/storage-use-azurite)
+
+The harness uses each agent CLI's existing authentication and does not sign in
+on your behalf.
 
 On macOS:
 
@@ -116,60 +122,89 @@ az provider register --namespace Microsoft.CognitiveServices --wait
 - For an existing Azure OpenAI deployment: **Cognitive Services OpenAI User**
   on that Azure OpenAI account.
 
-## Verify Copilot CLI
+## Configure a run
+
+Copy the example configuration:
 
 ```bash
-copilot --version
-copilot -p "Reply with exactly AUTHENTICATED." \
-  --model gpt-5.4 \
-  --silent \
-  --stream off \
-  --disable-builtin-mcps \
-  --allow-all-tools
+cp configuration.EXAMPLE.yml configuration.yml
 ```
 
-Use `copilot login` if authentication is required.
+`configuration.yml` is ignored by Git. It defines the ordered harnesses,
+models, scenarios, timeouts, and workspace retention setting for a run.
+`validation.env` remains separate and contains the Azure settings.
+
+Use either `--configuration` or repeatable `--target HARNESS:MODEL` options,
+not both. Any `--scenario` options replace the scenarios in the YAML file.
 
 ## Commands
 
 ### Preview a run
 
-Shows the selected models and scenarios without running them:
+Shows the selected targets and scenarios without running them:
 
 ```bash
-python run_evals.py --dry-run
+python run_evals.py --configuration configuration.yml --dry-run
 ```
+
+### Run from the configuration file
+
+```bash
+python run_evals.py --configuration configuration.yml
+```
+
+### Run selected targets directly
+
+```bash
+python run_evals.py \
+  --target copilot:gpt-5.4 \
+  --target claude:claude-sonnet-5 \
+  --target codex:gpt-6-sol
+```
+
+Without `--configuration` or `--target`, the default target is
+`copilot:gpt-5.4`.
+
+### List models
+
+Lists the documented model options for a harness:
+
+```bash
+python run_evals.py --list-models copilot
+python run_evals.py --list-models claude
+python run_evals.py --list-models codex
+```
+
+Account policy may limit availability. Use agent preflight to verify access.
 
 ### Run preflight
 
-Checks the Azure configuration and permissions required by the selected
-scenarios:
+Check agent installation, authentication, and model access:
 
 ```bash
 python run_evals.py \
-  --scenario rag-app \
+  --configuration configuration.yml \
+  --preflight:agents
+```
+
+Check Azure configuration and permissions:
+
+```bash
+python run_evals.py \
+  --configuration configuration.yml \
+  --preflight:permissions
+```
+
+Run both checks:
+
+```bash
+python run_evals.py \
+  --configuration configuration.yml \
   --preflight
 ```
 
-The result is written to `runs/<run-id>/preflight.json`.
-
-### Run all scenarios with one model
-
-```bash
-python run_evals.py --model gpt-5.4
-```
-
-```bash
-python run_evals.py --model claude-sonnet-5
-```
-
-### Run all scenarios with both models
-
-```bash
-python run_evals.py \
-  --model gpt-5.4 \
-  --model claude-sonnet-5
-```
+The result is written to `runs/<run-id>/preflight.json`. Agent-only preflight
+does not require `validation.env`.
 
 ### Run selected scenarios
 
@@ -177,7 +212,7 @@ Repeat `--scenario` to select more than one:
 
 ```bash
 python run_evals.py \
-  --model gpt-5.4 \
+  --configuration configuration.yml \
   --scenario javascript-app \
   --scenario rag-app
 ```
@@ -198,6 +233,7 @@ Scenario dependencies are included automatically. `multi-tenant` includes
 
 ```bash
 python run_evals.py \
+  --configuration configuration.yml \
   --agent-timeout-seconds 3600 \
   --validation-timeout-seconds 1200
 ```
@@ -205,7 +241,9 @@ python run_evals.py \
 ### Retain generated workspaces
 
 ```bash
-python run_evals.py --keep-workspaces
+python run_evals.py \
+  --configuration configuration.yml \
+  --keep-workspaces
 ```
 
 ## Scenario coverage
@@ -225,34 +263,28 @@ Runs are written under `runs/<UTC timestamp>-<unique suffix>/`:
 
 ```text
 runs/<run-id>/
-├── manifest.json                         // Selected models, scenarios, and limits
-├── preflight.json                        // Azure context and permission results
-├── results.json                          // Complete run result rollup
-├── summary.md                            // Human-readable result summary
-└── <model>/
-    ├── azure/                            // Azure command metadata, stdout, and stderr
-    ├── resources.json                    // Azure resource names and identifiers
-    ├── results.json                      // Result rollup for this model
-    ├── scenarios/
-    │   └── <scenario>/
-    │       ├── prompt.md                 // Exact prompt sent to the agent
-    │       ├── result.json               // Result for this scenario and model
-    │       ├── agent/
-    │       │   ├── *.json                // Copilot command metadata
-    │       │   ├── *.stdout.txt          // Copilot JSONL event stream
-    │       │   ├── *.stderr.txt          // Copilot stderr
-    │       │   └── copilot-logs/         // Copilot session logs
-    │       └── validation/
-    │           ├── *.json                // Validator command metadata
-    │           ├── *.stdout.txt          // Validator output and server logs
-    │           └── *.stderr.txt          // Validator stderr
-    └── workspaces/                       // Present when --keep-workspaces is used
-        └── <scenario>/                   // Agent-generated application
+├── manifest.json
+├── preflight.json
+├── results.json
+├── summary.md
+└── <harness>/
+    └── <model>/
+        ├── azure/
+        ├── resources.json
+        ├── results.json
+        ├── scenarios/
+        │   └── <scenario>/
+        │       ├── prompt.md
+        │       ├── result.json
+        │       ├── agent/
+        │       └── validation/
+        └── workspaces/                  # Present when --keep-workspaces is used
 ```
 
 ## Run the harness tests
 
-The harness tests do not invoke Copilot CLI or create Azure resources:
+The harness tests use fake agent executables and do not invoke real coding
+agents or create Azure resources:
 
 ```bash
 python -m unittest discover -s tests -v

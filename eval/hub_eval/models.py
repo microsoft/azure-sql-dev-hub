@@ -7,6 +7,32 @@ from pathlib import Path
 from typing import Any
 
 
+def output_slug(value: str) -> str:
+    """Normalize one target identity component for an artifact directory."""
+    import re
+
+    return re.sub(r"[^a-z0-9]+", "-", value.lower()).strip("-")
+
+
+@dataclass(frozen=True)
+class EvaluationTarget:
+    """One coding-agent harness and model combination."""
+
+    harness: str
+    model: str
+
+
+@dataclass(frozen=True)
+class TestMatrix:
+    """Fully expanded, ordered non-secret evaluation run plan."""
+
+    targets: tuple[EvaluationTarget, ...]
+    scenarios: tuple[str, ...]
+    agent_timeout_seconds: int
+    validation_timeout_seconds: int
+    keep_workspaces: bool
+
+
 @dataclass(frozen=True)
 class CommandResult:
     """Result of a bounded subprocess invocation."""
@@ -44,6 +70,7 @@ class ScenarioResult:
     """Outcome and evidence for one prompt scenario."""
 
     scenario: str
+    harness: str
     model: str
     status: str
     reason: str
@@ -59,8 +86,9 @@ class ScenarioResult:
 
 @dataclass(frozen=True)
 class EnvironmentResult:
-    """Azure setup, cleanup, and provisioned resources for one model."""
+    """Azure setup, cleanup, and resources for one evaluation target."""
 
+    harness: str
     model: str
     setup_duration_seconds: float
     cleanup_duration_seconds: float
@@ -93,8 +121,9 @@ class PermissionCheck:
 
 @dataclass(frozen=True)
 class PreflightResult:
-    """Azure preflight outcome for one model environment."""
+    """Azure preflight outcome for one target environment."""
 
+    harness: str | None
     model: str | None
     status: str
     duration_seconds: float
@@ -111,6 +140,22 @@ class PreflightResult:
 
 
 @dataclass(frozen=True)
+class AgentPreflightResult:
+    """Outcome of one no-tools coding-agent access probe."""
+
+    harness: str
+    model: str
+    status: str
+    duration_seconds: float
+    reason: str
+    evidence: tuple[str, ...]
+
+    def to_dict(self) -> dict[str, Any]:
+        """Serialize the probe result for standalone JSON evidence."""
+        return asdict(self)
+
+
+@dataclass(frozen=True)
 class RunSettings:
     """Validated command-line settings for one matrix run."""
 
@@ -119,7 +164,7 @@ class RunSettings:
     tenant_id: str
     subscription_id: str
     location: str
-    models: tuple[str, ...]
+    targets: tuple[EvaluationTarget, ...]
     scenarios: tuple[str, ...]
     agent_timeout_seconds: int
     validation_timeout_seconds: int
@@ -130,3 +175,4 @@ class RunSettings:
     embedding_dimension: int | None
     existing_resource_group: str | None
     existing_server: str | None
+    configuration_path: Path | None = None

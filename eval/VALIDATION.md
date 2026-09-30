@@ -1,31 +1,37 @@
 # Evaluation status
 
-## Model smoke tests
+## Harness and model smoke tests
 
-GitHub Copilot CLI 1.0.85 successfully completed noninteractive smoke tests with:
+The evaluation completed successfully with:
 
-- `gpt-5.4`
-- `claude-sonnet-5`
+- GitHub Copilot CLI using `gpt-5.4`
+- GitHub Copilot CLI using `claude-sonnet-5`
+- Claude Code using `claude-sonnet-5`
 
 ## Scenario results
 
-Run `20260928T172540Z-ae419628` completed all six scenarios with `gpt-5.4`
-and `claude-sonnet-5`. All 12 scenario/model combinations passed independent
-end-state validation, both Azure preflights passed, and cleanup completed
-without errors. The evidence is under
-`eval/runs/20260928T172540Z-ae419628/`.
+Run `20260929T004000Z-f1d89da0` completed all six scenarios with three
+harness/model targets. All 18 combinations passed independent end-state
+validation, all three Azure preflights passed, and cleanup completed without
+errors.
 
-| Scenario | Model | Result | Run ID |
-|---|---|---|---|
-| JavaScript app | `gpt-5.4` | ✅ PASS: independent end-state validation passed. | `20260928T172540Z-ae419628` |
-| JavaScript app | `claude-sonnet-5` | ✅ PASS: independent end-state validation passed. | `20260928T172540Z-ae419628` |
-| Python API | `gpt-5.4` | ✅ PASS: independent end-state validation passed. | `20260928T172540Z-ae419628` |
-| Python API | `claude-sonnet-5` | ✅ PASS: independent end-state validation passed. | `20260928T172540Z-ae419628` |
-| RAG | `gpt-5.4` | ✅ PASS: independent end-state validation passed. | `20260928T172540Z-ae419628` |
-| RAG | `claude-sonnet-5` | ✅ PASS: independent end-state validation passed. | `20260928T172540Z-ae419628` |
-| Serverless API | `gpt-5.4` | ✅ PASS: independent end-state validation passed. | `20260928T172540Z-ae419628` |
-| Serverless API | `claude-sonnet-5` | ✅ PASS: independent end-state validation passed. | `20260928T172540Z-ae419628` |
-| Event-driven app | `gpt-5.4` | ✅ PASS: independent end-state validation passed. | `20260928T172540Z-ae419628` |
-| Event-driven app | `claude-sonnet-5` | ✅ PASS: independent end-state validation passed. | `20260928T172540Z-ae419628` |
-| Multi-tenant app | `gpt-5.4` | ✅ PASS: independent end-state validation passed. | `20260928T172540Z-ae419628` |
-| Multi-tenant app | `claude-sonnet-5` | ✅ PASS: independent end-state validation passed. | `20260928T172540Z-ae419628` |
+| Scenario | Harness | Model | Result | Run ID |
+|---|---|---|---|---|
+| JavaScript app | Copilot | `gpt-5.4` | ✅ PASS: independent end-state validation passed. | `20260929T004000Z-f1d89da0` |
+| Python API | Copilot | `gpt-5.4` | ✅ PASS: independent end-state validation passed. | `20260929T004000Z-f1d89da0` |
+| RAG | Copilot | `gpt-5.4` | ✅ PASS: independent end-state validation passed. | `20260929T004000Z-f1d89da0` |
+| Serverless API | Copilot | `gpt-5.4` | ✅ PASS: independent end-state validation passed. | `20260929T004000Z-f1d89da0` |
+| Event-driven app | Copilot | `gpt-5.4` | ✅ PASS: independent end-state validation passed. | `20260929T004000Z-f1d89da0` |
+| Multi-tenant app | Copilot | `gpt-5.4` | ✅ PASS: independent end-state validation passed. | `20260929T004000Z-f1d89da0` |
+| JavaScript app | Copilot | `claude-sonnet-5` | ✅ PASS: independent end-state validation passed. | `20260929T004000Z-f1d89da0` |
+| Python API | Copilot | `claude-sonnet-5` | ✅ PASS: independent end-state validation passed. | `20260929T004000Z-f1d89da0` |
+| RAG | Copilot | `claude-sonnet-5` | ✅ PASS: independent end-state validation passed. | `20260929T004000Z-f1d89da0` |
+| Serverless API | Copilot | `claude-sonnet-5` | ✅ PASS: independent end-state validation passed. | `20260929T004000Z-f1d89da0` |
+| Event-driven app | Copilot | `claude-sonnet-5` | ✅ PASS: independent end-state validation passed. | `20260929T004000Z-f1d89da0` |
+| Multi-tenant app | Copilot | `claude-sonnet-5` | ✅ PASS: independent end-state validation passed. | `20260929T004000Z-f1d89da0` |
+| JavaScript app | Claude Code | `claude-sonnet-5` | ✅ PASS: independent end-state validation passed. | `20260929T004000Z-f1d89da0` |
+| Python API | Claude Code | `claude-sonnet-5` | ✅ PASS: independent end-state validation passed. | `20260929T004000Z-f1d89da0` |
+| RAG | Claude Code | `claude-sonnet-5` | ✅ PASS: independent end-state validation passed. | `20260929T004000Z-f1d89da0` |
+| Serverless API | Claude Code | `claude-sonnet-5` | ✅ PASS: independent end-state validation passed. | `20260929T004000Z-f1d89da0` |
+| Event-driven app | Claude Code | `claude-sonnet-5` | ✅ PASS: independent end-state validation passed. | `20260929T004000Z-f1d89da0` |
+| Multi-tenant app | Claude Code | `claude-sonnet-5` | ✅ PASS: independent end-state validation passed. | `20260929T004000Z-f1d89da0` |
