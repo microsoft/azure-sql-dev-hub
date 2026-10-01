@@ -5,6 +5,8 @@
   "type": "module",
   "scripts": {
     "test": "node scripts/check-house-rules.mjs && node scripts/check-telemetry.mjs",
+    "build:site": "node scripts/build-site.mjs",
+    "build:site:telemetry": "node scripts/build-site.mjs --telemetry",
     "build:agent-files": "node scripts/build-agent-files.mjs",
     "check:links": "node scripts/check-links.mjs"
   },

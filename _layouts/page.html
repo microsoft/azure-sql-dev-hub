@@ -1,7 +1,11 @@
 <!doctype html>
 <html lang="en">
 {% include head.html %}
-<body>
+{%- if page.path contains 'build/' -%}
+<body data-view="scenarioPage" data-scenario="{{ page.name | remove: '.md' | remove: '.html' }}">
+{%- else -%}
+<body data-view="{{ page.name | remove: '.md' | remove: '.html' }}">
+{%- endif -%}
 {% include nav.html %}
 <main id="main">
   <div class="prosePage">

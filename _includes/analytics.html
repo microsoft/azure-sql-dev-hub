@@ -6,7 +6,7 @@
   {%- if site.analytics.clarity_project_id != "" -%}
     {% include analytics/clarity.html %}
   {%- endif -%}
-  {%- if site.analytics.app_insights_connection_string != "" -%}
-    {% include analytics/app-insights.html %}
+  {%- if site.analytics.one_ds_instrumentation_key != "" -%}
+    {% include analytics/one-ds.html %}
   {%- endif -%}
 {%- endif -%}

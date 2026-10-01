@@ -44,7 +44,8 @@ jobs:
         run: |
           base='${{ steps.pages.outputs.base_path }}'
           if [ "$base" = "/" ]; then base=""; fi
-          printf 'url: "%s"\nbaseurl: "%s"\n' '${{ steps.pages.outputs.origin }}' "$base" > _config_pages.yml
+          printf 'url: "%s"\nbaseurl: "%s"\ntelemetry_build_version: "%s"\n' \
+            '${{ steps.pages.outputs.origin }}' "$base" "$GITHUB_SHA" > _config_pages.yml
           echo "Building for ${{ steps.pages.outputs.origin }}$base"
           cat _config_pages.yml
       - name: Build with Jekyll

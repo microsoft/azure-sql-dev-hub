@@ -23,19 +23,13 @@ azure_free_offer: "https://learn.microsoft.com/azure/azure-sql/database/free-off
 azure_portal_hub: "https://aka.ms/azuresqlhub"
 azure_sql_docs: "https://learn.microsoft.com/azure/azure-sql/"
 
-# Web analytics (client-side). Loads only when `enabled` is true and a provider
-# is configured. Clarity project IDs and Application Insights connection strings
-# are browser-embeddable identifiers, not secrets, so they belong in this file.
-#
-# TODO: this hub has no Application Insights resource yet. Create one for the
-# hub and paste its connection string below. The loader in
-# _includes/analytics/app-insights.html and the track() helper in
-# assets/js/main.js are already wired; track() fans out to App Insights the
-# moment this is filled in.
+# Web analytics (client-side). Clarity and 1DS identifiers are browser-embeddable
+# and are not read credentials. Local builds initialize 1DS in disabled mode.
+telemetry_build_version: "local"
 analytics:
   enabled: true
   clarity_project_id: "yjvfuw0h6k"
-  app_insights_connection_string: ""
+  one_ds_instrumentation_key: "29a207bb14f84905966a8f22524cb730-25407f35-11b6-4d4e-8114-ab9e843cb52f-7380"
 
 markdown: kramdown
 kramdown:
@@ -72,3 +66,10 @@ exclude:
   - vendor
 
   - outputs
+  - eval/.venv
+  - eval/__pycache__
+  - eval/hub_eval/__pycache__
+  - eval/runs
+  - eval/tests/__pycache__
+  - eval/verifications/__pycache__
+  - eval/configuration.yml

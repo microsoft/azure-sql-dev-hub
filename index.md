@@ -30,7 +30,6 @@ quickstart:
   title: Create a free Azure SQL database.
   desc: Create it in the Azure portal with the free offer, then verify from any SQL editor. Prerequisites and offer limits are in the setup guide.
   code: SELECT 1 AS connected;
-  copy_event: copy_verify
   detail_title: Three steps, then you are live.
   checks:
   - - Create the database
@@ -42,7 +41,6 @@ quickstart:
   link:
     label: 'Free offer: setup guide, prerequisites, and limits'
     href: https://learn.microsoft.com/azure/azure-sql/database/free-offer
-    event: docs_free_offer
 - key: local
   name: Local container
   pill: Preview
@@ -51,7 +49,6 @@ quickstart:
   button:
     label: Sign up for the Preview
     href: https://aka.ms/sqldbcontainerpreview-signup
-    event: container_signup
   detail_title: What you get once you are in.
   checks:
   - - One docker run
@@ -63,13 +60,11 @@ quickstart:
   link:
     label: Container quickstart
     href: https://microsoft.github.io/azure-sql-database-container/getting-started.html
-    event: docs_container
 - key: agent
   name: With your coding agent
   title: Install the skills, then ask in plain English.
   desc: One command teaches Claude Code, Copilot, Codex, or Cursor how Azure SQL works. You stay in the loop on every step.
   code: npx skills add microsoft/microsoft-sql
-  copy_event: copy_skills_start
   detail_title: Then say what you want.
   checks:
   - - Create a free database first
@@ -81,7 +76,6 @@ quickstart:
   link:
     label: What the skills teach, per agent
     href: https://aka.ms/azuresql-skills
-    event: docs_skills
 then:
   from: Local or free tier
   to: Azure SQL Database
@@ -153,28 +147,24 @@ workloads:
   link:
     label: Vector docs
     href: https://learn.microsoft.com/sql/relational-databases/vectors/vectors-sql-server
-    event: docs_vector
 - title: Embeddings in T-SQL
   text: Generate and chunk from inside the database with external model calls. No separate pipeline.
   icon: <svg viewBox="0 0 24 24"><path d="M12 3v18M3 12h18"/><circle cx="12" cy="12" r="8"/></svg>
   link:
     label: AI_GENERATE_EMBEDDINGS
     href: https://learn.microsoft.com/sql/t-sql/functions/ai-generate-embeddings-transact-sql
-    event: docs_embeddings
 - title: RAG, end to end
   text: Chunk, embed, store, retrieve, ground. One skill walks your agent through all five.
   icon: <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M8 10h8M8 14h5"/></svg>
   link:
     label: Copy the RAG prompt
     href: '#rag-app'
-    event: tile_rag_prompt
 - title: Safe for agents to write
   text: Row-level security, Entra identity, and injection-safe patterns the skills enforce by default.
   icon: <svg viewBox="0 0 24 24"><path d="M12 3l8 4v6c0 4-3.5 7-8 8-4.5-1-8-4-8-8V7z"/></svg>
   link:
     label: Row-level security docs
     href: https://learn.microsoft.com/sql/relational-databases/security/row-level-security
-    event: docs_rls
 skills:
   heading: Microsoft SQL Agent Skills
   text: Pick your agent. One install. The skills load themselves when the work matches.
@@ -188,7 +178,7 @@ skills:
 
       claude plugin install microsoft-sql@microsoft-sql'
     note: 'Two commands: register the marketplace, then install the plugin with every skill. Or the portable form: <code>gh skill install microsoft/microsoft-sql --all --agent claude-code</code>.'
-  - key: copilot
+  - key: vscode-copilot
     name: GitHub Copilot
     blurb: VS Code, CLI, app
     logo: <svg aria-hidden="true" fill="#ffffff" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M23.922 16.997C23.061 18.492 18.063 22.02 12 22.02 5.937 22.02.939 18.492.078 16.997A.641.641 0 0 1 0 16.741v-2.869a.883.883 0 0 1 .053-.22c.372-.935 1.347-2.292 2.605-2.656.167-.429.414-1.055.644-1.517a10.098 10.098 0 0 1-.052-1.086c0-1.331.282-2.499 1.132-3.368.397-.406.89-.717 1.474-.952C7.255 2.937 9.248 1.98 11.978 1.98c2.731 0 4.767.957 6.166 2.093.584.235 1.077.546 1.474.952.85.869 1.132 2.037 1.132 3.368 0 .368-.014.733-.052 1.086.23.462.477 1.088.644 1.517 1.258.364 2.233 1.721 2.605 2.656a.841.841 0 0 1 .053.22v2.869a.641.641 0 0 1-.078.256Zm-11.75-5.992h-.344a4.359 4.359 0 0 1-.355.508c-.77.947-1.918 1.492-3.508 1.492-1.725 0-2.989-.359-3.782-1.259a2.137 2.137 0 0 1-.085-.104L4 11.746v6.585c1.435.779 4.514 2.179 8 2.179 3.486 0 6.565-1.4 8-2.179v-6.585l-.098-.104s-.033.045-.085.104c-.793.9-2.057 1.259-3.782 1.259-1.59 0-2.738-.545-3.508-1.492a4.359 4.359
