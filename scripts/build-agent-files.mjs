@@ -20,7 +20,7 @@ import yaml from 'js-yaml';
 
 const SITE = '_site';
 const SKIP_FILES = new Set(['README.md', 'CONTRIBUTING.md', 'CODE_OF_CONDUCT.md', 'SECURITY.md', 'SUPPORT.md']);
-const SKIP_DIRS = new Set(['_site', '_includes', '_layouts', 'docs', 'scripts', 'node_modules', '.github', '.git', 'assets', 'vendor', '.jekyll-cache', 'outputs']);
+const SKIP_DIRS = new Set(['_site', '_includes', '_layouts', '__pycache__', 'docs', 'runs', 'scripts', 'node_modules', '.github', '.git', 'assets', 'vendor', '.jekyll-cache', 'outputs']);
 
 // Reading order for llms-full.txt. Anything discovered but not listed appends
 // alphabetically, so a new page is never silently dropped.

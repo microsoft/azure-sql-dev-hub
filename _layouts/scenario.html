@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
 {% include head.html %}
-<body>
+<body data-view="scenarioPage" data-scenario="{{ page.name | remove: '.md' | remove: '.html' }}">
 {% include nav.html %}
 
 <main id="main">
@@ -23,8 +23,10 @@
               <div class="promptSurface">
                 <span id="scenario-prompt">{{ page.prompt }}</span>
                 <button class="promptCopy" type="button" data-copy="#scenario-prompt"
-                        data-copy-kind="prompt" data-copy-source="scenario"
-                        data-scenario="{{ scenario_id }}"
+                        data-copy-kind="prompt"
+                        data-event-action="copyPrompt"
+                        data-event-action-location="scenario"
+                        data-event-scenario="{{ scenario_id }}"
                         data-clarity-event="copy_prompt_{{ scenario_id }}"
                         aria-label="Copy the scenario prompt">Copy prompt</button>
               </div>
@@ -37,7 +39,9 @@
               <div class="codeBox">
                 <pre id="scenario-code">{{ page.starter.code }}</pre>
                 <button class="copyBtn" type="button" data-copy="#scenario-code"
-                        data-copy-event="copy_code" data-copy-source="scenario"
+                        data-event-action-location="scenario"
+                        data-event-content-id="{{ scenario_id }}-starter"
+                        data-event-content-type="code"
                         aria-label="Copy the starter code">Copy</button>
               </div>
             </div>
@@ -52,13 +56,17 @@
             <div class="codeBox">
               <pre id="scenario-skill">{{ page.skill.install }}</pre>
               <button class="copyBtn" type="button" data-copy="#scenario-skill"
-                      data-copy-event="install_cmd_copy" data-copy-source="scenario"
+                      data-event-action-location="scenario"
+                      data-event-content-id="{{ scenario_id }}-skill"
+                      data-event-content-type="skill-install"
                       aria-label="Copy the skill install command">Copy</button>
             </div>
             {%- else %}
             <div class="asideActions">
               <a class="actionLink" href="{{ site.skills_catalog }}" rel="noopener"
-                 data-event="install_cmd_copy" data-event-source="scenario-catalog">Browse the skill catalog <span aria-hidden="true">→</span></a>
+                 data-event="site/action" data-event-action="outboundClicked"
+                 data-event-destination-id="skills-catalog"
+                 data-event-destination-type="github">Browse the skill catalog <span aria-hidden="true">→</span></a>
             </div>
             {%- endif %}
           </div>
@@ -67,10 +75,13 @@
             <h4>Go deeper</h4>
             <div class="asideActions">
               <a class="actionLink primary" href="{{ page.docs.href }}" rel="noopener"
-                 data-event="docs_deep_read" data-event-source="scenario">{{ page.docs.label }} <span aria-hidden="true">→</span></a>
+                 data-event="site/action" data-event-action="outboundClicked"
+                 data-event-destination-id="{{ scenario_id }}-docs"
+                 data-event-destination-type="docs">{{ page.docs.label }} <span aria-hidden="true">→</span></a>
               <a class="actionLink" href="{{ page.url | replace: '.html', '.md' | relative_url }}"
-                 data-event="md_fetch" data-event-source="scenario"
-                 data-event-scenario-id="{{ scenario_id }}"
+                 data-event="site/action" data-event-action="viewPrompt"
+                 data-event-action-location="scenario"
+                 data-event-scenario="{{ scenario_id }}"
                  data-clarity-event="view_prompt_{{ scenario_id }}">View as Markdown <span class="hint">.md</span></a>
             </div>
           </div>

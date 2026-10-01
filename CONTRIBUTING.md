@@ -40,8 +40,7 @@ back into markdown for the twin, so edit the front matter and let the script reg
 
    ```
    npm test
-   bundle exec jekyll build
-   npm run build:agent-files
+   npm run build:site
    npm run check:links
    ```
 

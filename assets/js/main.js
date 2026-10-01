@@ -7,19 +7,115 @@
   document.documentElement.classList.add("js");
 
   // ---- telemetry ----
-  // Telemetry contract for engineering. One track() fans out to every provider.
-  // Providers join the fan-out when their IDs are configured in _config.yml.
-  // Event taxonomy:
-  //   quickstart_start, agent_start_clicked, install_cmd_copy, copy_command,
-  //   copy_prompt, copy_code, gallery_card_open, docs_deep_read, docs_outbound,
-  //   azure_outbound, md_fetch, existing_data_clicked, walkthrough_open.
-  // Item-level Clarity events supplement these aggregate names when configured.
-  var clarityTagKeys = ["agent_id", "mode", "scenario_id", "source", "video_id"];
+  var clarityTagKeys = [
+    "action",
+    "actionLocation",
+    "contentId",
+    "contentType",
+    "destinationType",
+    "harnessId",
+    "mediaAction",
+    "pathId",
+    "runtimeId",
+    "scenario",
+    "view"
+  ];
+
+  function currentView() {
+    return document.body.getAttribute("data-view") || "unknown";
+  }
+
+  function browserFamily() {
+    var ua = navigator.userAgent || "";
+    if (/Edg\//.test(ua)) return "edge";
+    if (/Chrome\//.test(ua)) return "chrome";
+    if (/Firefox\//.test(ua)) return "firefox";
+    if (/Safari\//.test(ua)) return "safari";
+    return "other";
+  }
+
+  function osFamily() {
+    var ua = navigator.userAgent || "";
+    if (/Windows/.test(ua)) return "windows";
+    if (/Android/.test(ua)) return "android";
+    if (/iPhone|iPad|iPod/.test(ua)) return "ios";
+    if (/Mac OS/.test(ua)) return "macos";
+    if (/Linux/.test(ua)) return "linux";
+    return "other";
+  }
+
+  function deviceClass() {
+    var ua = navigator.userAgent || "";
+    if (/iPad|Tablet/.test(ua)) return "tablet";
+    if (/Mobile|Android|iPhone|iPod/.test(ua)) return "mobile";
+    return "desktop";
+  }
+
+  function localeGroup() {
+    var language = (navigator.language || "other").slice(0, 2).toLowerCase();
+    return ["de", "en", "fr", "ja"].indexOf(language) >= 0 ? language : "other";
+  }
+
+  function referrerCategory() {
+    if (!document.referrer) return "direct";
+    try {
+      var hostname = new URL(document.referrer).hostname.toLowerCase();
+      if (hostname === "github.com" || /\.github\.com$/.test(hostname)) return "github";
+      if (
+        /\.microsoft\.com$/.test(hostname) ||
+        hostname === "microsoft.github.io" ||
+        /\.microsoft\.github\.io$/.test(hostname)
+      ) return "microsoft";
+      if (/google\.|bing\.com$|duckduckgo\.com$/.test(hostname)) return "search";
+    } catch (error) {
+      console.warn("[telemetry] could not classify referrer", error);
+    }
+    return "other";
+  }
+
+  function isLandingPage() {
+    if (!document.referrer) return true;
+    try {
+      return new URL(document.referrer).origin !== location.origin;
+    } catch (error) {
+      console.warn("[telemetry] could not compare landing referrer", error);
+      return true;
+    }
+  }
+
+  function browserContext() {
+    var context = {
+      browserFamily: browserFamily(),
+      deviceClass: deviceClass(),
+      localeGroup: localeGroup(),
+      osFamily: osFamily(),
+      pagePath: location.pathname,
+      referrerCategory: referrerCategory(),
+      timeZoneOffsetMinutes: String(new Date().getTimezoneOffset()),
+      view: currentView()
+    };
+    var scenario = document.body.getAttribute("data-scenario");
+    if (scenario) context.scenario = scenario;
+    return context;
+  }
+
+  function eventProperties(el) {
+    var props = {};
+    Array.prototype.forEach.call(el.attributes, function (attribute) {
+      if (attribute.name.indexOf("data-event-") === 0) {
+        var key = attribute.name
+          .slice(11)
+          .replace(/-([a-z])/g, function (_, letter) { return letter.toUpperCase(); });
+        props[key] = attribute.value;
+      }
+    });
+    return props;
+  }
 
   function track(name, props, options) {
-    var p = props || {};
+    var p = Object.assign({}, props || {});
+    p.view = p.view || currentView();
     var clarityEvent = options && options.clarityEvent;
-    p.path = location.pathname;
     try { console.log("[telemetry]", name, p); } catch (e) {}
     try {
       if (typeof window.clarity === "function") {
@@ -33,31 +129,33 @@
           window.clarity("event", clarityEvent);
         }
       }
-    } catch (e) {}
+    } catch (error) {
+      console.warn("[telemetry] Clarity event failed", error);
+    }
     try {
-      if (window.appInsights && typeof window.appInsights.trackEvent === "function") {
-        window.appInsights.trackEvent({ name: name }, p);
+      if (
+        window.mssqlAgentSkillsTelemetry &&
+        typeof window.mssqlAgentSkillsTelemetry.track === "function"
+      ) {
+        window.mssqlAgentSkillsTelemetry.track(
+          name,
+          Object.assign(browserContext(), p),
+          (options && options.measurements) || { count: 1 }
+        );
       }
-    } catch (e) {}
+    } catch (error) {
+      console.warn("[telemetry] 1DS event failed", error);
+    }
   }
   window.trackHubEvent = track;
+  track("site/action", { action: "pageView", isLanding: isLandingPage() });
 
   // Declarative events: any element with data-event fires it on click, with
   // optional data-event-* props (data-event-scenario-id becomes scenario_id).
   document.querySelectorAll("[data-event]").forEach(function (el) {
     if (el.hasAttribute("data-copy") || el.hasAttribute("data-hcopy") || el.hasAttribute("data-hprompt")) return;
     el.addEventListener("click", function () {
-      var props = {};
-      Array.prototype.forEach.call(el.attributes, function (a) {
-        if (a.name.indexOf("data-event-") === 0) {
-          props[a.name.slice(11).replace(/-/g, "_")] = a.value;
-        }
-      });
-      ["agent", "scenario", "video"].forEach(function (key) {
-        var value = el.getAttribute("data-" + key);
-        if (value) props[key + "_id"] = value;
-      });
-      track(el.getAttribute("data-event"), props, {
+      track(el.getAttribute("data-event"), eventProperties(el), {
         clarityEvent: el.getAttribute("data-clarity-event")
       });
     });
@@ -70,7 +168,11 @@
     var toAzure = /portal\.azure\.com|aka\.ms/.test(a.href);
     if (!toDocs && !toAzure) return;
     a.addEventListener("click", function () {
-      track(toDocs ? "docs_outbound" : "azure_outbound", { href: a.href });
+      track("site/action", {
+        action: "outboundClicked",
+        destinationId: toDocs ? "microsoft-learn" : "azure-or-short-link",
+        destinationType: toDocs ? "docs" : "other"
+      });
     });
   });
 
@@ -110,10 +212,12 @@
     }
   }
 
-  function commandEvent(text, declared) {
+  function copyContentType(text, declared) {
     if (declared) return declared;
-    if (/npx skills add|plugin marketplace add|plugin (?:install|add)/.test(text)) return "install_cmd_copy";
-    return "copy_command";
+    if (/npx skills add|plugin marketplace add|plugin (?:install|add)/.test(text)) {
+      return "collection-install";
+    }
+    return "command";
   }
 
   // Buttons that name their source: data-copy points at the element to copy,
@@ -125,19 +229,22 @@
       var isPrompt = btn.getAttribute("data-copy-kind") === "prompt";
       var text = isPrompt ? raw.trim() : normalizeCommand(raw);
       copyText(text, btn).then(function (copied) { if (!copied) return;
-      var props = { source: btn.getAttribute("data-copy-source") || "page" };
-      var scenario = btn.getAttribute("data-scenario");
-      if (scenario) props.scenario_id = scenario;
-      track(
-        btn.getAttribute("data-copy-event") || (isPrompt ? "copy_prompt" : commandEvent(text, null)),
-        props,
-        { clarityEvent: btn.getAttribute("data-clarity-event") }
-      ); });
+        var props = eventProperties(btn);
+        props.actionLocation = props.actionLocation || "prose";
+        props.action = props.action || "contentCopied";
+        if (props.action !== "copyPrompt") {
+          props.contentId = props.contentId || currentView() + "-copy";
+          props.contentType = props.contentType || (isPrompt ? "prompt" : copyContentType(text));
+        }
+        track("site/action", props, {
+          clarityEvent: btn.getAttribute("data-clarity-event")
+        });
+      });
     });
   });
 
   // Every bare code block in prose gets a copy button.
-  document.querySelectorAll(".prose pre, .scenarioProse pre").forEach(function (pre) {
+  document.querySelectorAll(".prose pre, .scenarioProse pre").forEach(function (pre, index) {
     if (pre.querySelector(".copyBtn")) return;
     var btn = document.createElement("button");
     btn.className = "copyBtn";
@@ -148,7 +255,15 @@
       var code = pre.querySelector("code") || pre;
       var text = normalizeCommand(code.innerText);
       var isPrompt = code.classList.contains("language-text");
-      copyText(text, btn).then(function (copied) { if (copied) track(isPrompt ? "copy_prompt" : commandEvent(text, /npx |plugin /.test(text) ? null : "copy_code"), { source: "prose" }); });
+      copyText(text, btn).then(function (copied) {
+        if (!copied) return;
+        track("site/action", {
+          action: "contentCopied",
+          actionLocation: "prose",
+          contentId: currentView() + "-prose-" + (index + 1),
+          contentType: isPrompt ? "prompt" : copyContentType(text, /npx |plugin /.test(text) ? null : "code"),
+        });
+      });
     });
     pre.appendChild(btn);
   });
@@ -180,7 +295,7 @@
         }
       }
       if (opts && opts.user && name === "quickstart") {
-        track("quickstart_start", { mode: key });
+        track("site/action", { action: "pathSelected", pathId: key });
       }
     }
 
