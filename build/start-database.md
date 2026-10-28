@@ -55,4 +55,7 @@ You need an Azure account and subscription.
 The [free tier documentation](https://learn.microsoft.com/azure/azure-sql/database/free-tier)
 has the current limits and what happens when a database reaches its monthly cap.
 The same creation is scriptable with the Azure CLI; the Cloud tab on the
-[home page](../index.md) carries the command.
+[home page](../index.md) carries the command. To run the first query from a
+terminal instead of the portal, the
+[sqlcmd utility](https://learn.microsoft.com/sql/tools/sqlcmd/sqlcmd-utility)
+supports Azure SQL Database.
