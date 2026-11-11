@@ -2,13 +2,16 @@
 <html lang="en">
 {% include head.html %}
 <style>
-.h{--ink:#1a1a1a;--muted:#5a626c;--faint:#8a919a;--line:#e1e6eb;--accent:#0067b8;--accent-ink:#00508f;--tint:#eff6fc;--ok:#107c10;--dark:#0e1a2b;--dark2:#162538;--panel:#f5f7fa;--panel2:#fafbfd;--r:12px;color:var(--ink);line-height:1.55}
+/* Colors, type, and width come from the tokens in main.scss. These local names
+   map onto them until each section is rebuilt from the redesign. Here --ink
+   means text, not the dark code surface it means in main.scss. */
+.h{--ink:var(--text);--faint:var(--text-3);--accent-ink:var(--accent-hover);--tint:#eff6fc;--ok:#107c10;--dark:var(--code-bg);--dark2:var(--code-control-bg);--panel:var(--bg-subtle);--panel2:var(--bg-soft);--r:12px;color:var(--text);line-height:1.5}
 .h *{box-sizing:border-box}
-.h .w{max-width:1080px;margin:0 auto;padding:0 24px}
+.h .w{max-width:calc(var(--max) + 2 * var(--gutter));margin:0 auto;padding:0 var(--gutter)}
 .h h1,.h h2,.h h3{margin:0;line-height:1.15;letter-spacing:-0.02em}
 .h h2{font-size:34px;font-weight:700}.h h3{font-size:18px;font-weight:600}.h p{margin:0}
 .h .muted{color:var(--muted)}.h .faint{color:var(--faint);font-size:13px}
-.h code,.h pre,.h .mono{font-family:ui-monospace,"Cascadia Code",Menlo,Consolas,monospace}
+.h code,.h pre,.h .mono{font-family:var(--font-mono)}
 .h a{color:var(--accent);text-decoration:none}.h a:hover{text-decoration:underline}
 .h [id]{scroll-margin-top:80px}
 .h .btn{display:inline-flex;align-items:center;gap:8px;padding:12px 22px;border-radius:9px;font-weight:600;font-size:15px;border:1px solid transparent;cursor:pointer;font-family:inherit}

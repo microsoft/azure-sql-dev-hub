@@ -5,85 +5,191 @@
 /* ============================================================
    Azure SQL Developer Hub
 
-   Ported from the approved V8 mockup. Light, high contrast, developer
-   oriented. The page is never dark; code surfaces are. Blue is Microsoft
-   blue and appears on interactive elements and accents.
+   The tokens in :root come from the Ignite redesign. Components are still
+   the V8 port and move to the redesign one section at a time. Until a
+   section is rebuilt it reads these tokens through the legacy names at the
+   end of :root, so it already takes the new palette.
 
-   Sections the mockup did not design (skills, scenario pages, prose pages)
-   extend the same tokens and rhythm rather than inventing a second look.
+   The page follows the visitor's theme: the system setting until they pick
+   one with the toggle, then their pick (see the script in head.html). Only
+   regions already rebuilt from the redesign switch to dark; the rest stays
+   light until its section is rebuilt and added to the themed regions below.
+   Blue is Microsoft blue and appears on interactive elements and accents.
+
+   Pages the redesign did not draw (scenario pages, prose pages) extend the
+   same tokens and rhythm rather than inventing a second look.
    ============================================================ */
 
-:root{
-  --bg:#fbfcfe;
-  --surface:#ffffff;
-  --surface2:#f6f8fb;
-  --text:#0f1728;
-  --muted:#667085;
-  --line:#e5e9ef;
-  --line2:#d6dde7;
-  --blue:#0f6cbd;
-  --blue2:#185abd;
-  --blueSoft:#edf6ff;
-  --ink:#0a1020;
-  --ink2:#121a2d;
-  --green:#15803d;
-  --max:1180px;
-  --shadow:0 18px 52px rgba(15,23,42,.07);
-  --font-mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+/* Tokens that change with the theme, light and dark, from the redesign. */
+@mixin theme-light{
+  color-scheme:light;
+  /* Surfaces */
+  --bg:#ffffff;
+  --bg-subtle:#f7f8fa;
+  --bg-muted:#f1f3f5;
+  --bg-hover:#f6f7f9;
+  --bg-soft:#fafbfc;
+  /* Text */
+  --text:#16181d;
+  --text-2:#4a505b;
+  --text-nav:#3d424c;
+  --text-3:#5b616e;
+  --text-code:#2a2e36;
+  /* Borders */
+  --border-soft:#eef0f2;
+  --border-2:#e3e5e8;
+  --border:#e6e8eb;
+  --border-3:#d4d8dd;
+  /* Accent */
+  --accent:#0f6cbd;
+  --accent-hover:#0c5494;
+  --on-accent:#ffffff;
+  /* Status badge, as on Preview labels */
+  --badge-bg:#fff4e0;
+  --badge-text:#8a5300;
+  /* Code on a light surface: syntax colors */
+  --kw:#7a3e9d;
+  --str:#a3410c;
+  --cm:#6b7280;
+  /* Dark code surfaces, thumbnails, segmented controls */
+  --code-bg:#11141a;
+  --code-border:#11141a;
+  --thumb:#1b1f27;
+  --seg-shadow:0 1px 2px rgba(16,24,40,.10);
 }
+@mixin theme-dark{
+  color-scheme:dark;
+  --bg:#0e1116;
+  --bg-subtle:#13171d;
+  --bg-muted:#1c2129;
+  --bg-hover:#181c23;
+  --bg-soft:#151920;
+  --text:#e8eaed;
+  --text-2:#b6bcc6;
+  --text-nav:#c3c8d0;
+  --text-3:#9aa1ad;
+  --text-code:#d5d9df;
+  --border-soft:#1f242c;
+  --border-2:#2a303a;
+  --border:#232830;
+  --border-3:#3a414c;
+  --accent:#4c9fe8;
+  --accent-hover:#79b8f0;
+  --on-accent:#08111d;
+  --badge-bg:#33270f;
+  --badge-text:#f5c46b;
+  --kw:#c39be0;
+  --str:#f0a07a;
+  --cm:#8b93a1;
+  --code-bg:#080a0e;
+  --code-border:#262b34;
+  --thumb:#1f242d;
+  --seg-shadow:0 0 0 1px #3a414c;
+}
+
+:root{
+  @include theme-light;
+  /* Text and copy buttons on a dark code surface: the same in both themes */
+  --code-text:#e6e8eb;
+  --code-control-bg:#1a1e26;
+  --code-control-border:#2e3440;
+  --code-control-text:#d7dbe1;
+  /* Type */
+  --font-sans:"Segoe UI Variable Text","Segoe UI",system-ui,-apple-system,"Helvetica Neue",Arial,sans-serif;
+  --font-mono:"JetBrains Mono","Cascadia Code",ui-monospace,Menlo,monospace;
+  /* Layout: a 1120px content column inside a 32px gutter, 16px on a phone */
+  --max:1120px;
+  --gutter:32px;
+
+  /* Legacy names from the V8 port, pointed at the tokens above. Each one is
+     removed when the last rule that reads it is rebuilt. They resolve here,
+     on :root, so they always hold light values: a themed region below must
+     read the token names above, never these. */
+  --surface:var(--bg);
+  --surface2:var(--bg-subtle);
+  --muted:var(--text-3);
+  --line:var(--border);
+  --line2:var(--border-3);
+  --blue:var(--accent);
+  --blue2:var(--accent-hover);
+  --blueSoft:#edf6ff;
+  --ink:var(--code-bg);
+  --ink2:var(--code-bg);
+  --green:#15803d;
+  --shadow:0 18px 52px rgba(15,23,42,.07);
+}
+
+/* Themed regions: the parts of the page rebuilt from the redesign, which turn
+   dark when the visitor chose dark, or when their system prefers dark and they
+   have not chosen. Add a section here once it is rebuilt; when every section
+   is, this collapses to the theme on :root. */
+@mixin dark-regions{
+  .topbar{@include theme-dark}
+  .theme-icon-moon{display:none}
+  .theme-icon-sun{display:block}
+}
+:root[data-theme="dark"]{@include dark-regions}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){@include dark-regions}
+}
+
 *{box-sizing:border-box}
 html{scroll-behavior:smooth}
 body{
   margin:0;
   background:var(--bg);
   color:var(--text);
-  font-family:Inter,"Segoe UI",system-ui,-apple-system,BlinkMacSystemFont,Arial,sans-serif;
+  font-family:var(--font-sans);
+  font-size:15px;
   line-height:1.5;
+  -webkit-font-smoothing:antialiased;
 }
 a{color:inherit;text-decoration:none}
 button{font:inherit}
 img{max-width:100%;display:block}
-.wrap{max-width:var(--max);margin:0 auto;padding:0 28px}
+/* Box sizing here is border-box, so the gutter is added to the column width. */
+.wrap{max-width:calc(var(--max) + 2 * var(--gutter));margin:0 auto;padding:0 var(--gutter)}
 
 .skip-link{
   position:absolute;left:-999px;top:0;z-index:200;
   background:var(--ink);color:#fff;padding:10px 16px;border-radius:0 0 8px 0;
 }
 .skip-link:focus{left:0}
-:focus-visible{outline:2px solid var(--blue);outline-offset:2px;border-radius:4px}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
 
 /* sticky nav offset for every in-page anchor target */
 section[id],footer[id],.alias-anchor,.prose h2[id],.prose h3[id]{scroll-margin-top:80px}
 
-/* ---------- nav ---------- */
-.nav{
+/* ---------- top bar, rebuilt from the redesign ---------- */
+.topbar{
   position:sticky;top:0;z-index:50;
-  background:rgba(251,252,254,.92);
-  backdrop-filter:blur(14px);
-  border-bottom:1px solid rgba(229,233,239,.9);
+  background:var(--bg);color:var(--text);
+  border-bottom:1px solid var(--border);
 }
-.navin{height:66px;display:flex;align-items:center;justify-content:space-between;gap:20px}
-.brand{display:flex;align-items:center;gap:10px;font-size:18px;font-weight:800;letter-spacing:-.015em;white-space:nowrap}
-/* The Azure SQL database icon, the same asset in the same 28px box the container
-   site gives it, down to the 24px it drops to on a narrow screen. */
-.logo{display:block;width:28px;height:28px}
-.navlinks{display:flex;gap:26px;align-items:center;color:#475467;font-size:15px;font-weight:500}
-.navlinks a:hover{color:var(--text)}
-.navright{display:flex;gap:10px;align-items:center}
-/* Nav actions read as buttons, not as more nav links. Both are the same neutral
-   white pill: the GitHub mark, not a colour, is what tells them apart. The
-   explicit line-height matches the mark's 17px box, so the two are the same
-   height whether or not a button carries an icon. */
-.utility{
-  display:inline-flex;align-items:center;gap:6px;
-  border:1px solid var(--line2);background:#fff;border-radius:8px;padding:8px 14px;
-  font-size:13px;line-height:17px;font-weight:600;color:var(--text);white-space:nowrap
+/* On one row the 56px minimum height centres the 44px theme toggle exactly, so
+   the 6px padding only shows when the bar wraps on a narrow screen. */
+.topbar-in{
+  min-height:56px;padding-top:6px;padding-bottom:6px;
+  display:flex;flex-wrap:wrap;align-items:center;gap:8px 24px;
 }
-.utility:hover{background:var(--surface2);border-color:#c3ccd8}
-.utility.github{background:#fff;border-color:var(--line2);color:var(--text)}
-.utility.github:hover{background:var(--surface2);border-color:#c3ccd8;color:var(--text)}
-.github-mark{display:inline-flex;width:17px;height:17px;align-items:center;justify-content:center}
-.github-mark svg{display:block;width:17px;height:17px;fill:currentColor}
+.brand{display:flex;align-items:center;gap:10px;color:var(--text);font-size:15px;font-weight:600;white-space:nowrap}
+.brand img{display:block;width:26px;height:26px}
+.topnav{display:flex;flex-wrap:wrap;flex-grow:1;gap:4px 20px;font-size:14px}
+.topnav a{color:var(--text-nav)}
+.topnav a:hover{color:var(--text)}
+.topbar-actions{display:flex;align-items:center;gap:14px;font-size:14px}
+.topbar-link{display:inline-flex;align-items:center;gap:6px;color:var(--text-nav)}
+.topbar-link:hover{text-decoration:underline}
+/* The toggle needs the theme script, so it stays hidden until that has run. The
+   negative right margin lines the icon up with the content edge, as drawn. */
+.theme-toggle{
+  display:none;width:44px;height:44px;margin-left:-4px;margin-right:-10px;
+  align-items:center;justify-content:center;
+  border:0;border-radius:8px;background:transparent;color:var(--text-3);cursor:pointer;
+}
+.theme-switchable .theme-toggle{display:flex}
+.theme-toggle:hover{background:var(--bg-muted);color:var(--text)}
+.theme-icon-sun{display:none}
 
 /* ---------- hero ---------- */
 .hero{padding:92px 0 92px}
@@ -379,7 +485,6 @@ footer{margin-top:34px;border-top:1px solid var(--line);padding:34px 0 42px;back
 
 /* ---------- responsive ---------- */
 @media(max-width:940px){
-  .navlinks{display:none}
   h1{font-size:52px}
   .runBody{grid-template-columns:1fr}
   .detailPane{border-top:1px solid var(--line)}
@@ -390,9 +495,6 @@ footer{margin-top:34px;border-top:1px solid var(--line);padding:34px 0 42px;back
   .scenarioHead h1{font-size:38px}
 }
 @media(max-width:650px){
-  .brand{gap:8px}
-  .logo{width:24px;height:24px}
-  .wrap{padding:0 18px}
   .hero{padding:68px 0 72px}
   h1{font-size:41px}
   .heroSub{font-size:17px}
@@ -410,6 +512,9 @@ footer{margin-top:34px;border-top:1px solid var(--line);padding:34px 0 42px;back
   .promptSurface{padding-right:14px;padding-bottom:44px}
   .scenarioHead h1{font-size:33px}
   .prose h1{font-size:33px}
+}
+@media(max-width:640px){
+  :root{--gutter:16px}
 }
 @media(prefers-reduced-motion:reduce){
   html{scroll-behavior:auto}
@@ -430,9 +535,4 @@ footer{margin-top:34px;border-top:1px solid var(--line);padding:34px 0 42px;back
 .videoBody small { color:#526273; font-size:11px; letter-spacing:.08em; }
 .videoBody h3 { margin:12px 0; font-size:23px; }
 .videoBody p { color:#526273; }
-.navright[hidden] { display:none; }
 @media(max-width:700px) { .videoGrid { grid-template-columns:1fr; } }
-@media(max-width:1100px) {
-  .navin { height:auto; min-height:66px; flex-wrap:wrap; padding-top:14px; padding-bottom:12px; gap:12px; }
-  .navlinks { display:flex; width:100%; gap:18px; overflow-x:auto; white-space:nowrap; padding-bottom:4px; }
-}

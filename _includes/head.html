@@ -41,7 +41,45 @@
   <link rel="icon" type="image/svg+xml" href="{{ '/assets/img/azure-sql-database.svg' | relative_url }}">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400..900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script>
+    // Theme. With nothing saved, the CSS follows the system setting, so this works
+    // without JavaScript. A visitor's choice is saved in this browser only, never
+    // sent anywhere, and applied here before first paint so the page does not
+    // flash the other theme. The toggle shows only once this script has run.
+    (function () {
+      var root = document.documentElement, key = "hub-theme";
+      var system = window.matchMedia ? window.matchMedia("(prefers-color-scheme: dark)") : null;
+      try {
+        var saved = localStorage.getItem(key);
+        if (saved === "light" || saved === "dark") root.setAttribute("data-theme", saved);
+      } catch (e) {}
+      root.classList.add("theme-switchable");
+      function current() {
+        var chosen = root.getAttribute("data-theme");
+        if (chosen === "light" || chosen === "dark") return chosen;
+        return system && system.matches ? "dark" : "light";
+      }
+      function label() {
+        var text = current() === "dark" ? "Switch to light theme" : "Switch to dark theme";
+        var toggles = document.querySelectorAll("[data-theme-toggle]");
+        for (var i = 0; i < toggles.length; i++) {
+          toggles[i].setAttribute("aria-label", text);
+          toggles[i].setAttribute("title", text);
+        }
+      }
+      document.addEventListener("click", function (event) {
+        var toggle = event.target.closest && event.target.closest("[data-theme-toggle]");
+        if (!toggle) return;
+        var next = current() === "dark" ? "light" : "dark";
+        root.setAttribute("data-theme", next);
+        try { localStorage.setItem(key, next); } catch (e) {}
+        label();
+      });
+      document.addEventListener("DOMContentLoaded", label);
+      if (system && system.addEventListener) system.addEventListener("change", label);
+    })();
+  </script>
   <link rel="stylesheet" href="{{ '/assets/css/main.css' | relative_url }}">
   {% include analytics.html %}
 </head>
