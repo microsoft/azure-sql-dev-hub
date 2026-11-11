@@ -23,8 +23,8 @@
    .h, outside the hero, and would stay light inside a dark hero. */
 .h .hero{position:relative;overflow:hidden;padding:64px 0;background:var(--hero-bg);color:var(--text)}
 .h .hero::before{content:"";position:absolute;inset:0;pointer-events:none;background-image:linear-gradient(var(--hero-grid) 1px,transparent 1px),linear-gradient(90deg,var(--hero-grid) 1px,transparent 1px);background-size:100% 40px,200px 100%;background-position:0 -1px,calc(50% - 100px) 0;-webkit-mask-image:linear-gradient(#000,#000 50%,transparent);mask-image:linear-gradient(#000,#000 50%,transparent)}
-.h .hero-in{position:relative;z-index:1;display:flex;flex-wrap:wrap;gap:40px 56px;align-items:flex-start}
-.h .hero-copy{flex:1 1 360px;min-width:0;padding-top:8px}
+.h .hero-in{position:relative;z-index:1;display:flex;flex-wrap:wrap;gap:40px 56px;align-items:center}
+.h .hero-copy{flex:1 1 360px;min-width:0}
 .h .hero-media{flex:1.3 1 520px;min-width:0}
 .h .hero h1{font-size:clamp(34px,7vw,44px);line-height:1.08;font-weight:600;letter-spacing:-.02em;text-wrap:balance}
 .h .hero .tagline{margin-top:20px;font-size:19px;line-height:1.4;font-weight:600}
@@ -363,15 +363,27 @@ html:has(.qs-dialog[open]){overflow:hidden}
 .h .tpl-dhead{grid-area:head}
 .h .tpl-dialog .tpl-dhead h2{padding-right:32px;font-size:28px;line-height:1.2;font-weight:600;letter-spacing:-.015em}
 .h .tpl-sum{margin-top:8px;font-size:16px;line-height:1.5;color:var(--text-3)}
-/* Building it: a card like the quickstart's, with the setup guides' numbered
-   steps. Copy prompt is the accent button, as Get started is in the hero. */
-.h .tpl-side{grid-area:side;position:sticky;top:28px;display:flex;flex-direction:column;gap:16px;padding:20px;border:1px solid var(--border-2);border-radius:12px;background:var(--bg);box-shadow:0 1px 2px rgba(16,24,40,.04)}
-.h .tpl-side h3{font-size:15px;line-height:1.35;font-weight:600;letter-spacing:0}
-.h .tpl-dact{display:flex;flex-wrap:wrap;align-items:center;gap:8px 16px}
-.h .tpl-dact a{display:inline-flex;align-items:center;gap:4px;font-size:14px;font-weight:600}
-.h .tpl-primary{min-height:40px;padding:0 16px;border:0;border-radius:8px;background:var(--accent);color:var(--on-accent);font:inherit;font-size:14px;font-weight:600;cursor:pointer}
+/* Building it: open space rather than a box. One paragraph, Copy prompt as
+   the one accent button (as Get started is in the hero), the skills install
+   folded away below it, and a footnote on the database. */
+.h .tpl-side{grid-area:side;position:sticky;top:28px;display:flex;flex-direction:column;gap:12px;padding-top:4px}
+.h .tpl-side h3{font-size:17px;line-height:1.3;font-weight:600;letter-spacing:-.01em}
+.h .tpl-how{font-size:14px;line-height:1.5;color:var(--text-3)}
+.h .tpl-dact{display:flex;flex-wrap:wrap;align-items:center;gap:6px 14px;margin:2px 0 4px}
+.h .tpl-skills summary{display:flex;align-items:center;gap:8px;min-height:24px;list-style:none;color:var(--text-2);font-size:13.5px;font-weight:500;cursor:pointer}
+.h .tpl-skills summary::-webkit-details-marker{display:none}
+.h .tpl-skills summary::before{content:"";flex:none;width:6px;height:6px;border:solid currentColor;border-width:0 1.5px 1.5px 0;transform:rotate(-45deg);transition:transform .15s}
+.h .tpl-skills[open] summary::before{transform:rotate(45deg)}
+.h .tpl-skills summary:hover{color:var(--text)}
+.h .tpl-skills > p{margin:6px 0 10px;font-size:13.5px;line-height:1.5;color:var(--text-3)}
+.h .tpl-cmd{padding:10px 48px 10px 12px}
+.h .tpl-cmd code{overflow-x:auto;font-size:12.5px;white-space:nowrap;overflow-wrap:normal}
+.h .tpl-icopy{top:6px;right:6px;align-items:center;gap:6px;min-height:30px;padding:0 8px}
+.js .h .tpl-icopy{display:inline-flex}.h .tpl-icopy .sk-act{color:inherit}.h .tpl-icopy .sk-act:empty{display:none}
+.h .tpl-dact a{display:inline-flex;align-items:center;gap:3px;font-size:13px;font-weight:500}
+.h .tpl-primary{min-height:36px;padding:0 14px;border:0;border-radius:8px;background:var(--accent);color:var(--on-accent);font:inherit;font-size:14px;font-weight:600;cursor:pointer}
 .h .tpl-primary:hover{background:var(--accent-hover)}
-.h .tpl-need{padding-top:14px;border-top:1px solid var(--border-soft);font-size:13.5px;line-height:1.5;color:var(--text-3)}
+.h .tpl-need{font-size:13px;line-height:1.5;color:var(--text-3)}
 .h .tpl-dmain{grid-area:body;display:flex;flex-direction:column;gap:14px;margin-top:28px}
 .h .tpl-dshot{margin-bottom:10px;aspect-ratio:8/5;padding:16px 18px;overflow:hidden;border:1px solid var(--border-2);border-radius:12px;background:var(--shot-bg)}
 .h .tpl-desc{font-size:16px;line-height:1.65;color:var(--text-2)}
@@ -381,7 +393,7 @@ html:has(.qs-dialog[open]){overflow:hidden}
 .h .tpl-prose b{font-weight:600;color:var(--text)}
 @media (max-width:860px){
   .h .tpl-dbody{grid-template-columns:minmax(0,1fr);grid-template-areas:"head" "side" "body";padding:32px 20px 24px}
-  .h .tpl-side{position:static;margin-top:20px;padding:16px}
+  .h .tpl-side{position:static;margin-top:24px;padding:20px 0;border-top:1px solid var(--border-soft);border-bottom:1px solid var(--border-soft)}
   .h .tpl-dialog .tpl-dhead h2{font-size:24px}
 }
 :root:not(.js) .h .tpl-dialog{display:none}
@@ -758,22 +770,22 @@ html:has(.qs-dialog[open]){overflow:hidden}
           </div>
           <aside class="tpl-side" aria-labelledby="tpl-{{ t.slug }}-build">
             <h3 id="tpl-{{ t.slug }}-build">{{ ti.build_ai }}</h3>
-            <ol class="qs-steps qs-dsteps">
-              <li><span class="qs-n">1</span><div class="qs-dstep"><div><b>{{ ti.skills_title }}</b></div>
-                <div class="code-box sm"><code>{{ ti.skills_code }}</code><button class="code-copy" type="button" data-hcopy="{{ ti.skills_code | escape }}"
-                  data-event="site/action" data-event-action="contentCopied" data-event-action-location="scenario"
-                  data-event-content-id="template-skills" data-event-content-type="collection-install">Copy</button></div></div></li>
-              <li><span class="qs-n">2</span><div class="qs-dstep"><div><b>{{ ti.copy_title }}</b><p>{{ ti.copy_text }}</p></div>
-                <div class="tpl-dact">
-                  <button class="tpl-primary" type="button" data-hprompt="{{ '/build/' | append: t.slug | append: '.md' | relative_url }}"
-                          data-event="site/action" data-event-action="copyPrompt" data-event-action-location="scenario"
-                          data-event-scenario="{{ t.slug }}" data-clarity-event="copy_prompt_{{ t.slug }}">Copy prompt</button>
-                  <a href="{{ hub_repo }}/blob/main/build/{{ t.slug }}.md" target="_blank" rel="noopener"
-                     data-event="site/action" data-event-action="viewPrompt" data-event-action-location="scenario"
-                     data-event-scenario="{{ t.slug }}" data-clarity-event="view_prompt_{{ t.slug }}">Read the prompt<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17L17 7M9 7h8v8"/></svg></a>
-                </div></div></li>
-              <li><span class="qs-n">3</span><div class="qs-dstep"><div><b>{{ ti.check_title }}</b><p>{{ ti.check_text }}</p></div></div></li>
-            </ol>
+            <p class="tpl-how">{{ ti.copy_text }}</p>
+            <div class="tpl-dact">
+              <button class="tpl-primary" type="button" data-hprompt="{{ '/build/' | append: t.slug | append: '.md' | relative_url }}"
+                      data-event="site/action" data-event-action="copyPrompt" data-event-action-location="scenario"
+                      data-event-scenario="{{ t.slug }}" data-clarity-event="copy_prompt_{{ t.slug }}">Copy prompt</button>
+              <a href="{{ hub_repo }}/blob/main/build/{{ t.slug }}.md" target="_blank" rel="noopener"
+                 data-event="site/action" data-event-action="viewPrompt" data-event-action-location="scenario"
+                 data-event-scenario="{{ t.slug }}" data-clarity-event="view_prompt_{{ t.slug }}">Read the prompt<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17L17 7M9 7h8v8"/></svg></a>
+            </div>
+            <details class="tpl-skills">
+              <summary>{{ ti.skills_title }}</summary>
+              <p>{{ ti.skills_text }}</p>
+              <div class="code-box tpl-cmd"><code>{{ ti.skills_code }}</code><button class="code-copy tpl-icopy" type="button" aria-label="Copy" title="Copy" data-hcopy="{{ ti.skills_code | escape }}"
+                data-event="site/action" data-event-action="contentCopied" data-event-action-location="scenario"
+                data-event-content-id="template-skills" data-event-content-type="collection-install"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><span class="sk-act"></span></button></div>
+            </details>
             <p class="tpl-need">{{ ti.before_text }}</p>
           </aside>
           <div class="tpl-dmain">

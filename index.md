@@ -277,13 +277,12 @@ template_runs_on: [Azure SQL Database, Microsoft Entra ID]
 # for the markdown twin.
 template_inside:
   build_ai: Build it with your coding agent
-  skills_title: Install the skills
+  copy_text: Paste it into Claude Code, GitHub Copilot, Codex or Cursor, and your agent builds the app.
+  # A collapsed section under Copy prompt.
+  skills_title: First time? Add the Azure SQL skills
+  skills_text: One install for Claude Code, GitHub Copilot, Codex and Cursor.
   skills_code: npx skills add microsoft/microsoft-sql
-  copy_title: Copy the build prompt
-  copy_text: Paste it into Claude Code, GitHub Copilot, Codex or Cursor.
-  check_title: Check the result
-  check_text: Once the app runs, go through Check it works.
-  before_text: Needs an Azure SQL Database with Microsoft Entra ID. No database yet? <a href="#get-running">Get one running</a>.
+  before_text: Needs an Azure SQL Database. No database yet? <a href="#get-running">Get one running</a>.
   features: What it does
   tables: Tables it creates
   sql: Azure SQL features it uses
