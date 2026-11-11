@@ -115,13 +115,8 @@ function homeToMarkdown(d) {
   out.push(h.subline, '');
   if (h.agents) out.push(`Works with ${sentenceList(h.agents)}.`, '');
 
-  const v = d.video || {};
-  if (v.id) {
-    out.push('## Demo video', '', `${v.title}. ${v.sub}`, '', `https://www.youtube.com/watch?v=${v.id}`, '');
-    if (v.chapters) out.push(v.chapters.map((c) => `${c.stamp} ${c.label}`).join(' · '), '');
-  } else if (v.poster) {
-    out.push(`## ${v.title}`, '', v.sub, '');
-  }
+  const v = d.demo || {};
+  if (v.title) out.push(`## ${v.title}`, '', v.sub, '');
 
   out.push('## Get running {#get-running}', '', d.quickstart_text || '', '');
   for (const m of d.quickstart || []) {
@@ -159,7 +154,8 @@ function homeToMarkdown(d) {
     out.push(`### ${a.name}`, '', fence(a.code, 'bash'), '', plain(a.note), '');
   }
   if (sk.chips) out.push('Example prompts once the skills are installed:', '', ...sk.chips.map((c) => `- ${c}`), '');
-  if (sk.note) out.push(plain(sk.note), '');
+  const skNote = [sk.catalog, sk.note].filter(Boolean).map(plain).join(' ');
+  if (skNote) out.push(skNote, '');
 
   out.push('## Videos {#watch}', '', d.videos_text || '', '');
   for (const vv of d.videos || []) out.push(`- [${vv.title}](${vv.href}): ${vv.text}`);
@@ -169,7 +165,6 @@ function homeToMarkdown(d) {
   if (d.continuity) out.push('## Local development {#continuity}', '', d.continuity.heading, '', d.continuity.text, '');
   out.push('## Before you build', '');
   for (const f of d.faqs || []) out.push(`### ${f.question}`, '', f.answer, '');
-  if (d.close) out.push('## Get started', '', d.close.heading, '', fence(d.close.code, 'bash'), '');
   return out.join('\n');
 }
 

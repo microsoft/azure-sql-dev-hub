@@ -79,6 +79,12 @@
       document.addEventListener("DOMContentLoaded", label);
       if (system && system.addEventListener) system.addEventListener("change", label);
     })();
+    // Motion. Animations run only under .motion, so without scripts or with
+    // reduced motion asked for, animated pieces rest on their finished frame.
+    (function () {
+      var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      if (!reduce) document.documentElement.classList.add("motion");
+    })();
   </script>
   <link rel="stylesheet" href="{{ '/assets/css/main.css' | relative_url }}">
   {% include analytics.html %}

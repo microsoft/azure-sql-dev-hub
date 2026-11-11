@@ -56,6 +56,12 @@
   --code-border:#11141a;
   --thumb:#1b1f27;
   --seg-shadow:0 1px 2px rgba(16,24,40,.10);
+  --window-shadow:0 12px 32px rgba(16,24,40,.10),0 2px 6px rgba(16,24,40,.05);
+  /* Hero backdrop: the grid lines and the band across its top */
+  --hero-bg:#fafbfc;
+  --hero-grid:rgba(100,116,139,.10);
+  --hero-band:rgba(100,116,139,.035);
+  --hero-band-line:rgba(100,116,139,.12);
 }
 @mixin theme-dark{
   color-scheme:dark;
@@ -85,6 +91,11 @@
   --code-border:#262b34;
   --thumb:#1f242d;
   --seg-shadow:0 0 0 1px #3a414c;
+  --window-shadow:0 12px 32px rgba(0,0,0,.35);
+  --hero-bg:#0a0f1a;
+  --hero-grid:rgba(148,163,184,.09);
+  --hero-band:rgba(148,163,184,.05);
+  --hero-band-line:rgba(148,163,184,.12);
 }
 
 :root{
@@ -94,6 +105,13 @@
   --code-control-bg:#1a1e26;
   --code-control-border:#2e3440;
   --code-control-text:#d7dbe1;
+  /* Terminal output on that surface */
+  --term-rule:rgba(255,255,255,.06);
+  --term-dot:#3a414c;
+  --term-dim:#8b93a1;
+  --term-prompt:#79b8f0;
+  --term-ok:#3fb950;
+  --term-shell:#f5c46b;
   /* Type */
   --font-sans:"Segoe UI Variable Text","Segoe UI",system-ui,-apple-system,"Helvetica Neue",Arial,sans-serif;
   --font-mono:"JetBrains Mono","Cascadia Code",ui-monospace,Menlo,monospace;
@@ -124,7 +142,7 @@
    have not chosen. Add a section here once it is rebuilt; when every section
    is, this collapses to the theme on :root. */
 @mixin dark-regions{
-  .topbar{@include theme-dark}
+  .topbar,.h .hero,.h .skills,.h .faqs,.site-footer{@include theme-dark}
   .theme-icon-moon{display:none}
   .theme-icon-sun{display:block}
 }
@@ -400,22 +418,28 @@ pre code{font-family:inherit;font-size:inherit;background:none;padding:0;border:
 .sqlVisual pre{margin-top:12px;background:#111a30}
 
 /* ---------- footer ---------- */
-footer{margin-top:34px;border-top:1px solid var(--line);padding:34px 0 42px;background:#fff}
-.footTop{display:flex;justify-content:space-between;gap:24px;align-items:flex-start}
-.footBrand{font-weight:800}
-.footBrand p{margin:5px 0 0;color:#667085;font-size:11px;font-weight:400}
-.footLinks{display:flex;gap:12px;flex-wrap:wrap;justify-content:flex-end}
-.footLinks a{
-  font-family:var(--font-mono);font-size:10px;color:#475467;
-  border:1px solid var(--line);background:#f9fafb;border-radius:7px;padding:7px 8px
-}
-.footLinks a:hover{border-color:var(--line2);color:var(--text)}
-.footBottom{
-  margin-top:26px;padding-top:18px;border-top:1px solid var(--line);font-size:10px;color:#98a2b3;
-  display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap
-}
-.footBottom > span:last-child{display:flex;gap:16px;flex-wrap:wrap}
-.footBottom a:hover{color:var(--text)}
+/* Rebuilt from the redesign. A themed region, so shared tokens only. On the
+   home page it follows a full-width section directly, so it drops the gap. */
+.site-footer{margin-top:34px;border-top:1px solid var(--border);background:var(--bg-subtle);color:var(--text)}
+main.h + .site-footer{margin-top:0}
+.foot-top{display:flex;flex-wrap:wrap;gap:32px 56px;padding-top:40px;padding-bottom:32px}
+.foot-brand{flex:2 1 320px;min-width:0}
+.foot-name{display:flex;align-items:center;gap:10px;margin:0;font-weight:600}
+.foot-name img{display:block;width:24px;height:24px}
+.foot-tag{margin:2px 0 0;font-size:13px;color:var(--text-3)}
+.foot-cta{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-top:20px}
+.foot-cmd{display:flex;align-items:center;gap:12px;max-width:100%;min-height:44px;padding:0 6px 0 14px;border:1px solid var(--border-3);border-radius:8px;background:var(--bg)}
+.foot-cmd code{min-width:0;overflow-wrap:anywhere;font-family:var(--font-mono);font-size:13px;color:var(--text-code)}
+.foot-copy{display:none;flex:none;min-height:32px;padding:0 10px;border:0;border-radius:6px;background:var(--bg);color:var(--accent);font:inherit;font-size:13px;font-weight:600;cursor:pointer}
+.js .foot-copy{display:block}
+.foot-copy:hover{background:var(--bg-hover)}
+.foot-start{display:inline-flex;align-items:center;min-height:44px;padding:0 18px;border-radius:8px;background:var(--accent);color:var(--on-accent);font-size:14px;font-weight:600}
+.foot-start:hover{background:var(--accent-hover);color:var(--on-accent);text-decoration:none}
+.foot-links{flex:1 1 140px;display:flex;flex-direction:column;align-items:flex-start;gap:8px;font-size:14px}
+.foot-links a,.foot-legal a{color:var(--text-3)}
+.foot-links a:hover,.foot-legal a:hover{color:var(--text)}
+.foot-bottom{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px 24px;padding-top:16px;padding-bottom:24px;border-top:1px solid var(--border);font-size:13px;color:var(--text-3)}
+.foot-legal{display:flex;flex-wrap:wrap;gap:6px 20px}
 
 /* ---------- scenario pages ---------- */
 .scenarioPage{padding:64px 0 88px}
@@ -507,8 +531,6 @@ footer{margin-top:34px;border-top:1px solid var(--line);padding:34px 0 42px;back
   .endpointRow{grid-template-columns:1fr}
   .arrowCell{display:none}
   .endpoint + .endpoint{border-left:0;border-top:1px solid var(--line)}
-  .footTop{flex-direction:column}
-  .footLinks{justify-content:flex-start}
   .promptSurface{padding-right:14px;padding-bottom:44px}
   .scenarioHead h1{font-size:33px}
   .prose h1{font-size:33px}

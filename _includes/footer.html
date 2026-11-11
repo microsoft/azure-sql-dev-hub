@@ -1,21 +1,38 @@
-<footer>
-  <div class="wrap">
-    <div class="footTop">
-      <div class="footBrand">Azure SQL Developer Hub<p>Build applications with Azure SQL.</p></div>
-      <div class="footLinks">
-        <a href="{{ '/' | relative_url }}#get-running" data-event="site/action" data-event-action="pathSelected" data-event-path-id="get-running">Get started</a>
-        <a href="{{ '/' | relative_url }}#build" data-event="site/action" data-event-action="pathSelected" data-event-path-id="build">Build examples</a>
-        <a href="{{ '/' | relative_url }}#watch" data-event="site/action" data-event-action="pathSelected" data-event-path-id="watch">Videos</a>
-        <a href="{{ site.azure_sql_docs }}" data-event="site/action" data-event-action="outboundClicked" data-event-destination-id="azure-sql-docs" data-event-destination-type="docs">Documentation</a>
+{%- comment -%}
+  Site footer, laid out like the Ignite redesign's. It follows the visitor's
+  theme; see the themed regions in main.scss. As in the redesign, it carries
+  the skills install command and Get started on every page. The links and
+  wording are the site's own: the redesign's extra link columns are not
+  adopted. The Copy button uses main.js's data-copy handler and shows only once
+  that script has run.
+{%- endcomment -%}
+<footer class="site-footer">
+  <div class="wrap foot-top">
+    <div class="foot-brand">
+      <p class="foot-name"><img src="{{ '/assets/img/azure-sql-database.svg' | relative_url }}" alt="" width="24" height="24">Azure SQL Developer Hub</p>
+      <p class="foot-tag">Build applications with Azure SQL.</p>
+      <div class="foot-cta">
+        <div class="foot-cmd">
+          <code id="footInstall">npx skills add microsoft/microsoft-sql</code>
+          <button class="foot-copy" type="button" data-copy="#footInstall"
+                  data-event="site/action" data-event-action="contentCopied" data-event-action-location="footer"
+                  data-event-content-id="microsoft-sql" data-event-content-type="collection-install">Copy</button>
+        </div>
+        <a class="foot-start" href="{{ '/' | relative_url }}#get-running" data-event="site/action" data-event-action="pathSelected" data-event-path-id="get-running">Get started</a>
       </div>
     </div>
-    <div class="footBottom">
-      <span>Microsoft Azure SQL</span>
-      <span>
-        <a href="{{ '/privacy.html' | relative_url }}">Privacy</a>
-        <a href="{{ site.repo }}/issues/new" data-event="site/action" data-event-action="outboundClicked" data-event-destination-id="github-issues" data-event-destination-type="feedback">Feedback</a>
-        <a href="{{ site.repo }}" data-event="site/action" data-event-action="outboundClicked" data-event-destination-id="dev-hub-repository" data-event-destination-type="github">GitHub</a>
-      </span>
+    <div class="foot-links">
+      <a href="{{ '/' | relative_url }}#build" data-event="site/action" data-event-action="pathSelected" data-event-path-id="build">Build examples</a>
+      <a href="{{ '/' | relative_url }}#watch" data-event="site/action" data-event-action="pathSelected" data-event-path-id="watch">Videos</a>
+      <a href="{{ site.azure_sql_docs }}" data-event="site/action" data-event-action="outboundClicked" data-event-destination-id="azure-sql-docs" data-event-destination-type="docs">Documentation</a>
     </div>
+  </div>
+  <div class="wrap foot-bottom">
+    <span>Microsoft Azure SQL</span>
+    <span class="foot-legal">
+      <a href="{{ '/privacy.html' | relative_url }}">Privacy</a>
+      <a href="{{ site.repo }}/issues/new" data-event="site/action" data-event-action="outboundClicked" data-event-destination-id="github-issues" data-event-destination-type="feedback">Feedback</a>
+      <a href="{{ site.repo }}" data-event="site/action" data-event-action="outboundClicked" data-event-destination-id="dev-hub-repository" data-event-destination-type="github">GitHub</a>
+    </span>
   </div>
 </footer>

@@ -1,0 +1,36 @@
+{%- comment -%}
+  Hero demo. A terminal replays a recorded run of the JavaScript starter prompt
+  (build/javascript-app.md) in GitHub Copilot, then the app it built slides in.
+  The lines are the ones the recorded demo showed; change them only from a new
+  recording. Screen readers get one label for the whole picture, from `demo.alt`
+  in index.md.
+
+  Styles and timing live in the home layout. Each element rests in its finished
+  state, and --d is when it appears, in seconds after page load. --n is the
+  number of characters typed, and --dur is how long typing them takes.
+{%- endcomment -%}
+<div class="ht play" id="hDemo" role="img" aria-label="{{ page.demo.alt | escape }}">
+  <div class="ht-term">
+    <div class="ht-bar"><span class="ht-dots"><i></i><i></i><i></i></span>GitHub Copilot</div>
+    <div class="ht-body">
+      <p><span class="t-pr">❯</span> <span class="ht-type" style="--n:60;--d:.5s;--dur:1.5s"># AI Prompt: Scaffold a JavaScript app on Azure SQL Database</span><span class="ht-caret" style="--d:.5s;--dur:1.5s"></span></p>
+      <p class="gap ht-in" style="--d:2.3s"><span class="t-ok">●</span> skill(build-app-on-azure-sql)</p>
+      <p class="ht-in t-dim" style="--d:2.8s">❯ <em>Thought for 1s</em></p>
+      <p class="ht-in" style="--d:3.3s"><span class="t-ok">●</span> skill(connect-from-typescript-and-node)</p>
+      <p class="gap ht-in" style="--d:4s"><span class="t-sh">$</span> <b>Shell</b> Build task app <span class="t-dim">2 lines…</span></p>
+      <p class="ht-in t-dim indent" style="--d:4.3s">npm run build</p>
+    </div>
+  </div>
+  <div class="ht-app" style="--d:4.8s">
+    <div class="ht-app-bar">Local app · Azure SQL Database</div>
+    <div class="ht-app-body">
+      <p class="ht-app-title">My Tasks</p>
+      <ul>
+        <li class="ht-in" style="--d:5.1s">Connect the app<span>To do</span></li>
+        <li class="ht-in" style="--d:5.3s">Render the list<span>To do</span></li>
+        <li class="ht-in" style="--d:5.5s">Ship it<span>To do</span></li>
+      </ul>
+      <p class="ht-app-foot ht-in" style="--d:5.7s">Built with Azure SQL</p>
+    </div>
+  </div>
+</div>
