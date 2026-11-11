@@ -1,0 +1,11 @@
+.git
+.vscode
+node_modules
+vendor
+_site
+.jekyll-cache
+.jekyll-metadata
+.env
+.env.*
+eval
+outputs

@@ -33,7 +33,7 @@
 .h .hero .btn{min-height:44px;padding:0 18px;border-radius:8px}
 .h .hero .btn-p{background:var(--accent);color:var(--on-accent)}.h .hero .btn-p:hover{background:var(--accent-hover)}
 .h .hero .btn-s{background:var(--bg);color:var(--text);border-color:var(--border-3)}.h .hero .btn-s:hover{background:var(--bg-hover);border-color:var(--border-3)}
-.h .hero .agentline{margin-top:16px;max-width:460px;font-size:13px;color:var(--text-3)}.h .hero .agentline span{color:var(--text-2)}
+.h .hero .stackline{margin-top:16px;max-width:460px;font-size:13px;color:var(--text-3)}.h .hero .stackline span{color:var(--text-2)}
 /* Hero demo (_includes/hero-demo.html). It plays like an animated GIF: the
    terminal types the prompt and shows the build once, the first app opens
    below the terminal's last line, and after that only the app name in the
@@ -481,10 +481,10 @@ html:has(.qs-dialog[open]){overflow:hidden}
         {%- if page.hero.tagline %}<p class="tagline">{{ page.hero.tagline }}</p>{% endif %}
         <p class="sub">{{ page.hero.subline }}</p>
         <div class="ctas">
-          <a class="btn btn-p" href="#get-running" data-event="site/action" data-event-action="pathSelected" data-event-path-id="get-running">Get started</a>
-          <a class="btn btn-s" href="#get-running" data-htab-go="agent">Install skills</a>
+          <a class="btn btn-p" href="#build">Browse templates</a>
+          <a class="btn btn-s" href="#get-running" data-event="site/action" data-event-action="pathSelected" data-event-path-id="get-running">Get a database</a>
         </div>
-        <p class="agentline">Works with <span>{% for a in page.hero.agents %}{{ a }}{% unless forloop.last %}{% if forloop.rindex == 2 %}, and {% else %}, {% endif %}{% endunless %}{% endfor %}.</span></p>
+        <p class="stackline">Build with <span>{% for s in page.hero.stacks %}{{ s }}{% unless forloop.last %}{% if forloop.rindex == 2 %}, and {% else %}, {% endif %}{% endunless %}{% endfor %}.</span></p>
       </div>
       <div class="hero-media">
         {%- include hero-demo.html %}

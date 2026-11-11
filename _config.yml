@@ -1,8 +1,8 @@
 title: Azure SQL Developer Hub
 description: >-
-  The front door for building with Azure SQL Database in the age of AI-assisted
-  development. Start locally or in Azure, build with the coding agent you
-  already use, and move from first prompt to production on Azure SQL.
+  App templates and practical patterns for Azure SQL Database. Explore
+  dashboards, APIs, search, and multi-tenant applications. Start locally
+  or in Azure and build with your preferred stack.
 
 # These two are local-preview defaults only. The deploy workflow overwrites both
 # from the Pages API at build time, because where this site actually publishes
@@ -61,6 +61,8 @@ exclude:
   - package-lock.json
   - Gemfile
   - Gemfile.lock
+  - Dockerfile
+  - compose.yaml
   - vendor
 
   - outputs

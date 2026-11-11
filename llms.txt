@@ -1,6 +1,6 @@
 # Azure SQL Developer Hub
 
-> The front door for building applications on Azure SQL Database with an AI coding agent. Start free in the cloud, hand your agent a build prompt, and verify a working app. Built for AI workloads: native vector search, in-engine embeddings, JSON, and row-level security. Agent skills teach Claude Code, GitHub Copilot, Codex, and Cursor how the engine works.
+> App templates and practical patterns for Azure SQL Database. Explore dashboards, APIs, search, and multi-tenant applications with your preferred stack. Each template includes a build prompt and validation checks rather than a prebuilt codebase. Coding-agent skills are available for guided development.
 
 _Last updated: September 2026._
 
@@ -14,8 +14,8 @@ _Last updated: September 2026._
 - [Container: get started](https://microsoft.github.io/azure-sql-dev-hub/container/get-started.md): run the Azure SQL Database container locally with Docker, Podman, or WSL containers, connect, and troubleshoot.
 - [Container FAQ](https://microsoft.github.io/azure-sql-dev-hub/container/faq.md): what the container is for, which Azure SQL Database features it includes and leaves out, and moving to Azure.
 
-## Build prompts
-Copy-and-run prompts to hand your AI coding agent. Each targets Azure SQL Database in the cloud and ends in a working app, with validation rules at the end:
+## App templates and building blocks
+Build briefs with requirements and validation checks for Azure SQL Database in the cloud. Use the prompts with a coding agent to implement and customize an app:
 - [Build a task-tracking app](https://microsoft.github.io/azure-sql-dev-hub/build/javascript-app.md): JavaScript. Build a web app that displays tasks stored in Azure SQL. Start with sample data and make it your own.
 - [Build an API for your app](https://microsoft.github.io/azure-sql-dev-hub/build/python-api.md): Python. Give your app a way to create, complete, and retrieve tasks. Build a Python API that connects to Azure SQL with Microsoft Entra, no passwords.
 - [Search your content by meaning](https://microsoft.github.io/azure-sql-dev-hub/build/rag-app.md): Python / AI. Find relevant text with vector search in Azure SQL. Build the retrieval layer for a RAG app using sample text and an embedding model you provide.

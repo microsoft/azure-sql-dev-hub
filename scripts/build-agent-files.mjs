@@ -142,7 +142,7 @@ function homeToMarkdown(d) {
   out.push(`# ${[h.headline, h.headline_accent].filter(Boolean).join(' ')}`.trim(), '');
   if (h.tagline) out.push(h.tagline, '');
   out.push(h.subline, '');
-  if (h.agents) out.push(`Works with ${sentenceList(h.agents)}.`, '');
+  if (h.stacks) out.push(`Build with ${sentenceList(h.stacks)}.`, '');
 
   const v = d.demo || {};
   if (v.title) out.push(`## ${v.title}`, '', v.sub, '');
@@ -203,7 +203,7 @@ function homeToMarkdown(d) {
     out.push(`#### [${s.title}](build/${s.slug}.md)`, '', `${s.tag}. ${s.blurb}`, '', `Full prompt: build/${s.slug}.md`, '');
   }
 
-  out.push('## Built for AI workloads {#workloads}', '', d.workloads_text || '', '');
+  out.push(`## ${d.workloads_heading} {#workloads}`, '', d.workloads_text || '', '');
   for (const t of d.workloads || []) {
     out.push(`- ${t.title}: ${plain(t.text)}${t.link && /^https?:/.test(t.link.href) ? ` (${t.link.href})` : ''}`);
   }

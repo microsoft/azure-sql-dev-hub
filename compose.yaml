@@ -1,0 +1,14 @@
+services:
+  website:
+    build:
+      context: .
+      args:
+        NPM_CONFIG_REGISTRY: ${NPM_CONFIG_REGISTRY:-https://registry.npmjs.org}
+    environment:
+      JEKYLL_HOST: 0.0.0.0
+    ports:
+      - "127.0.0.1:4000:4000"
+      - "127.0.0.1:35729:35729"
+    volumes:
+      - .:/workspace
+      - /workspace/node_modules

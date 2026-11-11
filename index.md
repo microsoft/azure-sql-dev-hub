@@ -1,55 +1,55 @@
 ---
 layout: home
 title: Azure SQL Developer Hub
-description: The front door for building applications on Azure SQL Database with an AI coding agent. Start free in the cloud, hand your agent a build prompt, verify a working app.
+description: Explore app templates and practical patterns for Azure SQL Database. Build dashboards, APIs, search, and multi-tenant applications with your preferred stack.
 hero:
-  headline: Azure SQL, built for AI workloads
-  tagline: Bring the idea. Build with Azure SQL.
-  subline: Start with a prompt. Give your AI coding agent SQL skills, and make your next app yours.
-  agents:
-  - Claude Code
-  - GitHub Copilot
-  - Codex
-  - Cursor
+  headline: Build your next app with Azure SQL.
+  tagline: Start with a template. Make it your own.
+  subline: Explore dashboards, APIs, search, and multi-tenant apps. Choose a starting point and build around your data.
+  stacks:
+  - JavaScript
+  - Python
+  - .NET
 demo:
   # Hero demo (_includes/hero-demo.html). It plays like an animated GIF: the
-  # terminal types the prompt with the first app's name, shows the skills and
+  # terminal types the prompt with the first app's name, shows the app layers and
   # the build once, and the first app opens below the terminal's last line.
   # After that only the app name in the prompt and the app picture change,
   # every few seconds, through the list and around again; the terminal does
   # not replay. Without scripts or with reduced motion, the first app shows
-  # finished. The run is illustrative, not recorded; the skills are real ones
-  # from microsoft/microsoft-sql. `{app}` in the prompt is replaced by each
+  # finished. The run is illustrative, not recorded. `{app}` in the prompt is replaced by each
   # app's name. The apps follow the idea-to-app reference apps (task board,
   # stock reservation, sales analytics, import dashboard, tenant helpdesk) and
   # are drawn in the include, keyed by `key`. The title and sub appear in the
   # markdown twin, and screen readers hear the shown app's alt in place of the
   # animation.
   title: From idea to app
-  sub: Azure SQL for the agent era.
-  prompt: Scaffold {app} on Azure SQL Database
-  skills: [build-app-on-azure-sql, connect-from-typescript-and-node]
+  sub: Explore what you can build with Azure SQL.
+  terminal: App template preview
+  prompt: Build {app} on Azure SQL Database
+  steps: [Schema and sample data, Application UI and data access]
+  status: Azure SQL Database connected
   shell: Build the app
   run: npm run build
   output: Compiled successfully
   apps:
   - key: board
     name: a team task board
-    alt: 'From idea to app: a prompt builds a team task board on Azure SQL with filters and due dates.'
+    alt: 'Team board template preview: an Azure SQL app with filters and due dates.'
   - key: inventory
     name: an inventory reservation app
-    alt: 'From idea to app: a prompt builds an inventory reservation app on Azure SQL that never oversells.'
+    alt: 'Inventory reservation template preview: an Azure SQL app for reserving stock and tracking orders.'
   - key: revenue
     name: a revenue dashboard
-    alt: 'From idea to app: a prompt builds a revenue dashboard on Azure SQL with exact totals.'
+    alt: 'Revenue reporting template preview: an Azure SQL dashboard with revenue totals and charts.'
   - key: shipments
     name: a shipment tracker
-    alt: 'From idea to app: a prompt builds a shipment tracker on Azure SQL that imports events safely.'
+    alt: 'Shipment tracker template preview: an Azure SQL app for importing events and tracking deliveries.'
   - key: helpdesk
     name: a multi-tenant helpdesk
-    alt: 'From idea to app: a prompt builds a multi-tenant helpdesk on Azure SQL where each organization sees only its own tickets.'
+    alt: 'Multi-tenant helpdesk template preview: an Azure SQL app where each organization sees only its own tickets.'
 quickstart_heading: Power your next app with Azure SQL.
-quickstart_text: 'Choose your starting point: the cloud, local development, or your coding agent.'
+quickstart_text: Start with a free cloud database or develop locally. Coding-agent setup is available too.
 quickstart:
 - key: cloud
   name: Cloud, free tier
@@ -63,7 +63,7 @@ quickstart:
   - - Open access
     - Add your IP to the firewall and sign in with Microsoft Entra.
   - - Verify
-    - Run SELECT 1. A result of 1 means your connection works and you are ready for a build prompt.
+    - Run SELECT 1. A result of 1 means your connection works and you are ready to build.
   link:
     label: 'Free tier: setup guide, prerequisites, and limits'
     href: https://learn.microsoft.com/azure/azure-sql/database/free-tier
@@ -184,15 +184,15 @@ containers:
     href: https://mcr.microsoft.com/artifact/mar/mssql/azure-sql-db-server
   links_label: Container resources
   prerequisites: Prerequisites
-build_heading: Bring your app idea to life
-build_text: Start with a task app, an API, or search over your content. Choose a scenario and use its prompt with your coding agent to build on Azure SQL.
-build_note: Each prompt works against a database you already have. No database yet? Get a database running takes three steps.
+build_heading: Find a template for your next app
+build_text: Full apps and focused building blocks for dashboards, APIs, search, and more.
+build_note: No database yet? Get a database running.
 build_note_link: Get a database running
 build_note_href: '#get-running'
 build_steps:
-  - Choose a scenario
-  - Copy the prompt
-  - Build and verify
+  - Choose a template
+  - Review the build prompt
+  - Build and customize
 # The Build section shows two groups of templates behind a filter, as in the
 # redesign: full apps first, then the building blocks (scenarios, below). The
 # full apps follow the idea-to-app reference apps in the AgentSkills repo: each
@@ -373,8 +373,8 @@ scenarios:
   tag: JavaScript
   blurb: Extend a task app for multiple customers. Add row-level security and test that one tenant cannot read another tenant's tasks.
   shot: tenants
-workloads_heading: Built for AI workloads
-workloads_text: The pieces an AI app needs, inside the engine.
+workloads_heading: Search, AI, and access control
+workloads_text: Add semantic search, work with embeddings, and keep access scoped to the right users.
 workloads:
 - title: Vector search
   text: A native VECTOR type and VECTOR_DISTANCE. Store embeddings next to the rows they describe.
@@ -389,20 +389,20 @@ workloads:
     label: AI_GENERATE_EMBEDDINGS
     href: https://learn.microsoft.com/sql/t-sql/functions/ai-generate-embeddings-transact-sql
 - title: RAG, end to end
-  text: Chunk, embed, store, retrieve, ground. One skill walks your agent through all five.
+  text: Chunk, embed, store, and retrieve content in Azure SQL to ground responses in your application.
   icon: <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M8 10h8M8 14h5"/></svg>
   link:
     label: Copy the RAG prompt
     href: '#rag-app'
-- title: Safe for agents to write
-  text: Row-level security, Entra identity, and injection-safe patterns the skills enforce by default.
+- title: Access scoped to each user
+  text: Use Microsoft Entra identity and row-level security to keep each tenant's data separate.
   icon: <svg viewBox="0 0 24 24"><path d="M12 3l8 4v6c0 4-3.5 7-8 8-4.5-1-8-4-8-8V7z"/></svg>
   link:
     label: Row-level security docs
     href: https://learn.microsoft.com/sql/relational-databases/security/row-level-security
 skills:
   heading: Microsoft SQL Agent Skills
-  text: Install the skills for your coding agent.
+  text: Building with a coding agent? Add Azure SQL guidance to the tools you already use.
   agents:
   - key: claude
     name: Claude Code
