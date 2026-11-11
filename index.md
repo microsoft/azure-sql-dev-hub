@@ -163,7 +163,7 @@ workloads:
     href: https://learn.microsoft.com/sql/relational-databases/security/row-level-security
 skills:
   heading: Microsoft SQL Agent Skills
-  text: Pick your agent. One install. The skills load themselves when the work matches.
+  text: Install the skills for your coding agent. It uses them for Azure SQL tasks.
   agents:
   - key: claude
     name: Claude Code
@@ -198,9 +198,9 @@ skills:
     text: Add vector search to this table and make it use the index
   - key: troubleshoot_40613
     text: Why does my first query after idle fail with 40613
-  # The page shows the command and this note only. Each agent's note and the
-  # catalog line appear in the markdown twin, which has no links, so agents
-  # still get the other install commands and the catalog's address.
+  # The page shows none of these notes. Each agent's note, the catalog line,
+  # and the section note appear in the markdown twin only, which has no links,
+  # so agents still get the other install commands and the catalog's address.
   catalog: Full catalog, every skill's source, and the feedback form at aka.ms/azuresql-skills.
   note: Skills teach your agent the engine; they do not grant access to the Preview container.
 videos_heading: See it in action
@@ -230,13 +230,6 @@ videos:
   tag: Series
   href: https://aka.ms/azuresqlfoundationseries
   image: https://devblogs.microsoft.com/wp-content/uploads/2026/08/word-image-22210-2.webp
-existing:
-  heading: Already have Azure SQL data?
-  text: Point the prompts above at an existing development database. Review permissions and schema changes before you let an agent run them.
-  link: Start with the RAG example
-continuity:
-  heading: Prefer local development?
-  text: The Azure SQL Database container runs the same engine offline. Sign up for the Preview.
 faqs:
 - question: What do I need to get started?
   answer: An Azure account and a development database. The free tier covers everything on this page, within its limits. If you want to work offline, sign up for the container Preview.

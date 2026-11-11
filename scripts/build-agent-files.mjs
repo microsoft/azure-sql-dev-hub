@@ -161,8 +161,6 @@ function homeToMarkdown(d) {
   for (const vv of d.videos || []) out.push(`- [${vv.title}](${vv.href}): ${vv.text}`);
   out.push('');
 
-  if (d.existing) out.push('## Existing data {#existing}', '', d.existing.text, '');
-  if (d.continuity) out.push('## Local development {#continuity}', '', d.continuity.heading, '', d.continuity.text, '');
   out.push('## Before you build', '');
   for (const f of d.faqs || []) out.push(`### ${f.question}`, '', f.answer, '');
   return out.join('\n');
