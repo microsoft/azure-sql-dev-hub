@@ -106,6 +106,27 @@ function sentenceList(items) {
   return `${items.slice(0, -1).join(', ')}, and ${items[items.length - 1]}`;
 }
 
+// The local container's setup guide, a dialog on the page: both routes, with
+// every command, so an agent reading the twin can run them.
+function containerSetup(cs) {
+  if (!cs) return [];
+  const out = [`#### ${cs.title}`, ''];
+  const steps = (list) => {
+    for (const [i, st] of (list || []).entries()) {
+      out.push(`${i + 1}. ${st.title}. ${plain(st.text)}`, '');
+      if (st.code) out.push(fence(st.code, 'bash'), '');
+      if (st.prompt) out.push(`> ${st.prompt}`, '');
+    }
+  };
+  out.push(`${cs.manual.tab}. ${plain(cs.manual.intro)}`, '');
+  steps(cs.manual.steps);
+  out.push(`${cs.agent.tab}. ${plain(cs.agent.intro)}`, '');
+  steps(cs.agent.steps);
+  for (const l of [cs.prerequisites, cs.limitations, cs.troubleshooting]) if (l) out.push(`- ${l.label}: ${l.href}`);
+  out.push('');
+  return out;
+}
+
 // The home page's structured front matter, rendered back into markdown.
 function homeToMarkdown(d) {
   const out = [];
@@ -126,6 +147,7 @@ function homeToMarkdown(d) {
     out.push('');
     if (m.button) out.push(`${m.button.label}: ${m.button.href}`, '');
     if (m.link) out.push(`${m.link.label}: ${m.link.href}`, '');
+    if (m.key === 'local') out.push(...containerSetup(d.container_setup));
   }
   if (d.then) out.push(`Then: ${d.then.from} to ${d.then.to}. ${d.then.note}`, '');
 

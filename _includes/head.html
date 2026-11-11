@@ -85,6 +85,10 @@
       var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
       if (!reduce) document.documentElement.classList.add("motion");
     })();
+    // Scripts run. main.js sets this too, but only after the page is parsed;
+    // setting it here first keeps script-only controls and the no-script
+    // layouts from swapping places after the first paint.
+    document.documentElement.classList.add("js");
   </script>
   <link rel="stylesheet" href="{{ '/assets/css/main.css' | relative_url }}">
   {% include analytics.html %}

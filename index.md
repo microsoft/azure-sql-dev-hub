@@ -40,38 +40,89 @@ quickstart:
 - key: local
   name: Local container
   pill: Preview
-  title: Run the Azure SQL Database engine on your laptop.
-  desc: Same engine as the cloud, in a container, offline. Preview today. Sign up and we send registry access.
-  button:
-    label: Sign up for the Preview
-    href: https://aka.ms/sqldbcontainerpreview-signup
-  detail_title: What you get once you are in.
+  title: Run the Azure SQL Database engine on your laptop
+  desc: The same engine as the cloud, in a container, for development, testing and CI. It runs offline after the first pull, and only the connection string changes when you ship to Azure.
+  start: Get started
   checks:
-  - - One docker run
-    - Sign in to the preview registry, pull the image, start the engine.
-  - - Agent skills included
-    - Skills teach your agent to provision, connect, migrate, seed, and ship, with you reviewing each step.
-  - - Ship to Azure unchanged
-    - Only the connection string changes.
-  link:
-    label: Container quickstart
-    href: https://microsoft.github.io/azure-sql-database-container/getting-started.html
+  - - Get the image
+    - Pull the public image from Microsoft Container Registry. No sign-up needed.
+  - - Start the container
+    - One docker run starts the engine on port 1433, bound to localhost.
+  - - Connect and query
+    - Run SELECT @@VERSION with the sqlcmd bundled in the container. No host install.
+  setup_link: Full setup and commands
+  agent_link: Let your agent do it
 - key: agent
-  name: With your coding agent
-  title: Install the skills, then ask in plain English.
-  desc: One command teaches Claude Code, Copilot, Codex, or Cursor how Azure SQL works. You stay in the loop on every step.
+  name: With a coding agent
+  title: Install the skills, then ask in plain English
+  desc: One command teaches Claude Code, GitHub Copilot, Codex or Cursor how Azure SQL works. You stay in the loop on every step.
   code: npx skills add microsoft/microsoft-sql
-  detail_title: Then say what you want.
+  detail_title: Then say what you want
+  # A third entry of "prompt" shows the step's text as a prompt to copy.
   checks:
   - - Create a free database first
     - Provisioning is still your step today. The agent takes it from there.
   - - Prompt your agent
-    - '"Connect to my Azure SQL database and scaffold the schema, migrations, and data layer for my stack."'
+    - Connect to my Azure SQL database and scaffold the schema, migrations and data layer for my stack.
+    - prompt
   - - Verify
     - The agent runs the first query and shows you the result.
   link:
     label: What the skills teach, per agent
-    href: https://aka.ms/azuresql-skills
+    href: '#skills'
+# The local container's setup guide: a dialog from the Local container tab,
+# shown in place below the quickstart when scripts do not run. The image is
+# the public one on Microsoft Container Registry.
+container_setup:
+  title: Set up the Azure SQL Database container
+  pill: Public preview
+  prerequisites:
+    label: Check prerequisites
+    href: https://microsoft.github.io/azure-sql-database-container/prerequisites.html
+  limitations:
+    label: Limitations
+    href: https://microsoft.github.io/azure-sql-database-container/known-limitations.html
+  troubleshooting:
+    label: Troubleshooting
+    href: https://microsoft.github.io/azure-sql-database-container/getting-started.html#troubleshooting
+  skills_link: Per-tool install commands
+  # Each step's key names its Copy button in telemetry.
+  manual:
+    tab: Set up manually
+    intro: Three commands from pull to your first query. You need Docker, Podman or WSL, and a bash or zsh shell.
+    steps:
+    - key: pull
+      title: Get the image
+      text: Pull the public image from Microsoft Container Registry.
+      code: docker pull mcr.microsoft.com/mssql/azure-sql-db-server:latest
+    - key: run
+      title: Start the container
+      text: Generate a strong SA password, then start the engine on port 1433, bound to localhost.
+      code: |-
+        MSSQL_SA_PASSWORD="Aa1$(openssl rand -hex 16)"
+        docker run --name sqldb -e "ACCEPT_EULA=Y" \
+          -e "MSSQL_SA_PASSWORD=$MSSQL_SA_PASSWORD" \
+          -p 127.0.0.1:1433:1433 -d \
+          mcr.microsoft.com/mssql/azure-sql-db-server:latest
+    - key: query
+      title: Connect and query
+      text: The container bundles sqlcmd. A result that names Microsoft SQL Azure confirms the Azure SQL Database engine.
+      code: |-
+        docker exec sqldb /opt/mssql-tools18/bin/sqlcmd \
+          -S localhost -U sa -P "$MSSQL_SA_PASSWORD" -C -Q "SELECT @@VERSION;"
+    copy_all: Copy all three commands
+  agent:
+    tab: With your coding agent
+    intro: The container skills are part of the microsoft-sql plugin. They cover pulling the image, waiting for the engine to be ready and creating the database, with you reviewing each step.
+    steps:
+    - key: skills
+      title: Install the skills
+      text: One install for Claude Code, GitHub Copilot, Codex and Cursor. Per-tool commands are in <a href="#skills">Skills</a>.
+      code: npx skills add microsoft/microsoft-sql
+    - key: prompt
+      title: Ask in plain English
+      text: Paste this into your agent. It pulls the image, starts the container, creates the database and runs a first query.
+      prompt: Add a local Azure SQL Database to this project, then scaffold the schema, migrations and data-access layer for my stack.
 then:
   from: Local or free tier
   to: Azure SQL Database

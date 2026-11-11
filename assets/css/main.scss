@@ -142,7 +142,7 @@
    have not chosen. Add a section here once it is rebuilt; when every section
    is, this collapses to the theme on :root. */
 @mixin dark-regions{
-  .topbar,.h .hero,.h .skills,.h .videos,.h .faqs,.site-footer{@include theme-dark}
+  .topbar,.h .hero,.h .quick,.h .skills,.h .videos,.h .faqs,.site-footer{@include theme-dark}
   .theme-icon-moon{display:none}
   .theme-icon-sun{display:block}
 }
