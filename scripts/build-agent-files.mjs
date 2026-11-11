@@ -61,15 +61,26 @@ function splitFrontMatter(raw) {
   return { data: yaml.load(m[1]) || {}, body: raw.slice(m[0].length) };
 }
 
+// A {% raw %} ... {% endraw %} block, each tag on its own line, keeps Jekyll
+// from reading code as Liquid (JSX `style={{ ... }}` otherwise vanishes from
+// the HTML page). The twin drops the two tag lines and leaves the code between
+// them untouched, so it matches what the page shows.
+const RAW_BLOCK = /^[ \t]*\{%-?\s*raw\s*-?%\}[ \t]*\r?\n([\s\S]*?)^[ \t]*\{%-?\s*endraw\s*-?%\}[ \t]*(?:\r?\n|$)/m;
+
 function resolveLiquid(text, config) {
   const siteUrl = String(config.url || '').replace(/\/$/, '');
   const base = String(config.baseurl || '');
-  return text
+  const resolve = (s) => s
     .replace(/\{\{\s*'([^']*)'\s*\|\s*absolute_url\s*\}\}/g, (w, p) => siteUrl + base + p)
     .replace(/\{\{\s*'([^']*)'\s*\|\s*relative_url\s*\}\}/g, (w, p) => base + p)
     .replace(/\{\{\s*site\.([a-z0-9_]+)\s*\}\}/gi, (w, key) =>
       Object.prototype.hasOwnProperty.call(config, key) ? String(config[key]) : w
     );
+  // split() with a capture group alternates outside, inside, outside, ...
+  return text
+    .split(RAW_BLOCK)
+    .map((part, i) => (i % 2 ? part : resolve(part)))
+    .join('');
 }
 
 function stripAttributeLists(body) {

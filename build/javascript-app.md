@@ -126,6 +126,7 @@ The seed runs only when `dbo.tasks` is empty, so the starting state decides what
 
 Replace `src/app/page.tsx`. The page reads from Azure SQL and displays it. Nothing on it changes data.
 
+{% raw %}
 ```tsx
 import { getPool } from "@/lib/db";
 
@@ -204,6 +205,7 @@ export default async function Home() {
   );
 }
 ```
+{% endraw %}
 
 Run it:
 
