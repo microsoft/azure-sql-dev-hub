@@ -57,11 +57,11 @@
   --thumb:#1b1f27;
   --seg-shadow:0 1px 2px rgba(16,24,40,.10);
   --window-shadow:0 12px 32px rgba(16,24,40,.10),0 2px 6px rgba(16,24,40,.05);
-  /* Hero backdrop: the grid lines and the band across its top */
+  /* Hero backdrop: its grid lines */
   --hero-bg:#fafbfc;
   --hero-grid:rgba(100,116,139,.10);
-  --hero-band:rgba(100,116,139,.035);
-  --hero-band-line:rgba(100,116,139,.12);
+  /* Behind the Build section's app pictures */
+  --shot-bg:#eef3f9;
 }
 @mixin theme-dark{
   color-scheme:dark;
@@ -94,8 +94,7 @@
   --window-shadow:0 12px 32px rgba(0,0,0,.35);
   --hero-bg:#0a0f1a;
   --hero-grid:rgba(148,163,184,.09);
-  --hero-band:rgba(148,163,184,.05);
-  --hero-band-line:rgba(148,163,184,.12);
+  --shot-bg:#1c2129;
 }
 
 :root{
@@ -142,7 +141,7 @@
    have not chosen. Add a section here once it is rebuilt; when every section
    is, this collapses to the theme on :root. */
 @mixin dark-regions{
-  .topbar,.h .hero,.h .quick,.h .skills,.h .videos,.h .faqs,.site-footer{@include theme-dark}
+  .topbar,.h .hero,.h .quick,.h .ctr,.h .tpl,.h .wl,.h .skills,.h .videos,.h .faqs,.doc,.site-footer{@include theme-dark}
   .theme-icon-moon{display:none}
   .theme-icon-sun{display:block}
 }
@@ -506,6 +505,39 @@ main.h + .site-footer{margin-top:0}
 .prose blockquote{margin:0 0 16px;padding:10px 16px;border-left:3px solid var(--line2);color:#667085;font-size:14px}
 .prose hr{border:0;border-top:1px solid var(--line);margin:34px 0}
 .prose .muted{color:#98a2b3;font-size:12px}
+
+/* Doc pages: prose that reads the redesign's tokens, so it follows the theme
+   (a page opts in with doc: true). The container's Get started and FAQ use it;
+   other prose pages can move over one at a time. */
+.doc{background:var(--bg);color:var(--text);padding:56px 0 96px}
+.doc [id]{scroll-margin-top:80px}
+.doc-kicker{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-bottom:12px}
+.doc .prose a.doc-back{display:inline-flex;align-items:center;gap:6px;min-height:32px;color:var(--text-3);font-size:13px;font-weight:600}
+.doc .prose a.doc-back:hover{color:var(--accent)}
+.doc .sectionLabel{color:var(--text-3);font-size:13px;font-weight:600;letter-spacing:0;text-transform:none}
+.doc-pill{padding:2px 8px;border-radius:4px;background:var(--badge-bg);color:var(--badge-text);font-size:12px;font-weight:600}
+.doc .prose h1{margin:0 0 12px;color:var(--text);font-size:40px;line-height:1.15;font-weight:600;letter-spacing:-.02em}
+.doc .prose h2{margin:48px 0 12px;padding-top:28px;border-top:1px solid var(--border);color:var(--text);font-size:24px;line-height:1.25;font-weight:600;letter-spacing:-.015em}
+.doc .prose h3{margin:28px 0 8px;color:var(--text);font-size:17px;line-height:1.35;font-weight:600}
+.doc .prose p,.doc .prose ul,.doc .prose ol{color:var(--text-2)}
+.doc .prose strong{color:var(--text);font-weight:600}
+.doc .prose a{color:var(--accent)}
+.doc .prose .doc-lead{margin-bottom:16px;color:var(--text-2);font-size:18px;line-height:1.55}
+.doc .prose code{background:var(--bg-muted);border-color:var(--border);color:var(--text-code)}
+.doc .prose pre{border:1px solid var(--code-border);border-radius:8px;background:var(--code-bg);box-shadow:none;color:var(--code-text)}
+.doc .prose pre code{padding:0;border:0;border-radius:0;background:none;color:var(--code-text)}
+.doc .copyBtn{border-color:var(--code-control-border);background:var(--code-control-bg);color:var(--code-control-text)}
+.doc .copyBtn:hover{background:var(--bg-muted)}
+.doc .prose table{font-size:14px}
+.doc .prose th,.doc .prose td{border-color:var(--border-2);color:var(--text-2)}
+.doc .prose th{background:var(--bg-subtle);color:var(--text-3);font-size:12px;font-weight:600;letter-spacing:0;text-transform:none}
+.doc .prose td:first-child{color:var(--text);font-weight:600}
+.doc .doc-toc{display:flex;flex-wrap:wrap;gap:8px;margin:20px 0 0;padding:0;list-style:none}
+.doc .doc-toc li{margin:0}
+.doc .doc-toc a{display:inline-flex;align-items:center;min-height:32px;padding:0 12px;border:1px solid var(--border-3);border-radius:16px;color:var(--text-2);font-size:13px;font-weight:500}
+.doc .doc-toc a:hover{border-color:var(--text-3);color:var(--text);text-decoration:none}
+@media(max-width:820px){.doc [id]{scroll-margin-top:136px}}
+@media(max-width:640px){.doc{padding:40px 0 72px}.doc .prose h1{font-size:32px}.doc .prose .doc-lead{font-size:16px}}
 
 /* ---------- responsive ---------- */
 @media(max-width:940px){

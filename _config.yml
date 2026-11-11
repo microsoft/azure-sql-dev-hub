@@ -16,9 +16,7 @@ repo: "https://github.com/microsoft/azure-sql-dev-hub"
 
 # Sites this hub points at. Kept here so a link change is one edit, not twelve.
 container_repo: "https://github.com/microsoft/azure-sql-database-container"
-container_site: "https://microsoft.github.io/azure-sql-database-container"
 skills_catalog: "https://github.com/microsoft/azure-sql-database-container/tree/main/skills"
-container_signup: "https://aka.ms/sqldbcontainerpreview-signup"
 azure_free_tier: "https://learn.microsoft.com/azure/azure-sql/database/free-tier"
 azure_portal_hub: "https://aka.ms/azuresqlhub"
 azure_sql_docs: "https://learn.microsoft.com/azure/azure-sql/"

@@ -1,36 +1,46 @@
 {%- comment -%}
-  Hero demo. A terminal replays a recorded run of the JavaScript starter prompt
-  (build/javascript-app.md) in GitHub Copilot, then the app it built slides in.
-  The lines are the ones the recorded demo showed; change them only from a new
-  recording. Screen readers get one label for the whole picture, from `demo.alt`
-  in index.md.
+  Hero demo. It plays like an animated GIF. A terminal in GitHub Copilot types
+  the prompt from `demo.prompt` (index.md) with the first app's name, shows the
+  skills and the build once, and the first app opens below the terminal's last
+  line, overlapping only its empty bottom edge so no line is covered. After
+  that the terminal stays as it is: only the app name in the prompt and the
+  app picture change, through `demo.apps` and around again. Only the
+  first app and name show until the script moves on, so pages without
+  scripts, and visitors who ask for reduced motion, see it alone and finished.
+  The run is illustrative, not a recording. Screen readers get one label for
+  the whole picture, the shown app's `alt`.
+
+  The apps come from _includes/app-shot.html, shared with the Build section's
+  app cards. They keep a light Azure look in both site themes, as the
+  terminal stays dark in both.
 
   Styles and timing live in the home layout. Each element rests in its finished
-  state, and --d is when it appears, in seconds after page load. --n is the
-  number of characters typed, and --dur is how long typing them takes.
+  state, and --d is when it appears, in seconds after the page loads. --n is
+  the number of characters typed, and --dur is how long typing them takes. The
+  clock times the first switch, and each app's tick times the next one.
 {%- endcomment -%}
-<div class="ht play" id="hDemo" role="img" aria-label="{{ page.demo.alt | escape }}">
+{%- assign demo = page.demo %}
+{%- assign prompt_parts = demo.prompt | split: '{app}' %}
+{%- assign first_prompt = prompt_parts[0] | append: demo.apps[0].name | append: prompt_parts[1] %}
+{%- assign n = first_prompt | size %}
+<div class="ht play" id="hDemo" role="img" aria-label="{{ demo.apps[0].alt | escape }}">
   <div class="ht-term">
     <div class="ht-bar"><span class="ht-dots"><i></i><i></i><i></i></span>GitHub Copilot</div>
     <div class="ht-body">
-      <p><span class="t-pr">❯</span> <span class="ht-type" style="--n:60;--d:.5s;--dur:1.5s"># AI Prompt: Scaffold a JavaScript app on Azure SQL Database</span><span class="ht-caret" style="--d:.5s;--dur:1.5s"></span></p>
-      <p class="gap ht-in" style="--d:2.3s"><span class="t-ok">●</span> skill(build-app-on-azure-sql)</p>
-      <p class="ht-in t-dim" style="--d:2.8s">❯ <em>Thought for 1s</em></p>
-      <p class="ht-in" style="--d:3.3s"><span class="t-ok">●</span> skill(connect-from-typescript-and-node)</p>
-      <p class="gap ht-in" style="--d:4s"><span class="t-sh">$</span> <b>Shell</b> Build task app <span class="t-dim">2 lines…</span></p>
-      <p class="ht-in t-dim indent" style="--d:4.3s">npm run build</p>
+      <p><span class="t-pr">❯</span> <span class="ht-type" style="--n:{{ n }};--d:.3s;--dur:{{ n | times: 30 }}ms">{{ prompt_parts[0] }}<span class="ht-name">{% for a in demo.apps %}<b data-ht="{{ a.key }}"{% unless forloop.first %} hidden{% endunless %}>{{ a.name }}</b>{% endfor %}</span>{{ prompt_parts[1] }}</span><span class="ht-caret" style="--d:.3s;--dur:{{ n | times: 30 }}ms"></span></p>
+      <p class="gap ht-in" style="--d:2.1s"><span class="t-ok">●</span> skill({{ demo.skills[0] }})</p>
+      <p class="ht-in t-dim" style="--d:2.5s">❯ <em>Thought for 1s</em></p>
+      <p class="ht-in" style="--d:2.9s"><span class="t-ok">●</span> skill({{ demo.skills[1] }})</p>
+      <p class="gap ht-in" style="--d:3.4s"><span class="t-sh">$</span> <b>Shell</b> {{ demo.shell }}</p>
+      <p class="ht-in t-dim indent" style="--d:3.7s">{{ demo.run }}</p>
+      <p class="ht-in indent" style="--d:4.2s"><span class="t-ok">✓</span> {{ demo.output }}</p>
     </div>
   </div>
-  <div class="ht-app" style="--d:4.8s">
-    <div class="ht-app-bar">Local app · Azure SQL Database</div>
-    <div class="ht-app-body">
-      <p class="ht-app-title">My Tasks</p>
-      <ul>
-        <li class="ht-in" style="--d:5.1s">Connect the app<span>To do</span></li>
-        <li class="ht-in" style="--d:5.3s">Render the list<span>To do</span></li>
-        <li class="ht-in" style="--d:5.5s">Ship it<span>To do</span></li>
-      </ul>
-      <p class="ht-app-foot ht-in" style="--d:5.7s">Built with Azure SQL</p>
-    </div>
+  {%- for t in demo.apps %}
+  <div class="ht-app ha-app" data-ht="{{ t.key }}" data-alt="{{ t.alt | escape }}" style="--d:4.8s"{% unless forloop.first %} hidden{% endunless %}>
+    {%- include app-shot.html key=t.key %}
+    <i class="ht-tick" aria-hidden="true"></i>
   </div>
+  {%- endfor %}
+  <span class="ht-clock" aria-hidden="true"></span>
 </div>

@@ -8,9 +8,18 @@
 {%- endif -%}
 {% include nav.html %}
 <main id="main">
-  <div class="prosePage">
+  {%- comment -%} A page with doc: true reads the redesign's tokens and follows the
+  visitor's theme; see .doc in main.scss. Its pill sits beside the eyebrow, and
+  with eyebrow_href the eyebrow is a link back to the section the page belongs to. {%- endcomment %}
+  <div class="prosePage{% if page.doc %} doc{% endif %}">
     <div class="wrap prose">
-      {%- if page.eyebrow %}<div class="sectionLabel">{{ page.eyebrow }}</div>{% endif %}
+      {%- if page.pill %}
+      <div class="doc-kicker">
+        {%- if page.eyebrow_href %}<a class="doc-back" href="{{ page.eyebrow_href | relative_url }}" aria-label="Back to {{ page.eyebrow }}"
+           data-event="site/action" data-event-action="pathSelected" data-event-path-id="{{ page.eyebrow_href | remove: '/' | remove: '#' }}"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 8H3M7 4 3 8l4 4"/></svg>{{ page.eyebrow }}</a>
+        {%- elsif page.eyebrow %}<span class="sectionLabel">{{ page.eyebrow }}</span>{% endif -%}
+        <span class="doc-pill">{{ page.pill }}</span></div>
+      {%- elsif page.eyebrow %}<div class="sectionLabel">{{ page.eyebrow }}</div>{% endif %}
       {%- if page.title %}<h1>{{ page.title }}</h1>{% endif %}
       {{ content }}
     </div>

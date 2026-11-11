@@ -2,8 +2,8 @@
 {%- comment -%}
   Top bar, rebuilt from the Ignite redesign. It follows the visitor's theme; see
   the theme script in head.html and the themed regions in main.scss. The
-  redesign's Containers link and search box are added when the Containers
-  section and the search index exist, so no link points at nothing.
+  redesign's search box is added when the search index exists, so nothing
+  points at nothing.
 {%- endcomment -%}
 <header class="topbar">
   <div class="wrap topbar-in">
@@ -13,6 +13,7 @@
     </a>
     <nav class="topnav" aria-label="Primary">
       <a href="{{ '/' | relative_url }}#get-running">Quickstarts</a>
+      <a href="{{ '/' | relative_url }}#containers">Container</a>
       <a href="{{ '/' | relative_url }}#build">Build</a>
       <a href="{{ '/' | relative_url }}#skills">Skills</a>
       <a href="{{ '/' | relative_url }}#watch">Videos</a>

@@ -34,6 +34,8 @@ const ORDER = [
   'build/multi-tenant.md',
   'prompts.md',
   'for-agents.md',
+  'container/get-started.md',
+  'container/faq.md',
 ];
 
 if (!existsSync(SITE)) {
@@ -106,6 +108,12 @@ function sentenceList(items) {
   return `${items.slice(0, -1).join(', ')}, and ${items[items.length - 1]}`;
 }
 
+// A link to a page on this site points at that page's markdown twin, so an
+// agent reading a twin stays in markdown. Links elsewhere pass through.
+function twinHref(href) {
+  return /^\//.test(href) ? href.replace(/\.html(?=#|$)/, '.md') : href;
+}
+
 // The local container's setup guide, a dialog on the page: both routes, with
 // every command, so an agent reading the twin can run them.
 function containerSetup(cs) {
@@ -122,7 +130,7 @@ function containerSetup(cs) {
   steps(cs.manual.steps);
   out.push(`${cs.agent.tab}. ${plain(cs.agent.intro)}`, '');
   steps(cs.agent.steps);
-  for (const l of [cs.prerequisites, cs.limitations, cs.troubleshooting]) if (l) out.push(`- ${l.label}: ${l.href}`);
+  for (const l of [cs.prerequisites, cs.limitations, cs.troubleshooting]) if (l) out.push(`- ${l.label}: ${twinHref(l.href)}`);
   out.push('');
   return out;
 }
@@ -151,6 +159,19 @@ function homeToMarkdown(d) {
   }
   if (d.then) out.push(`Then: ${d.then.from} to ${d.then.to}. ${d.then.note}`, '');
 
+  // The container section: its cards open the setup guide above, so the twin
+  // names them and lists the resources, with the guide's own links.
+  const ct = d.containers;
+  if (ct) {
+    const cs = d.container_setup || {};
+    out.push(`## ${ct.heading} {#containers}`, '', `${ct.pill}. ${ct.text}`, '');
+    for (const c of ct.cards || []) out.push(`- ${c.title}: ${c.text} The steps are in the setup guide under Get running.`);
+    out.push('', `- ${ct.image.label}: ${ct.image.href}`);
+    if (cs.prerequisites) out.push(`- ${ct.prerequisites}: ${twinHref(cs.prerequisites.href)}`);
+    for (const l of [cs.limitations, cs.troubleshooting, cs.faq]) if (l) out.push(`- ${l.label}: ${twinHref(l.href)}`);
+    out.push('');
+  }
+
   out.push(`## ${d.build_heading || 'Build'} {#build}`, '', d.build_text || '', '');
   if (d.build_note) {
     const note = d.build_note_link && d.build_note_href
@@ -160,8 +181,26 @@ function homeToMarkdown(d) {
   }
   for (const [i, step] of (d.build_steps || []).entries()) out.push(`${i + 1}. ${step}`);
   out.push('');
+  // Two groups of templates, as the page's filter shows them: full apps, with
+  // the details their dialogs show, then the building blocks.
+  const groups = Object.fromEntries((d.template_groups || []).map((g) => [g.key, g.label]));
+  const inside = d.template_inside || {};
+  if (d.templates) {
+    out.push(`### ${groups.apps || 'Apps'}`, '');
+    for (const t of d.templates) {
+      out.push(`#### [${t.title}](build/${t.slug}.md)`, '', `${t.tag}. ${t.blurb}`, '');
+      out.push(`- Stack: ${d.template_stack}`, `- Covers: ${t.covers}`);
+      if (d.template_runs_on) out.push(`- Runs on: ${d.template_runs_on.join(', ')}`);
+      out.push('', `${inside.features || 'What it does'}:`, '', ...t.features.map((f) => `- ${f}`), '');
+      out.push(`${inside.tables || 'Tables it creates'}:`, '', ...t.tables.map(([n, x]) => `- \`${n}\`: ${x}`), '');
+      out.push(`${inside.sql || 'Azure SQL features it uses'}:`, '', ...t.sql.map(([n, x]) => `- ${n}: ${x}`), '');
+      out.push(`${inside.try || 'Try it yourself'}:`, '', ...t.try.map(([n, x]) => `- ${n}. ${x}`), '');
+      out.push(`Full prompt: build/${t.slug}.md`, '');
+    }
+    out.push(`### ${groups.blocks || 'Building blocks'}`, '');
+  }
   for (const s of d.scenarios || []) {
-    out.push(`### [${s.title}](build/${s.slug}.md)`, '', `${s.tag}. ${s.blurb}`, '', `Full prompt: build/${s.slug}.md`, '');
+    out.push(`#### [${s.title}](build/${s.slug}.md)`, '', `${s.tag}. ${s.blurb}`, '', `Full prompt: build/${s.slug}.md`, '');
   }
 
   out.push('## Built for AI workloads {#workloads}', '', d.workloads_text || '', '');
@@ -175,7 +214,7 @@ function homeToMarkdown(d) {
   for (const a of sk.agents || []) {
     out.push(`### ${a.name}`, '', fence(a.code, 'bash'), '', plain(a.note), '');
   }
-  if (sk.chips) out.push('Example prompts once the skills are installed:', '', ...sk.chips.map((c) => `- ${c}`), '');
+  if (sk.chips) out.push('Example prompts once the skills are installed:', '', ...sk.chips.map((c) => `- ${c.text || c}`), '');
   const skNote = [sk.catalog, sk.note].filter(Boolean).map(plain).join(' ');
   if (skNote) out.push(skNote, '');
 
@@ -209,6 +248,11 @@ for (const file of pages) {
   let head = '';
   if (data.layout === 'home') head = homeToMarkdown(data);
   // Scenario pages: the body is the prompt and already carries its own H1.
+  // Other pages print their title from front matter, so the twin adds it,
+  // with the page's status pill when it has one.
+  else if (data.title && !/^#\s/m.test(body.replace(/^```[\s\S]*?^```/gm, ''))) {
+    head = [`# ${data.head_title || data.title}`, data.pill ? `${data.pill}.` : ''].filter(Boolean).join('\n\n');
+  }
 
   const markdown = [head, stripAttributeLists(resolveLiquid(body, config))]
     .filter(Boolean)

@@ -1,0 +1,164 @@
+{%- comment -%}
+  One app screen, by key. The apps (board, inventory, revenue, shipments,
+  helpdesk) show one at a time in the hero demo, and on the Build section's
+  app cards and in their details. The building blocks (tasks, api, search,
+  functions, changes, tenants) show on their Build cards, each drawn from what
+  its prompt builds, with its sample rows where it has them. The apps are
+  drawn after the matching idea-to-app reference apps; other names, rows, and
+  numbers are made up for the picture.
+
+  Wrap it in an element with the ha-app class, which sets the screen's light
+  Azure look and makes it a container, so its own width decides what fits.
+  With window=true the screen opens on a window bar, as in the redesign's
+  mock-ups: three dots and the app's title. The Build section uses that and
+  hides the blue app bar; the hero keeps the blue bar. Styles live in the
+  home layout.
+{%- endcomment -%}
+{%- if include.window %}
+  {%- case include.key %}
+  {%- when 'board' %}{% assign ha_title = "Team board" %}
+  {%- when 'inventory' %}{% assign ha_title = "Inventory reservations" %}
+  {%- when 'revenue' %}{% assign ha_title = "Revenue reporting" %}
+  {%- when 'shipments' %}{% assign ha_title = "Shipment tracker" %}
+  {%- when 'helpdesk' %}{% assign ha_title = "Helpdesk · Contoso" %}
+  {%- when 'tasks' %}{% assign ha_title = "Tasks · localhost:3000" %}
+  {%- when 'api' %}{% assign ha_title = "Tasks API · localhost:8000" %}
+  {%- when 'search' %}{% assign ha_title = "Search · cosine distance" %}
+  {%- when 'functions' %}{% assign ha_title = "Functions · localhost:7071" %}
+  {%- when 'changes' %}{% assign ha_title = "Change log · Change Tracking on" %}
+  {%- when 'tenants' %}{% assign ha_title = "Tasks · row-level security" %}
+  {%- endcase %}
+  <div class="ha-bar"><i></i><i></i><i></i><span>{{ ha_title }}</span></div>
+{%- endif %}
+  {%- case include.key %}
+  {%- when 'board' %}
+  <div class="ha-head"><svg viewBox="0 0 16 16" aria-hidden="true"><rect x="1.5" y="1.5" width="13" height="13" rx="3" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="m4.8 8.2 2.1 2.1 4.3-4.6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>Tasks</div>
+  <div class="ha-main">
+    <div class="ha-top"><div><p class="ha-h">Product launch</p><p class="ha-sub">3 open · 1 overdue</p></div><span class="ha-btn">+ New task</span></div>
+    <ul class="ha-list">
+      <li class="ht-in done" style="--d:5.2s"><i class="ha-check"></i><span class="ha-t">Book venue for launch event</span><i class="ha-av" style="--c:#0f6cbd">A</i><span class="ha-pill ok">Done</span></li>
+      <li class="ht-in" style="--d:5.35s"><i class="ha-check"></i><span class="ha-t">Finalize pricing page copy</span><i class="ha-av" style="--c:#8764b8">B</i><span class="ha-pill warn">Today</span></li>
+      <li class="ht-in" style="--d:5.5s"><i class="ha-check"></i><span class="ha-t">Send press kit to partners</span><i class="ha-av" style="--c:#038387">C</i><span class="ha-pill bad">Overdue</span></li>
+      <li class="ht-in" style="--d:5.65s"><i class="ha-check"></i><span class="ha-t">Record product demo video</span><i class="ha-av" style="--c:#ca5010">D</i><span class="ha-pill">Nov 14</span></li>
+    </ul>
+  </div>
+  {%- when 'inventory' %}
+  <div class="ha-head"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2.5 5 8 2l5.5 3v6L8 14l-5.5-3Z M2.5 5 8 8l5.5-3M8 8v6" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>Inventory<span class="ha-hbtn">Reserve</span></div>
+  <div class="ha-main">
+    <div class="ha-table ha-inv ht-in" style="--d:5.2s">
+      <div class="ha-tr ha-th"><span>Product</span><span>On hand</span><span>Reserved</span><span>Available</span></div>
+      <div class="ha-tr"><span>Camera</span><span>10</span><span>7</span><span>3</span></div>
+      <div class="ha-tr"><span>Tripod</span><span>12</span><span>4</span><span>8</span></div>
+      <div class="ha-tr"><span>Microphone</span><span>30</span><span>12</span><span>18</span></div>
+    </div>
+    <ul class="ha-rows">
+      <li class="ht-in" style="--d:5.45s"><code>R-1042</code><span class="ha-grow">Camera × 2</span><span class="ha-pill brand">Active</span></li>
+      <li class="ht-in" style="--d:5.6s"><code>R-1043</code><span class="ha-grow">Camera × 4</span><span class="ha-pill bad">Only 3 available</span></li>
+    </ul>
+  </div>
+  {%- when 'revenue' %}
+  <div class="ha-head"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2.5 13.5h11M4.5 11V8M8 11V4.5M11.5 11V6.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>Revenue<span class="ha-hbtn">Export CSV</span></div>
+  <div class="ha-main">
+    <div class="ha-filters"><span>Nov 4–10</span><span>All regions</span></div>
+    <div class="ha-kpis">
+      <div class="ht-in" style="--d:5.2s"><small>Net revenue</small><b>$48,210.50</b></div>
+      <div class="ht-in" style="--d:5.3s"><small>Orders</small><b>1,284</b></div>
+      <div class="ht-in" style="--d:5.4s"><small>Avg. order</small><b>$37.55</b></div>
+    </div>
+    <div class="ha-card ht-in" style="--d:5.55s">
+      <p class="ha-card-h">Daily net revenue</p>
+      <div class="ha-bars"><span style="--h:.62"><i></i>Mon</span><span style="--h:.7"><i></i>Tue</span><span style="--h:.66"><i></i>Wed</span><span style="--h:.81"><i></i>Thu</span><span style="--h:.97"><i></i>Fri</span><span style="--h:.88"><i></i>Sat</span><span style="--h:.54"><i></i>Sun</span></div>
+    </div>
+  </div>
+  {%- when 'shipments' %}
+  <div class="ha-head"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M1.5 4h8v7h-8Z M9.5 6.5h3l2 2.5v2h-5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><circle cx="4.5" cy="12" r="1.4" fill="currentColor"/><circle cx="12" cy="12" r="1.4" fill="currentColor"/></svg>Shipments<span class="ha-hbtn">Import batch</span></div>
+  <div class="ha-main">
+    <div class="ha-card ha-receipt ht-in" style="--d:5.2s">
+      <p><code>events.csv</code><span class="ha-pill ok">Imported</span></p>
+      <p class="ha-counts"><span><b>1,204</b> accepted</span><span><b>18</b> duplicates</span><span><b>3</b> rejected</span></p>
+    </div>
+    <div class="ha-table ha-ship ht-in" style="--d:5.4s">
+      <div class="ha-tr ha-th"><span>Shipment</span><span>Status</span><span>Updated</span></div>
+      <div class="ha-tr"><span>SHP-20431</span><span><i class="ha-pill ok">Delivered</i></span><span>11:02</span></div>
+      <div class="ha-tr"><span>SHP-20432</span><span><i class="ha-pill brand">In transit</i></span><span>10:40</span></div>
+      <div class="ha-tr"><span>SHP-20433</span><span><i class="ha-pill bad">Exception</i></span><span>09:15</span></div>
+    </div>
+  </div>
+  {%- when 'helpdesk' %}
+  <div class="ha-head"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2.5 3.5h11v7h-6l-3 2.5v-2.5h-2Z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>Helpdesk<span class="ha-org"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 14V3h6v11M9 6h4v8M2 14h12M5 5.5h2M5 8h2M5 10.5h2" fill="none" stroke="currentColor" stroke-width="1.3"/></svg>Contoso</span><i class="ha-av" style="--c:#8764b8">D</i></div>
+  <div class="ha-main">
+    <div class="ha-top"><div><p class="ha-h">Tickets</p><p class="ha-sub">Contoso · 3 open</p></div><span class="ha-btn">+ New ticket</span></div>
+    <div class="ha-table ha-desk">
+      <div class="ha-tr ha-th"><span>Ticket</span><span>Assignee</span><span>Status</span></div>
+      <div class="ha-tr ht-in" style="--d:5.2s"><span>VPN drops every hour</span><span>Dana</span><span><i class="ha-pill brand">Open</i></span></div>
+      <div class="ha-tr ht-in" style="--d:5.35s"><span>Can't open shared mailbox</span><span><i class="ha-assign">Assign</i></span><span><i class="ha-pill brand">Open</i></span></div>
+      <div class="ha-tr ht-in" style="--d:5.5s"><span>Laptop for new hire</span><span>Sam</span><span><i class="ha-pill warn">In progress</i></span></div>
+    </div>
+  </div>
+  {%- when 'tasks' %}
+  <div class="ha-head"><svg viewBox="0 0 16 16" aria-hidden="true"><rect x="1.5" y="1.5" width="13" height="13" rx="3" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="m4.8 8.2 2.1 2.1 4.3-4.6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>Tasks<span class="ha-org">localhost:3000</span></div>
+  <div class="ha-main">
+    <div class="ha-top"><div><p class="ha-h">My tasks</p><p class="ha-sub">3 tasks · read from dbo.tasks</p></div></div>
+    <ul class="ha-list">
+      <li><i class="ha-check"></i><span class="ha-t">Plan a weekend trip</span><code>#1</code></li>
+      <li><i class="ha-check"></i><span class="ha-t">Book a dentist appointment</span><code>#2</code></li>
+      <li><i class="ha-check"></i><span class="ha-t">Pick up groceries</span><code>#3</code></li>
+    </ul>
+  </div>
+  {%- when 'api' %}
+  <div class="ha-head"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M5.5 2.5c-1.6 0-2 .8-2 2v1.6c0 .9-.5 1.4-1.5 1.9 1 .5 1.5 1 1.5 1.9v1.6c0 1.2.4 2 2 2M10.5 2.5c1.6 0 2 .8 2 2v1.6c0 .9.5 1.4 1.5 1.9-1 .5-1.5 1-1.5 1.9v1.6c0 1.2-.4 2-2 2" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>Tasks API<span class="ha-org">localhost:8000</span></div>
+  <div class="ha-main">
+    <ul class="ha-rows ha-ep">
+      <li><b class="ha-verb">GET</b><code class="ha-grow">/tasks</code><span class="ha-pill ok">200</span></li>
+      <li><b class="ha-verb post">POST</b><code class="ha-grow">/tasks</code><span class="ha-pill ok">201</span></li>
+      <li><b class="ha-verb post">POST</b><code class="ha-grow">/tasks/{id}/complete</code><span class="ha-pill ok">200</span></li>
+    </ul>
+    <div class="ha-card ha-json"><code>[{ <b>"id"</b>: 1, <b>"title"</b>: <i>"first task"</i>, <b>"done"</b>: false }]</code></div>
+  </div>
+  {%- when 'search' %}
+  <div class="ha-head"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="4.5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="m10.4 10.4 3.6 3.6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>Search<span class="ha-org">Cosine distance</span></div>
+  <div class="ha-main">
+    <div class="ha-search"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="4.5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="m10.4 10.4 3.6 3.6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg><span class="ha-grow">How do I rank rows by similarity?</span></div>
+    <ul class="ha-rows ha-hits">
+      <li><span class="ha-grow">VECTOR_DISTANCE ranks rows by cosine, euclidean, or dot product distance.</span><code>0.1824</code></li>
+      <li><span class="ha-grow">Azure SQL Database has a native VECTOR type.</span><code>0.3391</code></li>
+      <li><span class="ha-grow">Source text and embeddings can live in the same table, next to the rows they describe.</span><code>0.4127</code></li>
+    </ul>
+  </div>
+  {%- when 'functions' %}
+  <div class="ha-head"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M9 1.5 3.5 9H8l-1 5.5L12.5 7H8Z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>Functions<span class="ha-org">localhost:7071</span></div>
+  <div class="ha-main">
+    <div class="ha-card ha-receipt">
+      <p><code>func start</code><span class="ha-pill ok">Running</span></p>
+      <p class="ha-counts"><span><b>2</b> functions</span><span>Microsoft Entra sign-in</span></p>
+    </div>
+    <div class="ha-table ha-fn">
+      <div class="ha-tr ha-th"><span>Function</span><span>Route</span><span>Binding</span></div>
+      <div class="ha-tr"><span>GetTasks</span><span><b class="ha-verb">GET</b> /api/tasks</span><span><i class="ha-pill brand">SQL input</i></span></div>
+      <div class="ha-tr"><span>CreateTask</span><span><b class="ha-verb post">POST</b> /api/tasks</span><span><i class="ha-pill brand">SQL output</i></span></div>
+    </div>
+  </div>
+  {%- when 'changes' %}
+  <div class="ha-head"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M1.5 8.5h3l2-5 3 9 2-4h3" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Change log<span class="ha-org">Change Tracking on</span></div>
+  <div class="ha-main">
+    <div class="ha-top"><div><p class="ha-h">TasksChanged</p><p class="ha-sub">SQL trigger · dbo.tasks</p></div></div>
+    <div class="ha-table ha-chg">
+      <div class="ha-tr ha-th"><span>Time</span><span>Operation</span><span>Row</span></div>
+      <div class="ha-tr"><span>11:02:14</span><span><i class="ha-pill ok">Insert</i></span><span>task 42</span></div>
+      <div class="ha-tr"><span>11:02:31</span><span><i class="ha-pill brand">Update</i></span><span>task 42</span></div>
+      <div class="ha-tr"><span>11:03:05</span><span><i class="ha-pill bad">Delete</i></span><span>task 17</span></div>
+    </div>
+  </div>
+  {%- when 'tenants' %}
+  <div class="ha-head"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.5 13 3.3v4c0 3.1-2.1 5.6-5 7.2-2.9-1.6-5-4.1-5-7.2v-4Z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>Tasks<span class="ha-org">Row-level security</span></div>
+  <div class="ha-main">
+    <div class="ha-split">
+      <div class="ha-card"><p class="ha-card-h"><i class="ha-av" style="--c:#0f6cbd">1</i>Tenant 1</p><p>Plan a weekend trip</p><p>Pick up groceries</p></div>
+      <div class="ha-card"><p class="ha-card-h"><i class="ha-av" style="--c:#8764b8">2</i>Tenant 2</p><p>Tenant two task</p></div>
+    </div>
+    <ul class="ha-rows">
+      <li><span class="ha-grow">Cross-tenant read returns 0 rows</span><span class="ha-pill ok">Pass</span></li>
+      <li><span class="ha-grow">Cross-tenant update is blocked</span><span class="ha-pill ok">Pass</span></li>
+    </ul>
+  </div>
+  {%- endcase %}
