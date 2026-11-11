@@ -135,6 +135,27 @@ function containerSetup(cs) {
   return out;
 }
 
+// The free tier's setup guide, built like the container's, with its monthly
+// allowance and the Learn page.
+function freeSetup(fs) {
+  if (!fs) return [];
+  const out = [`#### ${fs.title}`, ''];
+  for (const side of [fs.portal, fs.agent]) {
+    out.push(`${side.tab}. ${plain(side.intro)}`, '');
+    for (const [i, st] of (side.steps || []).entries()) {
+      out.push(`${i + 1}. ${st.title}. ${plain(st.text)}`, '');
+      if (st.link) out.push(`${st.link.label}: ${st.link.href}`, '');
+      if (st.code) out.push(fence(st.code, st.key === 'verify' ? 'sql' : 'bash'), '');
+      if (st.prompt) out.push(`> ${st.prompt}`, '');
+    }
+  }
+  if (fs.free) {
+    out.push(`${fs.free.title}:`, '', ...fs.free.tiles.map(([k, v]) => `- ${k}: ${v}`), ...fs.free.notes.map((n) => `- ${n}`), '');
+  }
+  if (fs.learn) out.push(`${fs.learn.label}: ${fs.learn.href}`, '');
+  return out;
+}
+
 // The home page's structured front matter, rendered back into markdown.
 function homeToMarkdown(d) {
   const out = [];
@@ -142,20 +163,22 @@ function homeToMarkdown(d) {
   out.push(`# ${[h.headline, h.headline_accent].filter(Boolean).join(' ')}`.trim(), '');
   if (h.tagline) out.push(h.tagline, '');
   out.push(h.subline, '');
-  if (h.stacks) out.push(`Build with ${sentenceList(h.stacks)}.`, '');
+  if (h.agents) out.push(`Works with ${sentenceList(h.agents)}.`, '');
 
   const v = d.demo || {};
   if (v.title) out.push(`## ${v.title}`, '', v.sub, '');
 
   out.push('## Get running {#get-running}', '', d.quickstart_text || '', '');
   for (const m of d.quickstart || []) {
-    out.push(`### ${m.name}: ${m.title}`, '', m.desc, '');
-    if (m.code) out.push(fence(m.code, 'bash'), '');
+    out.push(`### ${m.name}: ${m.title}`, '');
     for (const c of m.checks || []) out.push(`- ${c[0]}: ${c[1]}`);
     out.push('');
-    if (m.button) out.push(`${m.button.label}: ${m.button.href}`, '');
-    if (m.link) out.push(`${m.link.label}: ${m.link.href}`, '');
-    if (m.key === 'local') out.push(...containerSetup(d.container_setup));
+    if (m.code) out.push(fence(m.code, 'sql'), '');
+    if (m.note) out.push(m.note, '');
+    for (const l of m.links || []) out.push(`- ${l.label}: ${twinHref(l.href)}`);
+    if (m.links) out.push('');
+    if (m.dialog === 'fs') out.push(...freeSetup(d.free_setup));
+    if (m.dialog === 'cs') out.push(...containerSetup(d.container_setup));
   }
   if (d.then) out.push(`Then: ${d.then.from} to ${d.then.to}. ${d.then.note}`, '');
 
@@ -189,6 +212,7 @@ function homeToMarkdown(d) {
     out.push(`### ${groups.apps || 'Apps'}`, '');
     for (const t of d.templates) {
       out.push(`#### [${t.title}](build/${t.slug}.md)`, '', `${t.tag}. ${t.blurb}`, '');
+      for (const para of t.description || []) out.push(para, '');
       out.push(`- Stack: ${d.template_stack}`, `- Covers: ${t.covers}`);
       if (d.template_runs_on) out.push(`- Runs on: ${d.template_runs_on.join(', ')}`);
       out.push('', `${inside.features || 'What it does'}:`, '', ...t.features.map((f) => `- ${f}`), '');

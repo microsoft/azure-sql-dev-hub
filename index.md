@@ -3,103 +3,114 @@ layout: home
 title: Azure SQL Developer Hub
 description: Explore app templates and practical patterns for Azure SQL Database. Build dashboards, APIs, search, and multi-tenant applications with your preferred stack.
 hero:
-  headline: Build your next app with Azure SQL.
-  tagline: Start with a template. Make it your own.
-  subline: Explore dashboards, APIs, search, and multi-tenant apps. Choose a starting point and build around your data.
-  stacks:
-  - JavaScript
-  - Python
-  - .NET
+  headline: Azure SQL, built for AI workloads
+  tagline: Bring the idea. Build with Azure SQL.
+  subline: Start with a prompt. Give your AI coding agent SQL skills, and make your next app yours.
+  agents:
+  - Claude Code
+  - GitHub Copilot
+  - Codex
+  - Cursor
 demo:
   # Hero demo (_includes/hero-demo.html). It plays like an animated GIF: the
-  # terminal types the prompt with the first app's name, shows the app layers and
+  # terminal types the prompt with the first app's name, shows the skills and
   # the build once, and the first app opens below the terminal's last line.
   # After that only the app name in the prompt and the app picture change,
   # every few seconds, through the list and around again; the terminal does
   # not replay. Without scripts or with reduced motion, the first app shows
-  # finished. The run is illustrative, not recorded. `{app}` in the prompt is replaced by each
+  # finished. The run is illustrative, not recorded; the skills are real ones
+  # from microsoft/microsoft-sql. `{app}` in the prompt is replaced by each
   # app's name. The apps follow the idea-to-app reference apps (task board,
   # stock reservation, sales analytics, import dashboard, tenant helpdesk) and
   # are drawn in the include, keyed by `key`. The title and sub appear in the
   # markdown twin, and screen readers hear the shown app's alt in place of the
   # animation.
   title: From idea to app
-  sub: Explore what you can build with Azure SQL.
-  terminal: App template preview
-  prompt: Build {app} on Azure SQL Database
-  steps: [Schema and sample data, Application UI and data access]
-  status: Azure SQL Database connected
+  sub: Azure SQL for the agent era.
+  prompt: Scaffold {app} on Azure SQL Database
+  skills: [build-app-on-azure-sql, connect-from-typescript-and-node]
   shell: Build the app
   run: npm run build
   output: Compiled successfully
   apps:
   - key: board
     name: a team task board
-    alt: 'Team board template preview: an Azure SQL app with filters and due dates.'
+    alt: 'From idea to app: a prompt builds a team task board on Azure SQL with filters and due dates.'
   - key: inventory
     name: an inventory reservation app
-    alt: 'Inventory reservation template preview: an Azure SQL app for reserving stock and tracking orders.'
+    alt: 'From idea to app: a prompt builds an inventory reservation app on Azure SQL that never oversells.'
   - key: revenue
     name: a revenue dashboard
-    alt: 'Revenue reporting template preview: an Azure SQL dashboard with revenue totals and charts.'
+    alt: 'From idea to app: a prompt builds a revenue dashboard on Azure SQL with exact totals.'
   - key: shipments
     name: a shipment tracker
-    alt: 'Shipment tracker template preview: an Azure SQL app for importing events and tracking deliveries.'
+    alt: 'From idea to app: a prompt builds a shipment tracker on Azure SQL that imports events safely.'
   - key: helpdesk
     name: a multi-tenant helpdesk
-    alt: 'Multi-tenant helpdesk template preview: an Azure SQL app where each organization sees only its own tickets.'
+    alt: 'From idea to app: a prompt builds a multi-tenant helpdesk on Azure SQL where each organization sees only its own tickets.'
 quickstart_heading: Power your next app with Azure SQL.
-quickstart_text: Start with a free cloud database or develop locally. Coding-agent setup is available too.
+quickstart_text: 'Choose your starting point: a free cloud database or the local container. Set either one up yourself or with your coding agent.'
+# Each tab shows three steps and opens its setup guide, a dialog: `dialog` is
+# the dialog's id prefix, and `guide` and `agent` open it on that tab. `code`
+# shows under the last step. In `links`, a path on this site is a page here; a
+# full URL is outbound docs.
 quickstart:
 - key: cloud
   name: Cloud, free tier
-  title: Create a free Azure SQL database.
-  desc: Create it in the Azure portal with the free tier, then verify from any SQL editor. Prerequisites and tier limits are in the setup guide.
-  code: SELECT 1 AS connected;
-  detail_title: Three steps, then you are live.
+  title: Set up in the Azure portal
+  dialog: fs
+  guide:
+    label: Free tier setup guide
+    tab: portal
+  agent:
+    label: Let your agent do it
+    tab: agent
   checks:
   - - Create the database
-    - You need an Azure subscription with permission to create resources. Follow the free-tier guide and pick the free tier when prompted.
+    - You need an Azure subscription with permission to create resources. Open the Azure SQL hub and select Start free.
   - - Open access
     - Add your IP to the firewall and sign in with Microsoft Entra.
   - - Verify
-    - Run SELECT 1. A result of 1 means your connection works and you are ready to build.
-  link:
-    label: 'Free tier: setup guide, prerequisites, and limits'
-    href: https://learn.microsoft.com/azure/azure-sql/database/free-tier
+    - Run SELECT 1. A result of 1 means your connection works and you are ready for a build prompt.
+  code: SELECT 1 AS connected;
+  note: 'Free for the life of your subscription: each month, per database, 100,000 vCore seconds, 32 GB of data and 32 GB of backup storage. Up to 10 free databases.'
+  links:
+  - label: Prerequisites
+    id: free-tier-prerequisites
+    href: https://learn.microsoft.com/azure/azure-sql/database/free-tier#prerequisites
+  - label: Limits
+    id: free-tier-limits
+    href: https://learn.microsoft.com/azure/azure-sql/database/free-tier#considerations-and-limitations
 - key: local
   name: Local container
   pill: Public preview
-  title: Run the Azure SQL Database engine on your laptop
-  desc: The same engine as the cloud, in a container, for development, testing and CI. It runs offline after the first pull, and only the connection string changes when you ship to Azure.
-  start: Get started
+  title: Run it on your machine
+  dialog: cs
+  guide:
+    label: Full setup and commands
+    tab: manual
+  agent:
+    label: Let your agent do it
+    tab: agent
   checks:
   - - Get the image
     - Pull the public image from Microsoft Container Registry. No sign-up needed.
   - - Start the container
     - One docker run starts the engine on port 1433, bound to localhost.
   - - Connect and query
-    - Run SELECT @@VERSION with the sqlcmd bundled in the container. No host install.
-  setup_link: Full setup and commands
-  agent_link: Let your agent do it
-- key: agent
-  name: With a coding agent
-  title: Install the skills, then ask in plain English
-  desc: One command teaches Claude Code, GitHub Copilot, Codex or Cursor how Azure SQL works. You stay in the loop on every step.
-  code: npx skills add microsoft/microsoft-sql
-  detail_title: Then say what you want
-  # A third entry of "prompt" shows the step's text as a prompt to copy.
-  checks:
-  - - Create a free database first
-    - Provisioning is still your step today. The agent takes it from there.
-  - - Prompt your agent
-    - Connect to my Azure SQL database and scaffold the schema, migrations and data layer for my stack.
-    - prompt
-  - - Verify
-    - The agent runs the first query and shows you the result.
-  link:
-    label: What the skills teach, per agent
-    href: '#skills'
+    - Run SELECT @@VERSION with the sqlcmd bundled in the container. A result that names Microsoft SQL Azure means the engine is up. No host install.
+  code: SELECT @@VERSION;
+  note: The same engine as the cloud, in a container, for development, testing and CI. It runs offline after the first pull, and only the connection string changes when you ship to Azure.
+  links:
+  - label: Prerequisites
+    id: container-prerequisites
+    href: /container/get-started.html#prerequisites
+  - label: Limitations
+    id: container-limitations
+    href: /container/faq.html#feature-availability
+  - label: Troubleshooting
+    id: container-troubleshooting
+    href: /container/get-started.html#troubleshooting
 # The local container's setup guide: a dialog from the Local container tab,
 # shown in place below the quickstart when scripts do not run. The image is
 # the public one on Microsoft Container Registry.
@@ -157,6 +168,60 @@ container_setup:
       title: Ask in plain English
       text: Paste this into your agent. It pulls the image, starts the container, creates the database and runs a first query.
       prompt: Add a local Azure SQL Database to this project, then scaffold the schema, migrations and data-access layer for my stack.
+# The free tier's setup guide: a dialog from the Cloud tab, built like the
+# container's above. Its facts follow the free tier page on Microsoft Learn.
+free_setup:
+  title: Create a free Azure SQL database
+  # Each step's key names its Copy button or link in telemetry.
+  portal:
+    tab: In the Azure portal
+    intro: A General Purpose serverless database with a monthly free allowance, created in the Azure portal in a few minutes.
+    steps:
+    - key: before
+      title: Before you start
+      text: You need an Azure subscription with permission to create resources. Most subscription types work; Azure for Students Starter doesn't.
+    - key: create
+      title: Create the database
+      text: Open the Azure SQL hub and select <b>Start free</b>. On <b>Basics</b>, pick the subscription, resource group, database name and server. If you create a new server, choose Microsoft Entra authentication. Check that <b>Estimated cost/month</b> shows 0, then select <b>Review + create</b> and <b>Create</b>.
+      link:
+        label: Open the Azure SQL hub
+        href: https://aka.ms/azuresqlhub
+    - key: access
+      title: Open access
+      text: Add your IP to the firewall and sign in with Microsoft Entra. Both are on the server, under Networking and Microsoft Entra ID.
+    - key: verify
+      title: Verify
+      text: Run SELECT 1 in the portal's query editor or the MSSQL extension for VS Code. The database's Overview page shows <b>Free monthly vCore amount</b>.
+      code: SELECT 1 AS connected;
+  agent:
+    tab: With your coding agent
+    intro: Your agent runs the Azure CLI as you, so sign in with <code>az login</code> first. You review each command before it runs.
+    steps:
+    - key: skills
+      title: Install the skills
+      text: One install for Claude Code, GitHub Copilot, Codex and Cursor. Per-tool commands are in <a href="#skills">Skills</a>.
+      code: npx skills add microsoft/microsoft-sql
+    - key: prompt
+      title: Ask in plain English
+      text: Paste this into your agent. It creates the free database, opens access for you and runs a first query.
+      prompt: Create a free Azure SQL Database in my Azure subscription using the free offer, and pause it when the monthly free limit is reached. Use Microsoft Entra authentication only, add my current IP address to the server firewall, then connect and run SELECT 1. Ask me which subscription and region to use, and show me each command before you run it.
+    - key: check
+      title: Check the result
+      text: Your agent should report that the database uses the free limit (useFreeLimit is true) and that SELECT 1 returned 1.
+  free:
+    title: What's free, every month
+    tiles:
+    - [Compute, '100,000 vCore s']
+    - [Data storage, 32 GB]
+    - [Backup storage, 32 GB]
+    - [Free databases, Up to 10]
+    notes:
+    - It pauses after 15 minutes idle. Close query editors and VS Code connections when you're done, or the database keeps using free time.
+    - 'When the monthly allowance runs out, you choose: pause until next month (the default) or keep running at standard rates. Once you choose to keep running, you can''t switch back.'
+    - For new databases only, with no SLA. Use it for development and proofs of concept.
+  learn:
+    label: Full guide on Microsoft Learn
+    href: https://learn.microsoft.com/azure/azure-sql/database/free-tier
 then:
   from: Local or free tier
   to: Azure SQL Database
@@ -207,12 +272,22 @@ template_groups:
   label: Building blocks
 template_stack: Your stack, or TypeScript and Node
 template_runs_on: [Azure SQL Database, Microsoft Entra ID]
+# The template details, laid out like a template page: the app and what it
+# builds on the left, Build with AI on the right. `features` and `covers` stay
+# for the markdown twin.
 template_inside:
-  heading: What's inside
+  build_ai: Build it with your coding agent
+  skills_title: Install the skills
+  skills_code: npx skills add microsoft/microsoft-sql
+  copy_title: Copy the build prompt
+  copy_text: Paste it into Claude Code, GitHub Copilot, Codex or Cursor.
+  check_title: Check the result
+  check_text: Once the app runs, go through Check it works.
+  before_text: Needs an Azure SQL Database with Microsoft Entra ID. No database yet? <a href="#get-running">Get one running</a>.
   features: What it does
   tables: Tables it creates
   sql: Azure SQL features it uses
-  try: Try it yourself
+  try: Check it works
 templates:
 - slug: team-board
   shot: board
@@ -221,6 +296,11 @@ templates:
   blurb: Filter by project, assignee, status, priority and overdue together. Due dates from one fixed clock, seed data that's safe to rerun, and edits that survive a restart.
   summary: A team task board with combined filters and due dates.
   covers: Filters, due dates, seed data, restarts
+  description:
+  - >-
+    A shared task board for a small team. Tasks move from Todo to In progress to Done, each with a priority, an assignee and a due date. Narrow the board by project, person, status, priority and what's overdue, all at once, and search titles as plain text, punctuation included.
+  - >-
+    Azure SQL keeps the board honest. The database accepts only real statuses and priorities, a task can't point at a project or person that doesn't exist, and due dates are calendar dates, so overdue means the same thing on every run. The sample tasks load once, and your edits are still there after a restart.
   features:
   - Todo, In progress and Done, with priority and due dates
   - Filters by project, assignee, status, priority and overdue, combined
@@ -245,6 +325,11 @@ templates:
   blurb: Reserve stock under concurrent orders without overselling. Retries return the same result, and stock and audit rows change together.
   summary: Reserve stock without overselling, even when orders arrive together.
   covers: Concurrency, retries, transactions
+  description:
+  - >-
+    A reservation system for a small equipment supplier. Browse the stock, see what's on hand, reserved and still available, and reserve, confirm or cancel orders. Every stock change is recorded, so you can trace how each number got where it is.
+  - >-
+    The hard part is two customers going for the last item at the same moment. Azure SQL settles it: one reservation wins, the other is turned away, and available stock can't drop below zero. A retried request gets the original answer instead of reserving twice, and a reservation and its audit record are saved together or not at all.
   features:
   - Shows on hand, reserved and available stock
   - Reserve, confirm and cancel, with fixed state rules
@@ -270,6 +355,11 @@ templates:
   blurb: Exact money arithmetic, partial refunds, order-date cohorts, and joins that never double-count.
   summary: Revenue reports that add up to the cent.
   covers: Money math, refunds, date ranges, joins
+  description:
+  - >-
+    A revenue dashboard for an online shop. It shows net revenue, completed orders and average order value, a daily revenue chart and the best-selling products. Filter by date range and region, drill down to the orders behind any number, and export what you see to CSV.
+  - >-
+    Every figure adds up to the cent. Money is kept in whole cents rather than decimals that drift, refunds are totalled per item before they're matched to sales so no sale is counted twice, and a refund counts against the day the order was placed, not the day it was issued.
   features:
   - Net revenue, completed orders and average order value
   - A daily revenue chart and top products
@@ -296,6 +386,11 @@ templates:
   blurb: Import shipment events atomically, catch duplicates and conflicts, replay safely, and order late events the same way on every run.
   summary: Track shipments from imported event files.
   covers: Atomic imports, duplicates, replay, ordering
+  description:
+  - >-
+    A tracker for shipments whose updates arrive as files of carrier events. Import a batch as CSV or JSON and get a receipt showing what was accepted, what was a duplicate and what was rejected. Then follow each shipment's history, its latest status and a daily count of exceptions.
+  - >-
+    Imports are all or nothing: new events and the batch's receipt are saved together. Azure SQL recognizes an event it has already stored, so importing the same file twice changes nothing, and an event that contradicts the stored one is rejected rather than overwriting it. Late events sort the same way on every run, so the latest status doesn't depend on arrival order.
   features:
   - Imports CSV or JSON event batches
   - A receipt for each batch, with accepted, duplicate and rejected rows
@@ -319,6 +414,11 @@ templates:
   blurb: Signed identities, tenant isolation in both the API and the database, role checks, and safe connection reuse.
   summary: A helpdesk where each organization sees only its own tickets.
   covers: Identity, isolation, roles, connection reuse
+  description:
+  - >-
+    A support desk shared by several organizations. People list, create, update, search and export tickets, and administrators assign them to teammates. Everyone sees only their own organization's tickets.
+  - >-
+    Who you are comes from your signed identity, not from what a request claims. Azure SQL enforces the separation itself with row-level security, so even a query that forgets to filter can't reach another organization's rows. The app connects as a database user that can work with tickets but can't change those rules, and a reused connection is reset before the next person's request.
   features:
   - List, create, update, search and export tickets
   - "Administrators assign tickets; members can't"
