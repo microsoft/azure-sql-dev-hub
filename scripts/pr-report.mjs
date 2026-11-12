@@ -51,12 +51,28 @@ const tail = (s, n = 15) => s.trim().split('\n').slice(-n).join('\n');
 const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 const delta = (now, base) => (typeof base === 'number' ? ` (main ${base}, ${now - base >= 0 ? '+' : ''}${Math.round((now - base) * 10) / 10})` : '');
 
-// open-agent-readiness's JSON: take its overall score wherever it sits.
-function findScore(o, depth = 0) {
-  if (!o || typeof o !== 'object' || depth > 3) return null;
-  for (const k of ['score', 'overallScore', 'overall', 'total']) if (typeof o[k] === 'number') return o[k];
-  for (const v of Object.values(o)) { const s = findScore(v, depth + 1); if (s !== null) return s; }
-  return null;
+// open-agent-readiness grades through the Cloudflare quick tunnel, and
+// Cloudflare's edge on trycloudflare.com rewrites robots.txt with its own
+// AI-crawler rules and content signals, and answers AI crawlers with 403.
+// These checks grade that edge, not this site, so the site score leaves them
+// out. Its rubric (web/2026.11) weights each check: pass 1, warn 0.4, fail 0,
+// skip not counted. That reproduces its total_score from its own checks.
+const TUNNEL_CHECKS = new Set(['ai_bot_rules', 'content_signals', 'browse_bot_access', 'multi_bot_fetch']);
+const WARN_CREDIT = 0.4;
+function agentScore(o) {
+  if (!o || typeof o.total_score !== 'number') return null;
+  let earned = 0, total = 0;
+  for (const c of o.checks || []) {
+    if (c.status === 'skip' || TUNNEL_CHECKS.has(c.id)) continue;
+    earned += c.weight * (c.status === 'pass' ? 1 : c.status === 'warn' ? WARN_CREDIT : 0);
+    total += c.weight;
+  }
+  return {
+    site: total ? Math.round((100 * earned) / total) : o.total_score,
+    scanned: o.total_score,
+    grade: o.grade,
+    open: (o.checks || []).filter((c) => (c.status === 'fail' || c.status === 'warn') && !TUNNEL_CHECKS.has(c.id)),
+  };
 }
 
 const rows = [];
@@ -68,10 +84,11 @@ rows.push(['Internal links and anchors', icon(out.links), linksOk ? `${linksOk[1
 const pages = json('pages.json');
 rows.push(['Page checks', icon(out.pages), pages ? `score **${pages.score}/100**${delta(pages.score, pages.baseline)}, ${pages.pages} pages` : '']);
 
-const oarPr = findScore(json('oar-pr.json'));
-const oarBase = findScore(json('oar-base.json'));
-rows.push(['Agent readiness (open-agent-readiness)', oarPr === null ? '⚠️' : '📊',
-  oarPr === null ? 'unavailable this run (the tunnel or scan did not finish); not blocking' : `score **${oarPr}/100**${delta(oarPr, oarBase)} · report only`]);
+const oarPr = agentScore(json('oar-pr.json'));
+const oarBase = agentScore(json('oar-base.json'));
+rows.push(['Agent readiness (open-agent-readiness)', oarPr ? '📊' : '⚠️',
+  oarPr ? `score **${oarPr.site}/100**${delta(oarPr.site, oarBase?.site)} · report only`
+    : 'unavailable this run (the tunnel or scan did not finish); not blocking']);
 
 const lumar = json('lumar.json');
 rows.push(['Agent files (Lumar)', icon(out.agentfiles),
@@ -127,6 +144,13 @@ if (pages) {
       `- ${c.label}: fails on ${c.total - c.passing} of ${c.total} pages (-${Math.round((c.points - c.earned) * 10) / 10}), e.g. \`${c.failing[0].path}\`: ${esc(c.failing[0].detail)}`),
   ];
   if (lost.length) lines.push(`<details><summary>Page checks: where the other ${100 - pages.score} points went</summary>`, '', ...lost, '', '</details>', '');
+}
+if (oarPr) {
+  const mark = { fail: '❌', warn: '⚠️' };
+  lines.push(`<details><summary>Agent readiness: what the other ${100 - oarPr.site} points need</summary>`, '',
+    ...oarPr.open.map((c) => `- ${mark[c.status]} ${esc(c.title || c.id)} (${c.category}, weight ${c.weight}): ${esc(c.detail || '')}`),
+    '', `The scanner reported ${oarPr.scanned}/100 (grade ${oarPr.grade}). The site score leaves out ${TUNNEL_CHECKS.size} checks that graded Cloudflare's tunnel instead of this site: its robots.txt and its blocking of AI crawlers. Some checks, such as Markdown content negotiation, need a server GitHub Pages does not provide.`,
+    '', '</details>', '');
 }
 if (broken.length) {
   lines.push('<details><summary>Broken links</summary>', '',
