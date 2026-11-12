@@ -73,3 +73,15 @@ exclude:
   - eval/tests/__pycache__
   - eval/verifications/__pycache__
   - eval/configuration.yml
+
+# The announcement above the top bar on every page. Dismissing it hides it for
+# that visitor in that browser; a new `key` shows it again. `open` names the
+# home page dialog that Try it opens; elsewhere, and without scripts, Try it
+# goes to `href`.
+banner:
+  key: container-preview
+  pill: Public preview
+  text: Run the Azure SQL Database engine locally in a container.
+  link: Try it
+  href: /#containers
+  open: setup-container

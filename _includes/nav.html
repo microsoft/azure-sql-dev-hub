@@ -1,5 +1,22 @@
 <a class="skip-link" href="#main">Skip to content</a>
 {%- comment -%}
+  Announcement banner, from site.banner in _config.yml. Try it opens the named
+  dialog on the home page and goes to its href elsewhere. Dismissing hides it
+  for this visitor until the banner's key changes; the close button shows only
+  when the script runs, so it never sits there doing nothing.
+{%- endcomment -%}
+{%- assign bn = site.banner %}
+{%- if bn %}
+<div class="site-banner" id="siteBanner" data-banner-key="{{ bn.key }}">
+  <div class="wrap banner-in">
+    <span class="banner-pill">{{ bn.pill }}</span>
+    <p>{{ bn.text }} <a href="{{ bn.href | relative_url }}" data-tpl-open="{{ bn.open }}" data-event="site/action" data-event-action="pathSelected" data-event-path-id="banner-{{ bn.key }}">{{ bn.link }}</a></p>
+    <button class="banner-x" type="button" aria-label="Dismiss announcement" title="Dismiss" hidden><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+  </div>
+</div>
+<script>(function(){var b=document.getElementById('siteBanner'),k='hub-banner-dismissed',key=b.getAttribute('data-banner-key');try{if(localStorage.getItem(k)===key){b.hidden=true;return}}catch(e){}var x=b.querySelector('.banner-x');x.hidden=false;x.addEventListener('click',function(){b.hidden=true;try{localStorage.setItem(k,key)}catch(e){}})})();</script>
+{%- endif %}
+{%- comment -%}
   Top bar, rebuilt from the Ignite redesign. It follows the visitor's theme; see
   the theme script in head.html and the themed regions in main.scss. The
   redesign's search box is added when the search index exists, so nothing
@@ -12,8 +29,7 @@
       Azure SQL Developer Hub
     </a>
     <nav class="topnav" aria-label="Primary">
-      <a href="{{ '/' | relative_url }}#get-running">Quickstarts</a>
-      <a href="{{ '/' | relative_url }}#containers">Container</a>
+      <a href="{{ '/' | relative_url }}#get-running">Get started</a>
       <a href="{{ '/' | relative_url }}#build">Templates</a>
       <a href="{{ '/' | relative_url }}#skills">Skills</a>
       <a href="{{ '/' | relative_url }}#watch">Videos</a>

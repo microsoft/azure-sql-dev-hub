@@ -141,7 +141,7 @@
    have not chosen. Add a section here once it is rebuilt; when every section
    is, this collapses to the theme on :root. */
 @mixin dark-regions{
-  .topbar,.h .hero,.h .quick,.h .ctr,.h .tpl,.h .wl,.h .skills,.h .videos,.h .faqs,.doc,.site-footer{@include theme-dark}
+  .site-banner,.topbar,.h .hero,.h .quick,.h .tpl,.h .wl,.h .skills,.h .videos,.h .faqs,.doc,.site-footer{@include theme-dark}
   .theme-icon-moon{display:none}
   .theme-icon-sun{display:block}
 }
@@ -178,6 +178,17 @@ img{max-width:100%;display:block}
 section[id],footer[id],.alias-anchor,.prose h2[id],.prose h3[id]{scroll-margin-top:80px}
 
 /* ---------- top bar, rebuilt from the redesign ---------- */
+/* Announcement banner above the top bar (nav.html). It scrolls away; the top
+   bar below it stays. */
+.site-banner{border-bottom:1px solid var(--border);background:var(--bg-subtle);color:var(--text-2);font-size:13.5px}
+.site-banner[hidden]{display:none}
+.banner-in{position:relative;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:4px 12px;min-height:44px;padding-top:6px;padding-bottom:6px;padding-right:48px;text-align:center}
+.banner-in p{margin:0}
+.banner-in a{font-weight:600}
+.banner-pill{padding:1px 7px;border-radius:4px;background:var(--badge-bg);color:var(--badge-text);font-size:12px;font-weight:600}
+.banner-x{position:absolute;top:50%;right:8px;display:grid;place-items:center;width:36px;height:36px;padding:0;border:0;border-radius:6px;background:transparent;color:var(--text-3);cursor:pointer;transform:translateY(-50%)}
+.banner-x[hidden]{display:none}
+.banner-x:hover{background:var(--bg-muted);color:var(--text)}
 .topbar{
   position:sticky;top:0;z-index:50;
   background:var(--bg);color:var(--text);
@@ -275,6 +286,12 @@ pre{
   font-family:var(--font-mono)
 }
 pre code{font-family:inherit;font-size:inherit;background:none;padding:0;border:0;color:inherit}
+/* Code that scrolls sideways gets a thin, quiet scrollbar on the dark code
+   surface rather than the platform's default bar. */
+pre,pre code{scrollbar-width:thin;scrollbar-color:rgba(139,147,161,.35) transparent}
+pre::-webkit-scrollbar,pre code::-webkit-scrollbar{height:6px;width:6px}
+pre::-webkit-scrollbar-track,pre code::-webkit-scrollbar-track{background:transparent}
+pre::-webkit-scrollbar-thumb,pre code::-webkit-scrollbar-thumb{border-radius:3px;background:rgba(139,147,161,.35)}
 .copyBtn{
   position:absolute;right:9px;top:9px;border:1px solid rgba(255,255,255,.12);
   background:#19233a;color:#dbe5f1;border-radius:7px;padding:6px 8px;

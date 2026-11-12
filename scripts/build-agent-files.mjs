@@ -114,45 +114,28 @@ function twinHref(href) {
   return /^\//.test(href) ? href.replace(/\.html(?=#|$)/, '.md') : href;
 }
 
-// The local container's setup guide, a dialog on the page: both routes, with
-// every command, so an agent reading the twin can run them.
-function containerSetup(cs) {
-  if (!cs) return [];
-  const out = [`#### ${cs.title}`, ''];
-  const steps = (list) => {
-    for (const [i, st] of (list || []).entries()) {
-      out.push(`${i + 1}. ${st.title}. ${plain(st.text)}`, '');
-      if (st.code) out.push(fence(st.code, 'bash'), '');
-      if (st.prompt) out.push(`> ${st.prompt}`, '');
-    }
-  };
-  out.push(`${cs.manual.tab}. ${plain(cs.manual.intro)}`, '');
-  steps(cs.manual.steps);
-  out.push(`${cs.agent.tab}. ${plain(cs.agent.intro)}`, '');
-  steps(cs.agent.steps);
-  for (const l of [cs.prerequisites, cs.limitations, cs.troubleshooting]) if (l) out.push(`- ${l.label}: ${twinHref(l.href)}`);
+// One way to get a database (Get a database running): its setup dialog, both
+// routes, with every command and the agent prompt, so an agent reading the twin
+// can follow either.
+function setupOption(o, labels, skills) {
+  const out = [`### ${o.title}${o.pill ? ` (${o.pill})` : ''}`, '', o.card, '', o.summary, ''];
+  out.push(`${labels.manual || 'Set it up yourself'}:`, '');
+  for (const [i, st] of (o.steps || []).entries()) {
+    out.push(`${i + 1}. ${st.title}. ${plain(st.text)}`, '');
+    if (st.link) out.push(`${st.link.label}: ${st.link.href}`, '');
+    if (st.code) out.push(fence(st.code, /^SELECT/.test(st.code) ? 'sql' : 'bash'), '');
+  }
+  if (o.free) {
+    out.push(`${o.free.title}:`, '', ...o.free.tiles.map(([k, v]) => `- ${k}: ${v}`), ...o.free.notes.map((n) => `- ${n}`), '');
+  }
+  if (o.agent) {
+    out.push(`${labels.agent || 'Set it up with your coding agent'}. ${plain(o.agent.text)}`, '');
+    if (skills && skills.skills_code) out.push(`${skills.skills_title}: ${skills.skills_text}`, '', fence(skills.skills_code, 'bash'), '');
+    out.push(`> ${o.agent.prompt}`, '');
+    if (o.agent.check) out.push(plain(o.agent.check), '');
+  }
+  for (const l of o.links || []) out.push(`- ${l.label}: ${twinHref(l.href)}`);
   out.push('');
-  return out;
-}
-
-// The free tier's setup guide, built like the container's, with its monthly
-// allowance and the Learn page.
-function freeSetup(fs) {
-  if (!fs) return [];
-  const out = [`#### ${fs.title}`, ''];
-  for (const side of [fs.portal, fs.agent]) {
-    out.push(`${side.tab}. ${plain(side.intro)}`, '');
-    for (const [i, st] of (side.steps || []).entries()) {
-      out.push(`${i + 1}. ${st.title}. ${plain(st.text)}`, '');
-      if (st.link) out.push(`${st.link.label}: ${st.link.href}`, '');
-      if (st.code) out.push(fence(st.code, st.key === 'verify' ? 'sql' : 'bash'), '');
-      if (st.prompt) out.push(`> ${st.prompt}`, '');
-    }
-  }
-  if (fs.free) {
-    out.push(`${fs.free.title}:`, '', ...fs.free.tiles.map(([k, v]) => `- ${k}: ${v}`), ...fs.free.notes.map((n) => `- ${n}`), '');
-  }
-  if (fs.learn) out.push(`${fs.learn.label}: ${fs.learn.href}`, '');
   return out;
 }
 
@@ -168,32 +151,9 @@ function homeToMarkdown(d) {
   const v = d.demo || {};
   if (v.title) out.push(`## ${v.title}`, '', v.sub, '');
 
-  out.push('## Get running {#get-running}', '', d.quickstart_text || '', '');
-  for (const m of d.quickstart || []) {
-    out.push(`### ${m.name}: ${m.title}`, '');
-    for (const c of m.checks || []) out.push(`- ${c[0]}: ${c[1]}`);
-    out.push('');
-    if (m.code) out.push(fence(m.code, 'sql'), '');
-    if (m.note) out.push(m.note, '');
-    for (const l of m.links || []) out.push(`- ${l.label}: ${twinHref(l.href)}`);
-    if (m.links) out.push('');
-    if (m.dialog === 'fs') out.push(...freeSetup(d.free_setup));
-    if (m.dialog === 'cs') out.push(...containerSetup(d.container_setup));
-  }
+  out.push(`## ${d.setup_heading || 'Get a database running'} {#get-running}`, '', d.setup_text || '', '');
+  for (const o of d.setup || []) out.push(...setupOption(o, d.setup_labels || {}, d.template_inside));
   if (d.then) out.push(`Then: ${d.then.from} to ${d.then.to}. ${d.then.note}`, '');
-
-  // The container section: its cards open the setup guide above, so the twin
-  // names them and lists the resources, with the guide's own links.
-  const ct = d.containers;
-  if (ct) {
-    const cs = d.container_setup || {};
-    out.push(`## ${ct.heading} {#containers}`, '', `${ct.pill}. ${ct.text}`, '');
-    for (const c of ct.cards || []) out.push(`- ${c.title}: ${c.text} The steps are in the setup guide under Get running.`);
-    out.push('', `- ${ct.image.label}: ${ct.image.href}`);
-    if (cs.prerequisites) out.push(`- ${ct.prerequisites}: ${twinHref(cs.prerequisites.href)}`);
-    for (const l of [cs.limitations, cs.troubleshooting, cs.faq]) if (l) out.push(`- ${l.label}: ${twinHref(l.href)}`);
-    out.push('');
-  }
 
   out.push(`## ${d.build_heading || 'Build'} {#build}`, '', d.build_text || '', '');
   if (d.build_note) {

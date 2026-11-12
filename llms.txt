@@ -7,7 +7,7 @@ _Last updated: September 2026._
 > Every page on this site has a markdown twin at the same path with `.md`. The whole site in one file is at /llms-full.txt.
 
 ## Documentation
-- [Get running](https://microsoft.github.io/azure-sql-dev-hub/#get-running): create a free Azure SQL Database, verify the connection, pick a path.
+- [Get a database running](https://microsoft.github.io/azure-sql-dev-hub/#get-running): create a free Azure SQL Database or run the Azure SQL Database container locally, by hand or with your coding agent.
 - [Skills](https://aka.ms/azuresql-skills): what the agent skills do, per-tool install, and the full catalog.
 - [Before you build](https://microsoft.github.io/azure-sql-dev-hub/#faq): what you need, what it costs, whether you need the container, whether it is safe to let an agent write to your database.
 - [For agents](https://microsoft.github.io/azure-sql-dev-hub/for-agents.md): how this site is laid out for machine readers.

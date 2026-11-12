@@ -48,166 +48,45 @@ demo:
   - key: helpdesk
     name: a multi-tenant helpdesk
     alt: 'From idea to app: a prompt builds a multi-tenant helpdesk on Azure SQL where each organization sees only its own tickets.'
-quickstart_heading: Power your next app with Azure SQL.
-quickstart_text: 'Choose your starting point: a free cloud database or the local container. Set either one up yourself or with your coding agent.'
-# Each tab shows three steps and opens its setup guide, a dialog: `dialog` is
-# the dialog's id prefix, and `guide` and `agent` open it on that tab. `code`
-# shows under the last step. In `links`, a path on this site is a page here; a
-# full URL is outbound docs.
-quickstart:
-- key: cloud
-  name: Cloud, free tier
-  title: Set up in the Azure portal
-  dialog: fs
-  guide:
-    label: Free tier setup guide
-    tab: portal
-  agent:
-    label: Let your agent do it
-    tab: agent
-  checks:
-  - - Create the database
-    - You need an Azure subscription with permission to create resources. Open the Azure SQL hub and select Start free.
-  - - Open access
-    - Add your IP to the firewall and sign in with Microsoft Entra.
-  - - Verify
-    - Run SELECT 1. A result of 1 means your connection works and you are ready for a build prompt.
-  code: SELECT 1 AS connected;
-  note: 'Free for the life of your subscription: each month, per database, 100,000 vCore seconds, 32 GB of data and 32 GB of backup storage. Up to 10 free databases.'
-  links:
-  - label: Prerequisites
-    id: free-tier-prerequisites
-    href: https://learn.microsoft.com/azure/azure-sql/database/free-tier#prerequisites
-  - label: Limits
-    id: free-tier-limits
-    href: https://learn.microsoft.com/azure/azure-sql/database/free-tier#considerations-and-limitations
-- key: local
-  name: Local container
-  pill: Public preview
-  title: Run it on your machine
-  dialog: cs
-  guide:
-    label: Full setup and commands
-    tab: manual
-  agent:
-    label: Let your agent do it
-    tab: agent
-  checks:
-  - - Get the image
-    - Pull the public image from Microsoft Container Registry. No sign-up needed.
-  - - Start the container
-    - One docker run starts the engine on port 1433, bound to localhost.
-  - - Connect and query
-    - Run SELECT @@VERSION with the sqlcmd bundled in the container. A result that names Microsoft SQL Azure means the engine is up. No host install.
-  code: SELECT @@VERSION;
-  note: The same engine as the cloud, in a container, for development, testing and CI. It runs offline after the first pull, and only the connection string changes when you ship to Azure.
-  links:
-  - label: Prerequisites
-    id: container-prerequisites
-    href: /container/get-started.html#prerequisites
-  - label: Limitations
-    id: container-limitations
-    href: /container/faq.html#feature-availability
-  - label: Troubleshooting
-    id: container-troubleshooting
-    href: /container/get-started.html#troubleshooting
-# The local container's setup guide: a dialog from the Local container tab,
-# shown in place below the quickstart when scripts do not run. The image is
-# the public one on Microsoft Container Registry.
-container_setup:
-  title: Set up the Azure SQL Database container
-  pill: Public preview
-  # These pages live on this site, under container/.
-  prerequisites:
-    label: Check prerequisites
-    href: /container/get-started.html#prerequisites
-  limitations:
-    label: Limitations
-    href: /container/faq.html#feature-availability
-  troubleshooting:
-    label: Troubleshooting
-    href: /container/get-started.html#troubleshooting
-  faq:
-    label: FAQ
-    href: /container/faq.html
-  skills_link: Per-tool install commands
-  # Each step's key names its Copy button in telemetry.
-  manual:
-    tab: Set up manually
-    intro: Three commands from pull to your first query. You need Docker, Podman or WSL, and a bash or zsh shell.
-    steps:
-    - key: pull
-      title: Get the image
-      text: Pull the public image from Microsoft Container Registry.
-      code: docker pull mcr.microsoft.com/mssql/azure-sql-db-server:latest
-    - key: run
-      title: Start the container
-      text: Generate a strong SA password, then start the engine on port 1433, bound to localhost.
-      code: |-
-        MSSQL_SA_PASSWORD="Aa1$(openssl rand -hex 16)"
-        docker run --name sqldb -e "ACCEPT_EULA=Y" \
-          -e "MSSQL_SA_PASSWORD=$MSSQL_SA_PASSWORD" \
-          -p 127.0.0.1:1433:1433 -d \
-          mcr.microsoft.com/mssql/azure-sql-db-server:latest
-    - key: query
-      title: Connect and query
-      text: The container bundles sqlcmd. A result that names Microsoft SQL Azure confirms the Azure SQL Database engine.
-      code: |-
-        docker exec sqldb /opt/mssql-tools18/bin/sqlcmd \
-          -S localhost -U sa -P "$MSSQL_SA_PASSWORD" -C -Q "SELECT @@VERSION;"
-    copy_all: Copy all three commands
-  agent:
-    tab: With your coding agent
-    intro: The container skills are part of the microsoft-sql plugin. They cover pulling the image, waiting for the engine to be ready and creating the database, with you reviewing each step.
-    steps:
-    - key: skills
-      title: Install the skills
-      text: One install for Claude Code, GitHub Copilot, Codex and Cursor. Per-tool commands are in <a href="#skills">Skills</a>.
-      code: npx skills add microsoft/microsoft-sql
-    - key: prompt
-      title: Ask in plain English
-      text: Paste this into your agent. It pulls the image, starts the container, creates the database and runs a first query.
-      prompt: Add a local Azure SQL Database to this project, then scaffold the schema, migrations and data-access layer for my stack.
-# The free tier's setup guide: a dialog from the Cloud tab, built like the
-# container's above. Its facts follow the free tier page on Microsoft Learn.
-free_setup:
-  title: Create a free Azure SQL database
-  # Each step's key names its Copy button or link in telemetry.
-  portal:
-    tab: In the Azure portal
-    intro: A General Purpose serverless database with a monthly free allowance, created in the Azure portal in a few minutes.
-    steps:
-    - key: before
-      title: Before you start
-      text: You need an Azure subscription with permission to create resources. Most subscription types work; Azure for Students Starter doesn't.
-    - key: create
-      title: Create the database
-      text: Open the Azure SQL hub and select <b>Start free</b>. On <b>Basics</b>, pick the subscription, resource group, database name and server. If you create a new server, choose Microsoft Entra authentication. Check that <b>Estimated cost/month</b> shows 0, then select <b>Review + create</b> and <b>Create</b>.
-      link:
-        label: Open the Azure SQL hub
-        href: https://aka.ms/azuresqlhub
-    - key: access
-      title: Open access
-      text: Add your IP to the firewall and sign in with Microsoft Entra. Both are on the server, under Networking and Microsoft Entra ID.
-    - key: verify
-      title: Verify
-      text: Run SELECT 1 in the portal's query editor or the MSSQL extension for VS Code. The database's Overview page shows <b>Free monthly vCore amount</b>.
-      code: SELECT 1 AS connected;
-  agent:
-    tab: With your coding agent
-    intro: Your agent runs the Azure CLI as you, so sign in with <code>az login</code> first. You review each command before it runs.
-    steps:
-    - key: skills
-      title: Install the skills
-      text: One install for Claude Code, GitHub Copilot, Codex and Cursor. Per-tool commands are in <a href="#skills">Skills</a>.
-      code: npx skills add microsoft/microsoft-sql
-    - key: prompt
-      title: Ask in plain English
-      text: Paste this into your agent. It creates the free database, opens access for you and runs a first query.
-      prompt: Create a free Azure SQL Database in my Azure subscription using the free offer, and pause it when the monthly free limit is reached. Use Microsoft Entra authentication only, add my current IP address to the server firewall, then connect and run SELECT 1. Ask me which subscription and region to use, and show me each command before you run it.
-    - key: check
-      title: Check the result
-      text: Your agent should report that the database uses the free limit (useFreeLimit is true) and that SELECT 1 returned 1.
+# Get a database running: two ways to get Azure SQL Database, as cards. Each
+# card opens its setup dialog, laid out like the template details: the
+# illustration and the manual steps on the left, the coding-agent route on the
+# right. Without scripts the dialogs show in place below the cards. `id`
+# prefixes each Copy button's telemetry id. In `links`, a path on this site is
+# a page here; a full URL is outbound, of `type` docs or other.
+setup_heading: Get a database running
+setup_text: Start free in Azure, or run the same engine on your machine. Set it up yourself or hand it to your coding agent.
+setup_labels:
+  open: Set it up
+  manual: Set it up yourself
+  agent: Set it up with your coding agent
+  copy: Copy prompt
+  show_prompt: See the prompt
+  resources: Resources
+setup:
+- key: free
+  id: free-setup
+  title: Azure SQL Database, free tier
+  icon: <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 18a4.5 4.5 0 0 1-.6-8.96A6 6 0 0 1 18 8.5a4 4 0 0 1-.5 9.5H7z"/></svg>
+  card: A serverless database in Azure with a monthly free allowance. Up to 10 free databases per subscription.
+  summary: A General Purpose serverless database with a monthly free allowance, created in the Azure portal in a few minutes.
+  steps:
+  - key: before
+    title: Before you start
+    text: You need an Azure subscription with permission to create resources. Most subscription types work; Azure for Students Starter doesn't.
+  - key: create
+    title: Create the database
+    text: Open the Azure SQL hub and select <b>Start free</b>. On <b>Basics</b>, pick the subscription, resource group, database name and server. If you create a new server, choose Microsoft Entra authentication. Check that <b>Estimated cost/month</b> shows 0, then select <b>Review + create</b> and <b>Create</b>.
+    link:
+      label: Open the Azure SQL hub
+      href: https://aka.ms/azuresqlhub
+  - key: access
+    title: Open access
+    text: Add your IP to the firewall and sign in with Microsoft Entra. Both are on the server, under Networking and Microsoft Entra ID.
+  - key: verify
+    title: Verify
+    text: Run SELECT 1 in the portal's query editor or the MSSQL extension for VS Code. The database's Overview page shows <b>Free monthly vCore amount</b>.
+    code: SELECT 1 AS connected;
   free:
     title: What's free, every month
     tiles:
@@ -219,36 +98,75 @@ free_setup:
     - It pauses after 15 minutes idle. Close query editors and VS Code connections when you're done, or the database keeps using free time.
     - 'When the monthly allowance runs out, you choose: pause until next month (the default) or keep running at standard rates. Once you choose to keep running, you can''t switch back.'
     - For new databases only, with no SLA. Use it for development and proofs of concept.
-  learn:
-    label: Full guide on Microsoft Learn
+  agent:
+    text: Your agent runs the Azure CLI as you, so sign in with <code>az login</code> first. You review each command before it runs.
+    prompt: Create a free Azure SQL Database in my Azure subscription using the free offer, and pause it when the monthly free limit is reached. Use Microsoft Entra authentication only, add my current IP address to the server firewall, then connect and run SELECT 1. Ask me which subscription and region to use, and show me each command before you run it.
+    check: Your agent should report that the database uses the free limit (useFreeLimit is true) and that SELECT 1 returned 1.
+  links:
+  - label: Full guide on Microsoft Learn
+    id: free-setup-docs
+    type: docs
     href: https://learn.microsoft.com/azure/azure-sql/database/free-tier
+  - label: Prerequisites
+    id: free-tier-prerequisites
+    type: docs
+    href: https://learn.microsoft.com/azure/azure-sql/database/free-tier#prerequisites
+  - label: Limits
+    id: free-tier-limits
+    type: docs
+    href: https://learn.microsoft.com/azure/azure-sql/database/free-tier#considerations-and-limitations
+- key: container
+  id: container
+  title: Azure SQL Database container
+  pill: Public preview
+  icon: <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l8 4.5v9L12 21l-8-4.5v-9z"/><path d="M4 7.5l8 4.5 8-4.5M12 12v9"/></svg>
+  card: The Azure SQL Database engine in a container, for development, testing and CI. It runs offline after the first pull.
+  summary: Three commands from pull to your first query. You need Docker, Podman or WSL, and a bash or zsh shell.
+  steps:
+  - key: pull
+    title: Get the image
+    text: Pull the public image from Microsoft Container Registry. No sign-up needed.
+    code: docker pull mcr.microsoft.com/mssql/azure-sql-db-server:latest
+  - key: run
+    title: Start the container
+    text: Generate a strong SA password, then start the engine on port 1433, bound to localhost.
+    code: |-
+      MSSQL_SA_PASSWORD="Aa1$(openssl rand -hex 16)"
+      docker run --name sqldb -e "ACCEPT_EULA=Y" \
+        -e "MSSQL_SA_PASSWORD=$MSSQL_SA_PASSWORD" \
+        -p 127.0.0.1:1433:1433 -d \
+        mcr.microsoft.com/mssql/azure-sql-db-server:latest
+  - key: query
+    title: Connect and query
+    text: The container bundles sqlcmd. A result that names Microsoft SQL Azure confirms the Azure SQL Database engine.
+    code: |-
+      docker exec sqldb /opt/mssql-tools18/bin/sqlcmd \
+        -S localhost -U sa -P "$MSSQL_SA_PASSWORD" -C -Q "SELECT @@VERSION;"
+  copy_all: Copy all three commands
+  agent:
+    text: The container skills are part of the microsoft-sql plugin. They cover pulling the image, waiting for the engine to be ready and creating the database, with you reviewing each step.
+    prompt: Add a local Azure SQL Database to this project, then scaffold the schema, migrations and data-access layer for my stack.
+  links:
+  - label: Prerequisites
+    id: container-prerequisites
+    href: /container/get-started.html#prerequisites
+  - label: Limitations
+    id: container-limitations
+    href: /container/faq.html#feature-availability
+  - label: Troubleshooting
+    id: container-troubleshooting
+    href: /container/get-started.html#troubleshooting
+  - label: FAQ
+    id: container-faq
+    href: /container/faq.html
+  - label: View image on MCR
+    id: container-image
+    type: other
+    href: https://mcr.microsoft.com/artifact/mar/mssql/azure-sql-db-server
 then:
   from: Local or free tier
   to: Azure SQL Database
   note: Same code, connection string changes, app goes live.
-# The container section, after the quickstart, from the redesign. Each card
-# opens the setup guide above (container_setup) on its tab, and the links
-# below reuse the guide's container site pages.
-containers:
-  heading: Azure SQL Database container
-  pill: Public preview
-  text: Setup guides and resources for local development.
-  cards:
-  - tab: manual
-    icon: <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="5" width="16" height="11" rx="1.5"/><path d="M2 19h20"/></svg>
-    title: Set up manually
-    text: Check prerequisites, start the container and connect.
-    link: Open setup guide
-  - tab: agent
-    icon: <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="4"/><path d="M9.5 9l-3 3 3 3M14.5 9l3 3-3 3M13 8l-2 8"/></svg>
-    title: Set up with your coding agent
-    text: Install the SQL skills and use a setup prompt.
-    link: View agent setup
-  image:
-    label: View image on MCR
-    href: https://mcr.microsoft.com/artifact/mar/mssql/azure-sql-db-server
-  links_label: Container resources
-  prerequisites: Prerequisites
 build_heading: Find a template for your next app
 build_text: Full apps and focused building blocks for dashboards, APIs, search, and more.
 build_note: No database yet? Get a database running.

@@ -216,98 +216,86 @@
 .h .code-copy:hover{border-color:var(--term-dim)}.h .code-copy.ok{color:var(--term-ok)}
 .h .code-box.sm{padding:12px 76px 12px 14px}.h .code-box.sm code{font-size:12.5px}
 .h .code-box.sm .code-copy{top:8px;right:8px;min-height:30px;padding:0 11px}
-/* Quickstart, rebuilt from the redesign. A themed region like the hero: shared
-   tokens only. With scripts, tabs show one panel at a time and the container
-   setup guide opens as a dialog. Without them, every panel shows, stacked, and
-   the guide shows in place below the card. */
+/* Get a database running. A themed region like the hero: shared tokens only.
+   Two cards, the free tier and the container, each opening its setup dialog,
+   laid out like the template details (see An app's details below). Without
+   scripts the dialogs show in place below the cards. */
 .h .quick{padding:56px 0 64px;background:var(--bg);color:var(--text)}
 .h .qs-head{margin-bottom:28px}
 .h .quick h2{font-size:28px;line-height:1.2;font-weight:600;letter-spacing:-.015em}
-.h .qs-head p{margin-top:8px;font-size:16px;color:var(--text-3)}
-.h .qs-body{display:flex;flex-direction:column;gap:14px;max-width:760px;margin:0 auto}
-.h .qs-card{overflow:hidden;border:1px solid var(--border-2);border-radius:12px;background:var(--bg);box-shadow:0 1px 2px rgba(16,24,40,.04)}
-.h .qs-tabs{display:flex;flex-wrap:wrap;gap:0 24px;padding:0 20px;border-bottom:1px solid var(--border)}
-.h .qs-dtabs{display:flex;flex-wrap:wrap;gap:0 24px;margin-top:-6px;border-bottom:1px solid var(--border)}
-.h .qs-tab,.h .qs-dtab{display:flex;align-items:center;gap:8px;margin-bottom:-1px;padding:13px 0 11px;border:0;border-bottom:2px solid transparent;background:none;color:var(--text-3);font:inherit;font-size:14px;font-weight:500;cursor:pointer}
-.h .qs-dtab{padding:10px 0 9px}
-.h .qs-tab:focus-visible,.h .qs-dtab:focus-visible{outline-offset:-2px}
-.h .qs-tab[aria-selected="false"]:hover,.h .qs-dtab[aria-selected="false"]:hover{color:var(--text)}
-.h .qs-tab[aria-selected="true"],.h .qs-dtab[aria-selected="true"]{border-bottom-color:var(--accent);color:var(--accent);font-weight:600}
-.h .qs-badge{padding:1px 6px;border-radius:4px;background:var(--badge-bg);color:var(--badge-text);font-size:11px;font-weight:600}
-.h .qs-panel{display:flex;flex-direction:column;gap:18px;padding:20px}
-.js .h .qs-panel:not(.on){display:none}
-.h .quick h3{font-size:15px;line-height:1.35;font-weight:600;letter-spacing:0}
-/* Each tab: its title, with links that open its setup guide on the right. */
-.h .qs-row{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:6px 20px}
-.h .qs-go{display:flex;flex-wrap:wrap;gap:6px 20px;font-size:14px;font-weight:500}
+.h .qs-head p{margin-top:8px;max-width:680px;font-size:16px;color:var(--text-3)}
+.h .qs-badge{padding:1px 6px;border-radius:4px;background:var(--badge-bg);color:var(--badge-text);font-size:11px;font-weight:600;white-space:nowrap}
+.h .su-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));gap:16px}
+.h .su-card{display:flex;flex-direction:column;gap:8px;padding:24px;border:1px solid var(--border-2);border-radius:12px;background:var(--bg);color:var(--text);box-shadow:0 1px 2px rgba(16,24,40,.04);transition:border-color .15s}
+.h .su-card:hover{border-color:var(--border-3);text-decoration:none}
+.h .su-card:hover .su-go{text-decoration:underline}
+.h .su-icon{display:grid;place-items:center;width:48px;height:48px;margin-bottom:8px;border:1px solid var(--border-2);border-radius:12px;background:var(--bg-subtle);color:var(--accent)}
+.h .su-title{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px}
+.h .su-card h3{font-size:18px;line-height:1.3;font-weight:600;letter-spacing:0}
+.h .su-card p{font-size:14.5px;line-height:1.55;color:var(--text-3)}
+.h .su-go{margin-top:auto;padding-top:6px;color:var(--accent);font-size:14px;font-weight:600}
+.h .qs-then{display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px;margin-top:16px;padding:0 4px;font-size:13px;color:var(--text-3)}
+.h .qs-node{padding:3px 10px;border:1px solid var(--border-3);border-radius:6px;background:var(--bg);color:var(--text);font-weight:500}
+/* Numbered steps, shared by the setup dialogs. */
 .h .qs-steps{display:flex;flex-direction:column;gap:14px;margin:0;padding:0;list-style:none}
 .h .qs-steps li{display:flex;gap:12px}
 .h .qs-steps li > div{flex:1 1 auto;min-width:0}
 .h .qs-n{flex:0 0 22px;display:flex;align-items:center;justify-content:center;height:22px;border:1px solid var(--border-3);border-radius:11px;color:var(--text-nav);font-size:12px;font-weight:600}
 .h .qs-steps b{display:block;font-size:14px;font-weight:600}
 .h .qs-steps p{font-size:14px;color:var(--text-3)}
-.h .qs-prompt{position:relative;margin-top:8px;padding:12px 76px 12px 14px;border:1px solid var(--border-2);border-radius:8px;background:var(--bg-soft)}
-.h .qs-steps .qs-prompt p{color:var(--text-code);line-height:1.6}
-.h .qs-pcopy{display:none;position:absolute;top:8px;right:8px;min-height:30px;padding:0 11px;border:1px solid var(--border-3);border-radius:6px;background:var(--bg);color:var(--text-2);font:inherit;font-size:12px;font-weight:500;cursor:pointer}
-.js .h .qs-pcopy{display:block}.h .qs-pcopy:hover{background:var(--bg-muted)}
-.h .qs-foot{display:flex;flex-direction:column;gap:8px;padding-top:14px;border-top:1px solid var(--border-soft);font-size:14px}
-.h .qs-foot p{font-size:13px;line-height:1.5;color:var(--text-3)}
-.h .qs-then{display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px;padding:0 4px;font-size:13px;color:var(--text-3)}
-.h .qs-node{padding:3px 10px;border:1px solid var(--border-3);border-radius:6px;background:var(--bg);color:var(--text);font-weight:500}
+.h .qs-steps p b{display:inline;font-size:inherit;color:var(--text-2)}
+.h .qs-dsteps{gap:18px}
+.h .qs-dstep{display:flex;flex-direction:column;gap:8px}
+.h .qs-dlink{display:inline-flex;align-items:center;gap:4px;align-self:flex-start;font-size:14px;font-weight:600}
+.h .qs-all{display:none;align-self:flex-start;min-height:28px;padding:0;border:0;background:none;color:var(--accent);font:inherit;font-size:14px;font-weight:600;cursor:pointer}
+.js .h .qs-all{display:block}.h .qs-all:hover{color:var(--accent-hover);text-decoration:underline}
+/* Dialogs: the setup dialogs and the template details share this frame. */
 .h .qs-dialog{margin:auto;width:calc(100% - 48px);max-width:720px;max-height:calc(100vh - 48px);padding:0;overflow-y:auto;border:1px solid var(--border-2);border-radius:12px;background:var(--bg);color:var(--text);box-shadow:0 20px 50px rgba(0,0,0,.35)}
 .h .qs-dialog:focus{outline:none}
 .h .qs-dialog::backdrop{background:rgba(8,10,14,.6)}
 html:has(.qs-dialog[open]){overflow:hidden}
-.h .qs-dlg-head{position:sticky;top:0;z-index:1;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 14px 14px 24px;border-bottom:1px solid var(--border);background:var(--bg)}
-.h .qs-dlg-title{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;min-width:0}
-.h .qs-dialog h2{font-size:18px;line-height:1.3;font-weight:600;letter-spacing:0}
 .h .qs-x{flex:0 0 44px;display:flex;align-items:center;justify-content:center;width:44px;height:44px;padding:0;border:0;border-radius:8px;background:transparent;color:var(--text-3);cursor:pointer}
 .h .qs-x:hover{background:var(--bg-muted);color:var(--text)}
-.h .qs-dlg-body{display:flex;flex-direction:column;gap:18px;padding:20px 24px 24px}
-.h .qs-dpanel{display:flex;flex-direction:column;gap:18px}
-.js .h .qs-dpanel:not(.on){display:none}
-.h .qs-dhead{display:none}
-.h .qs-dintro{font-size:14px;color:var(--text-3)}
-.h .qs-dsteps{gap:18px}
-.h .qs-dstep{display:flex;flex-direction:column;gap:8px}
-.h .qs-dstep .qs-prompt{margin-top:0}
-.h .qs-dfoot{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 20px;padding-top:14px;border-top:1px solid var(--border-soft);font-size:14px}
-.h .qs-dlinks{display:flex;flex-wrap:wrap;gap:6px 20px}
-.h .qs-all{display:none;min-height:28px;padding:0;border:0;background:none;color:var(--accent);font:inherit;font-size:14px;font-weight:600;cursor:pointer}
-.js .h .qs-all{display:block}.h .qs-all:hover{color:var(--accent-hover);text-decoration:underline}
-.h .qs-dlink{display:inline-flex;align-items:center;gap:4px;align-self:flex-start;font-size:14px;font-weight:600}
-/* The free tier's allowance, below both of its setup guide's tabs. */
+:root:not(.js) .h .qs-x{display:none}
+:root:not(.js) .h .qs-dialog{display:block;position:static;width:auto;max-width:none;max-height:none;margin:24px 0 0;overflow:visible;box-shadow:none}
+@media (max-width:640px){.h .qs-dialog{width:calc(100% - 24px);max-height:calc(100vh - 24px)}}
+/* The free tier's allowance, in its setup dialog. */
 .h .qs-free{display:flex;flex-direction:column;gap:12px;padding:16px;border:1px solid var(--border-2);border-radius:10px;background:var(--bg-subtle)}
 .h .qs-free h3{font-size:14px;font-weight:600}
 .h .qs-tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,130px),1fr));gap:8px;margin:0}
 .h .qs-tiles div{padding:10px 12px;border:1px solid var(--border-2);border-radius:8px;background:var(--bg)}
 .h .qs-tiles dt{font-size:12.5px;color:var(--text-3)}.h .qs-tiles dd{margin:2px 0 0;font-size:15px;font-weight:600}
 .h .qs-free ul{display:flex;flex-direction:column;gap:6px;margin:0;padding-left:18px;font-size:13.5px;line-height:1.5;color:var(--text-2)}
-:root:not(.js) .h .qs-tabs,:root:not(.js) .h .qs-dtabs,:root:not(.js) .h .qs-x{display:none}
-:root:not(.js) .h .qs-panel + .qs-panel{border-top:1px solid var(--border)}
-:root:not(.js) .h .qs-dialog{display:block;position:static;width:auto;max-width:760px;max-height:none;margin:24px auto 0;overflow:visible;box-shadow:none}
-:root:not(.js) .h .qs-dlg-head{position:static}
-:root:not(.js) .h .qs-dhead{display:block}
-@media (max-width:640px){.h .qs-dialog{width:calc(100% - 24px);max-height:calc(100vh - 24px)}.h .qs-dlg-head{padding-left:16px}.h .qs-dlg-body{padding:16px}}
-/* Azure SQL Database container, from the redesign. A themed region on the
-   subtle background: two cards that open the quickstart's setup guide on its
-   manual or agent tab, then the container's resources. Without scripts the
-   cards jump to the guide, shown in place in the quickstart. */
-.h .ctr{padding:56px 0;border-top:1px solid var(--border);background:var(--bg-subtle);color:var(--text)}
-.h .ctr-head{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px}
-.h .ctr h2{font-size:28px;line-height:1.2;font-weight:600;letter-spacing:-.015em}
-.h .ctr-head .qs-badge{padding:2px 8px;font-size:12px}
-.h .ctr-sub{max-width:640px;margin:8px 0 24px;font-size:16px;color:var(--text-3)}
-.h .ctr-cards{display:flex;flex-wrap:wrap;gap:16px}
-.h .ctr-card{flex:1 1 420px;min-width:0;display:flex;flex-direction:column;gap:8px;padding:28px;border:1px solid var(--border-2);border-radius:12px;background:var(--bg)}
-.h .ctr-card>svg{color:var(--accent)}
-.h .ctr-card h3{margin-top:10px;font-size:19px;line-height:1.3;font-weight:600;letter-spacing:0}
-.h .ctr-card p{font-size:15px;color:var(--text-3)}
-.h .ctr-go{align-self:flex-start;display:inline-flex;align-items:center;min-height:32px;margin-top:8px;font-size:15px;font-weight:600}
-.h .ctr-links{display:flex;flex-wrap:wrap;gap:8px 32px;margin-top:24px;font-size:15px}
-.h .ctr-links a{display:inline-flex;align-items:center;gap:4px;min-height:32px}
-@media (max-width:820px){.h .ctr{padding:44px 0}}
-@media (max-width:640px){.h .ctr-card{padding:22px}}
+/* Setup dialog specifics: the title with its badge, the prompt shown on
+   request, the resource links, and the illustrations (setup-shot.html). */
+.h .su-dtitle{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;padding-right:32px}
+.h .su-dtitle .qs-badge{padding:2px 8px;font-size:12px}
+.h .tpl-dialog .su-dtitle h2{padding-right:0}
+.h .su-prompt{margin-top:8px;padding:12px 14px;border:1px solid var(--border-2);border-radius:8px;background:var(--bg-soft);color:var(--text-code);font-size:13.5px;line-height:1.6}
+.h .su-links{display:flex;flex-direction:column;align-items:flex-start;gap:6px;font-size:13.5px}
+.h .su-links h4{margin:4px 0 2px;font-size:12px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--text-3)}
+.h .su-links a{display:inline-flex;align-items:center;gap:3px}
+.h .su-shot{display:flex;align-items:center;justify-content:center;padding:24px}
+.h .su-win,.h .su-term{width:100%;max-width:560px;overflow:hidden;border-radius:10px;box-shadow:var(--window-shadow)}
+.h .su-bar{display:flex;align-items:center;gap:10px;padding:8px 12px;font-size:12px}
+.h .su-dots{display:flex;gap:5px}.h .su-dots i{width:9px;height:9px;border-radius:50%;background:#ff5f57}.h .su-dots i+i{background:#febc2e}.h .su-dots i+i+i{background:#28c840}
+.h .su-win{border:1px solid #d5dee9;background:#fff;color:#1b1f24}
+.h .su-win .su-bar{border-bottom:1px solid #e3e8ef;background:#f6f8fb;color:#4b5563}
+.h .su-portal{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:14px;padding:14px;font-size:12px}
+.h .su-tabs{display:flex;flex-wrap:wrap;gap:4px 12px;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid #e3e8ef;color:#6b7280}
+.h .su-tabs b{color:#0f6cbd;font-weight:600}
+.h .su-field{display:flex;flex-direction:column;gap:2px;margin-top:8px}
+.h .su-field span{color:#6b7280;font-size:11px}
+.h .su-field em{padding:4px 8px;border:1px solid #d5dee9;border-radius:4px;font-style:normal}
+.h .su-cost{display:flex;flex-direction:column;gap:4px;align-self:start;padding:12px;border:1px solid #d5dee9;border-radius:6px;background:#f6f8fb}
+.h .su-cost span{color:#6b7280;font-size:11px}
+.h .su-cost strong{font-size:22px;line-height:1.2}
+.h .su-cost .su-free{margin-top:6px;color:#0e7a3e;font-weight:600}
+.h .su-term{border:1px solid var(--code-border);background:var(--code-bg);color:var(--code-text)}
+.h .su-term .su-bar{border-bottom:1px solid var(--code-border);color:var(--term-dim)}
+.h .su-term pre{margin:0;padding:14px 16px;overflow:hidden;border:0;background:none;font-size:12px;line-height:1.7;white-space:pre-wrap;overflow-wrap:anywhere}
+.h .su-term .t-sh{color:var(--accent)}.h .su-term .t-dim{color:var(--term-dim)}.h .su-term .t-ok{color:var(--term-ok)}
+@media (max-width:640px){.h .su-card{padding:20px}.h .su-portal{grid-template-columns:minmax(0,1fr)}.h .tpl-dshot.su-shot{aspect-ratio:auto;padding:14px}}
 /* Build, rebuilt from the redesign's templates. A themed region: shared tokens
    only. The filter shows one group, full apps first. The apps' pictures are
    the hero demo's app screens (_includes/app-shot.html), light in both themes,
@@ -366,7 +354,9 @@ html:has(.qs-dialog[open]){overflow:hidden}
 /* Building it: open space rather than a box. One paragraph, Copy prompt as
    the one accent button (as Get started is in the hero), the skills install
    folded away below it, and a footnote on the database. */
-.h .tpl-side{grid-area:side;position:sticky;top:28px;display:flex;flex-direction:column;gap:12px;padding-top:4px}
+/* Its sticky top matches .tpl-dbody's top padding (44px), so it stays put from the
+   first scroll instead of riding up to a smaller offset first. */
+.h .tpl-side{grid-area:side;position:sticky;top:44px;display:flex;flex-direction:column;gap:12px;padding-top:4px}
 .h .tpl-side h3{font-size:17px;line-height:1.3;font-weight:600;letter-spacing:-.01em}
 .h .tpl-how{font-size:14px;line-height:1.5;color:var(--text-3)}
 .h .tpl-dact{display:flex;flex-wrap:wrap;align-items:center;gap:6px 14px;margin:2px 0 4px}
@@ -377,7 +367,7 @@ html:has(.qs-dialog[open]){overflow:hidden}
 .h .tpl-skills summary:hover{color:var(--text)}
 .h .tpl-skills > p{margin:6px 0 10px;font-size:13.5px;line-height:1.5;color:var(--text-3)}
 .h .tpl-cmd{padding:10px 48px 10px 12px}
-.h .tpl-cmd code{overflow-x:auto;font-size:12.5px;white-space:nowrap;overflow-wrap:normal}
+.h .tpl-cmd code{overflow-x:auto;font-size:12px;white-space:nowrap;overflow-wrap:normal;scrollbar-width:none}.h .tpl-cmd code::-webkit-scrollbar{display:none}
 .h .tpl-icopy{top:6px;right:6px;align-items:center;gap:6px;min-height:30px;padding:0 8px}
 .js .h .tpl-icopy{display:inline-flex}.h .tpl-icopy .sk-act{color:inherit}.h .tpl-icopy .sk-act:empty{display:none}
 .h .tpl-dact a{display:inline-flex;align-items:center;gap:3px;font-size:13px;font-weight:500}
@@ -396,7 +386,7 @@ html:has(.qs-dialog[open]){overflow:hidden}
   .h .tpl-side{position:static;margin-top:24px;padding:20px 0;border-top:1px solid var(--border-soft);border-bottom:1px solid var(--border-soft)}
   .h .tpl-dialog .tpl-dhead h2{font-size:24px}
 }
-:root:not(.js) .h .tpl-dialog{display:none}
+:root:not(.js) .h .tpl-dialog{display:none}:root:not(.js) .h .su-dialog{display:block}
 @media (max-width:820px){.h .tpl{padding:44px 0}}
 /* Built for AI workloads. A themed region, so shared tokens only; the copy is
    unchanged. Four tiles, each with a framed icon, and its link pinned to a
@@ -509,199 +499,108 @@ html:has(.qs-dialog[open]){overflow:hidden}
     </div>
   </header>
 
-  <section id="get-running" class="quick">
-    <span id="start" aria-hidden="true"></span><span id="connect" aria-hidden="true"></span><span id="continuity" aria-hidden="true"></span>
+  <section id="get-running" class="quick" aria-labelledby="su-title">
+    <span id="start" aria-hidden="true"></span><span id="connect" aria-hidden="true"></span><span id="continuity" aria-hidden="true"></span><span id="containers" aria-hidden="true"></span>
     <div class="w">
-      <div class="qs-head"><h2>{{ page.quickstart_heading }}</h2><p>{{ page.quickstart_text }}</p></div>
-      <div class="qs-body">
-        <div class="qs-card">
-          <div class="qs-tabs" role="tablist" aria-label="Ways to start">
-            {%- for m in page.quickstart %}
-            <button class="qs-tab" type="button" role="tab" id="qs-tab-{{ m.key }}" aria-controls="qs-panel-{{ m.key }}" aria-selected="{% if forloop.first %}true{% else %}false{% endif %}"
-                    data-htab="{{ m.key }}" data-event="site/action" data-event-action="pathSelected" data-event-path-id="{{ m.key }}">{{ m.name }}{% if m.pill %}<span class="qs-badge">{{ m.pill }}</span>{% endif %}</button>
-            {%- endfor %}
-          </div>
-          {%- for m in page.quickstart %}
-          {%- assign setup_id = 'free-setup' %}{% if m.dialog == 'cs' %}{% assign setup_id = 'container-setup' %}{% endif %}
-          <div class="qs-panel{% if forloop.first %} on{% endif %}" role="tabpanel" id="qs-panel-{{ m.key }}" aria-labelledby="qs-tab-{{ m.key }}">
-            <div class="qs-row">
-              <h3>{{ m.title }}</h3>
-              <span class="qs-go">
-                <a href="#{{ setup_id }}" data-setup-open="{{ m.dialog }}-tab-{{ m.guide.tab }}" aria-haspopup="dialog"
-                   data-event="site/action" data-event-action="contentOpened" data-event-action-location="install-panel"
-                   data-event-content-id="{{ setup_id }}" data-event-content-type="setup-guide">{{ m.guide.label }} <span aria-hidden="true">&rarr;</span></a>
-                <a href="#{{ setup_id }}" data-setup-open="{{ m.dialog }}-tab-{{ m.agent.tab }}" aria-haspopup="dialog"
-                   data-event="site/action" data-event-action="contentOpened" data-event-action-location="install-panel"
-                   data-event-content-id="{{ setup_id }}-agent" data-event-content-type="setup-guide">{{ m.agent.label }} <span aria-hidden="true">&rarr;</span></a>
-              </span>
-            </div>
-            <ol class="qs-steps">
-              {%- for c in m.checks %}
-              <li><span class="qs-n">{{ forloop.index }}</span><div class="qs-dstep"><div><b>{{ c[0] }}</b><p>{{ c[1] }}</p></div>
-                {%- if forloop.last and m.code %}
-                <div class="code-box sm"><code>{{ m.code }}</code><button class="code-copy" type="button" data-hcopy="{{ m.code | escape }}"
-                  data-event="site/action" data-event-action="contentCopied" data-event-action-location="install-panel"
-                  data-event-content-id="quickstart-{{ m.key }}" data-event-content-type="command">Copy</button></div>
-                {%- endif %}</div></li>
-              {%- endfor %}
-            </ol>
-            <div class="qs-foot">
-              <p>{{ m.note }}</p>
-              <span class="qs-dlinks">
-                {%- for l in m.links %}
-                {%- assign lead = l.href | slice: 0 %}
-                {%- if lead == '/' %}<a href="{{ l.href | relative_url }}" data-event="site/action" data-event-action="pathSelected" data-event-path-id="{{ l.id }}">{{ l.label }}</a>
-                {%- else %}<a href="{{ l.href }}" data-event="site/action" data-event-action="outboundClicked" data-event-destination-id="{{ l.id }}" data-event-destination-type="docs">{{ l.label }}</a>{% endif %}
-                {%- endfor %}
-              </span>
-            </div>
-          </div>
-          {%- endfor %}
-        </div>
-        <p class="qs-then">
-          <span>Then:</span><span class="qs-node">{{ page.then.from }}</span><span aria-hidden="true">&rarr;</span><span class="qs-node">{{ page.then.to }}</span><span>{{ page.then.note }}</span>
-        </p>
+      <div class="qs-head"><h2 id="su-title">{{ page.setup_heading }}</h2><p>{{ page.setup_text }}</p></div>
+      {%- assign sl = page.setup_labels %}
+      {%- assign ti = page.template_inside %}
+      <div class="su-cards">
+        {%- for o in page.setup %}
+        <a class="su-card" href="#setup-{{ o.key }}" data-tpl-open="setup-{{ o.key }}" aria-haspopup="dialog"
+           data-event="site/action" data-event-action="contentOpened" data-event-action-location="install-panel"
+           data-event-content-id="{{ o.id }}" data-event-content-type="setup-guide">
+          <span class="su-icon">{{ o.icon }}</span>
+          <span class="su-title"><h3>{{ o.title }}</h3>{% if o.pill %}<span class="qs-badge">{{ o.pill }}</span>{% endif %}</span>
+          <p>{{ o.card }}</p>
+          <span class="su-go">{{ sl.open }} <span aria-hidden="true">&rarr;</span></span>
+        </a>
+        {%- endfor %}
       </div>
-      {%- assign cs = page.container_setup %}
+      <p class="qs-then">
+        <span>Then:</span><span class="qs-node">{{ page.then.from }}</span><span aria-hidden="true">&rarr;</span><span class="qs-node">{{ page.then.to }}</span><span>{{ page.then.note }}</span>
+      </p>
       {%- comment %} Liquid drops a block whose body is only whitespace, so the blank line between commands is captured once and joined in. {% endcomment %}
       {%- capture blank_line %}
 
 {% endcapture %}
-      {%- assign cs_all = cs.manual.steps | map: 'code' | join: blank_line %}
-      <dialog class="qs-dialog" id="container-setup" aria-labelledby="cs-title" tabindex="-1">
-        <div class="qs-dlg-head">
-          <div class="qs-dlg-title"><h2 id="cs-title">{{ cs.title }}</h2><span class="qs-badge">{{ cs.pill }}</span></div>
-          <button class="qs-x" type="button" aria-label="Close"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
-        </div>
-        <div class="qs-dlg-body">
-          <div class="qs-dtabs" role="tablist" aria-label="How to set up">
-            <button class="qs-dtab" type="button" role="tab" id="cs-tab-manual" aria-controls="cs-panel-manual" aria-selected="true">{{ cs.manual.tab }}</button>
-            <button class="qs-dtab" type="button" role="tab" id="cs-tab-agent" aria-controls="cs-panel-agent" aria-selected="false">{{ cs.agent.tab }}</button>
+      {%- for o in page.setup %}
+      {%- assign all_code = o.steps | map: 'code' | compact | join: blank_line %}
+      <dialog class="qs-dialog tpl-dialog su-dialog" id="setup-{{ o.key }}" aria-labelledby="setup-{{ o.key }}-title" tabindex="-1">
+        <div class="tpl-xbar"><button class="qs-x" type="button" aria-label="Close"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+        <div class="tpl-dbody">
+          <div class="tpl-dhead">
+            <div class="su-dtitle"><h2 id="setup-{{ o.key }}-title">{{ o.title }}</h2>{% if o.pill %}<span class="qs-badge">{{ o.pill }}</span>{% endif %}</div>
+            <p class="tpl-sum">{{ o.summary }}</p>
           </div>
-          <div class="qs-dpanel on" role="tabpanel" id="cs-panel-manual" aria-labelledby="cs-tab-manual">
-            <h3 class="qs-dhead">{{ cs.manual.tab }}</h3>
-            <p class="qs-dintro">{{ cs.manual.intro }} <a href="{{ cs.prerequisites.href | relative_url }}" data-event="site/action" data-event-action="pathSelected"
-              data-event-path-id="container-prerequisites">{{ cs.prerequisites.label }}</a></p>
-            <ol class="qs-steps qs-dsteps">
-              {%- for st in cs.manual.steps %}
-              <li><span class="qs-n">{{ forloop.index }}</span><div class="qs-dstep"><div><b>{{ st.title }}</b><p>{{ st.text }}</p></div>
-                <div class="code-box sm"><pre><code>{{ st.code | escape }}</code></pre><button class="code-copy" type="button" data-hcopy="{{ st.code | escape }}"
-                  data-event="site/action" data-event-action="contentCopied" data-event-action-location="container-setup"
-                  data-event-content-id="container-{{ st.key }}" data-event-content-type="command">Copy</button></div></div></li>
-              {%- endfor %}
-            </ol>
-            <div class="qs-dfoot">
-              <span class="qs-dlinks"><a href="{{ cs.limitations.href | relative_url }}" data-event="site/action" data-event-action="pathSelected" data-event-path-id="container-limitations">{{ cs.limitations.label }}</a><a href="{{ cs.troubleshooting.href | relative_url }}" data-event="site/action" data-event-action="pathSelected" data-event-path-id="container-troubleshooting">{{ cs.troubleshooting.label }}</a></span>
-              <button class="qs-all" type="button" data-hcopy="{{ cs_all | escape }}" data-event="site/action" data-event-action="contentCopied" data-event-action-location="container-setup"
-                      data-event-content-id="container-all" data-event-content-type="command">{{ cs.manual.copy_all }}</button>
+          <aside class="tpl-side" aria-labelledby="setup-{{ o.key }}-agent">
+            <h3 id="setup-{{ o.key }}-agent">{{ sl.agent }}</h3>
+            <p class="tpl-how">{{ o.agent.text }}</p>
+            <div class="tpl-dact">
+              <button class="tpl-primary" type="button" data-hcopy="{{ o.agent.prompt | escape }}"
+                      data-event="site/action" data-event-action="contentCopied" data-event-action-location="install-panel"
+                      data-event-content-id="{{ o.id }}-prompt" data-event-content-type="suggested-ask">{{ sl.copy }}</button>
             </div>
-          </div>
-          <div class="qs-dpanel" role="tabpanel" id="cs-panel-agent" aria-labelledby="cs-tab-agent">
-            <h3 class="qs-dhead">{{ cs.agent.tab }}</h3>
-            <p class="qs-dintro">{{ cs.agent.intro }}</p>
-            <ol class="qs-steps qs-dsteps">
-              {%- for st in cs.agent.steps %}
-              <li><span class="qs-n">{{ forloop.index }}</span><div class="qs-dstep"><div><b>{{ st.title }}</b><p>{{ st.text }}</p></div>
-                {%- if st.code %}
-                <div class="code-box sm"><pre><code>{{ st.code | escape }}</code></pre><button class="code-copy" type="button" data-hcopy="{{ st.code | escape }}"
-                  data-event="site/action" data-event-action="contentCopied" data-event-action-location="container-setup"
-                  data-event-content-id="container-{{ st.key }}" data-event-content-type="collection-install">Copy</button></div>
-                {%- endif %}
-                {%- if st.prompt %}
-                <div class="qs-prompt"><p>{{ st.prompt }}</p><button class="qs-pcopy" type="button" data-hcopy="{{ st.prompt | escape }}"
-                  data-event="site/action" data-event-action="contentCopied" data-event-action-location="container-setup"
-                  data-event-content-id="container-{{ st.key }}" data-event-content-type="suggested-ask">Copy</button></div>
-                {%- endif %}</div></li>
+            <details class="tpl-skills">
+              <summary>{{ sl.show_prompt }}</summary>
+              <p class="su-prompt">{{ o.agent.prompt }}</p>
+            </details>
+            <details class="tpl-skills">
+              <summary>{{ ti.skills_title }}</summary>
+              <p>{{ ti.skills_text }}</p>
+              <div class="code-box tpl-cmd"><code>{{ ti.skills_code }}</code><button class="code-copy tpl-icopy" type="button" aria-label="Copy" title="Copy" data-hcopy="{{ ti.skills_code | escape }}"
+                data-event="site/action" data-event-action="contentCopied" data-event-action-location="install-panel"
+                data-event-content-id="{{ o.id }}-skills" data-event-content-type="collection-install"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><span class="sk-act"></span></button></div>
+            </details>
+            {%- if o.agent.check %}
+            <p class="tpl-need">{{ o.agent.check }}</p>
+            {%- endif %}
+            <nav class="su-links" aria-label="{{ sl.resources }}">
+              <h4>{{ sl.resources }}</h4>
+              {%- for l in o.links %}
+              {%- assign lead = l.href | slice: 0 %}
+              {%- if lead == '/' %}
+              <a href="{{ l.href | relative_url }}" data-event="site/action" data-event-action="pathSelected" data-event-path-id="{{ l.id }}">{{ l.label }}</a>
+              {%- else %}
+              <a href="{{ l.href }}" target="_blank" rel="noopener" data-event="site/action" data-event-action="outboundClicked" data-event-destination-id="{{ l.id }}" data-event-destination-type="{{ l.type | default: 'docs' }}">{{ l.label }}<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17L17 7M9 7h8v8"/></svg></a>
+              {%- endif %}
               {%- endfor %}
-            </ol>
-            <div class="qs-dfoot">
-              <span class="qs-dlinks"><a href="#skills" data-event="site/action" data-event-action="pathSelected" data-event-path-id="skills">{{ cs.skills_link }}</a><a href="{{ cs.troubleshooting.href | relative_url }}" data-event="site/action" data-event-action="pathSelected" data-event-path-id="container-troubleshooting">{{ cs.troubleshooting.label }}</a></span>
+            </nav>
+          </aside>
+          <div class="tpl-dmain">
+            <div class="tpl-dshot su-shot" aria-hidden="true">{% include setup-shot.html key=o.key %}</div>
+            {%- if o.free %}
+            <div class="qs-free">
+              <h3>{{ o.free.title }}</h3>
+              <dl class="qs-tiles">{% for t in o.free.tiles %}<div><dt>{{ t[0] }}</dt><dd>{{ t[1] }}</dd></div>{% endfor %}</dl>
+              <ul>{% for n in o.free.notes %}<li>{{ n }}</li>{% endfor %}</ul>
             </div>
-          </div>
-        </div>
-      </dialog>
-      {%- comment %} The free tier's setup guide, built like the container's. The allowance panel and the Learn link sit below both tabs. {% endcomment %}
-      {%- assign fs = page.free_setup %}
-      <dialog class="qs-dialog" id="free-setup" aria-labelledby="fs-title" tabindex="-1">
-        <div class="qs-dlg-head">
-          <div class="qs-dlg-title"><h2 id="fs-title">{{ fs.title }}</h2></div>
-          <button class="qs-x" type="button" aria-label="Close"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
-        </div>
-        <div class="qs-dlg-body">
-          <div class="qs-dtabs" role="tablist" aria-label="How to set up">
-            <button class="qs-dtab" type="button" role="tab" id="fs-tab-portal" aria-controls="fs-panel-portal" aria-selected="true">{{ fs.portal.tab }}</button>
-            <button class="qs-dtab" type="button" role="tab" id="fs-tab-agent" aria-controls="fs-panel-agent" aria-selected="false">{{ fs.agent.tab }}</button>
-          </div>
-          {%- for side in (1..2) %}
-          {%- if side == 1 %}{% assign p = fs.portal %}{% assign pk = 'portal' %}{% else %}{% assign p = fs.agent %}{% assign pk = 'agent' %}{% endif %}
-          <div class="qs-dpanel{% if side == 1 %} on{% endif %}" role="tabpanel" id="fs-panel-{{ pk }}" aria-labelledby="fs-tab-{{ pk }}">
-            <h3 class="qs-dhead">{{ p.tab }}</h3>
-            <p class="qs-dintro">{{ p.intro }}</p>
+            {%- endif %}
+            <h3>{{ sl.manual }}</h3>
             <ol class="qs-steps qs-dsteps">
-              {%- for st in p.steps %}
+              {%- for st in o.steps %}
               <li><span class="qs-n">{{ forloop.index }}</span><div class="qs-dstep"><div><b>{{ st.title }}</b><p>{{ st.text }}</p></div>
                 {%- if st.link %}
                 <a class="qs-dlink" href="{{ st.link.href }}" target="_blank" rel="noopener" data-event="site/action" data-event-action="outboundClicked"
-                   data-event-destination-id="free-setup-{{ st.key }}" data-event-destination-type="other">{{ st.link.label }}<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17L17 7M9 7h8v8"/></svg></a>
+                   data-event-destination-id="{{ o.id }}-{{ st.key }}" data-event-destination-type="other">{{ st.link.label }}<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17L17 7M9 7h8v8"/></svg></a>
                 {%- endif %}
                 {%- if st.code %}
                 <div class="code-box sm"><pre><code>{{ st.code | escape }}</code></pre><button class="code-copy" type="button" data-hcopy="{{ st.code | escape }}"
                   data-event="site/action" data-event-action="contentCopied" data-event-action-location="install-panel"
-                  data-event-content-id="free-setup-{{ st.key }}" data-event-content-type="{% if pk == 'agent' %}collection-install{% else %}command{% endif %}">Copy</button></div>
-                {%- endif %}
-                {%- if st.prompt %}
-                <div class="qs-prompt"><p>{{ st.prompt }}</p><button class="qs-pcopy" type="button" data-hcopy="{{ st.prompt | escape }}"
-                  data-event="site/action" data-event-action="contentCopied" data-event-action-location="install-panel"
-                  data-event-content-id="free-setup-{{ st.key }}" data-event-content-type="suggested-ask">Copy</button></div>
+                  data-event-content-id="{{ o.id }}-{{ st.key }}" data-event-content-type="command">Copy</button></div>
                 {%- endif %}</div></li>
               {%- endfor %}
             </ol>
-          </div>
-          {%- endfor %}
-          <div class="qs-free">
-            <h3>{{ fs.free.title }}</h3>
-            <dl class="qs-tiles">{% for t in fs.free.tiles %}<div><dt>{{ t[0] }}</dt><dd>{{ t[1] }}</dd></div>{% endfor %}</dl>
-            <ul>{% for n in fs.free.notes %}<li>{{ n }}</li>{% endfor %}</ul>
-          </div>
-          <div class="qs-dfoot">
-            <a class="qs-dlink" href="{{ fs.learn.href }}" target="_blank" rel="noopener" data-event="site/action" data-event-action="outboundClicked"
-               data-event-destination-id="free-setup-docs" data-event-destination-type="docs">{{ fs.learn.label }}<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17L17 7M9 7h8v8"/></svg></a>
+            {%- if o.copy_all %}
+            <button class="qs-all" type="button" data-hcopy="{{ all_code | escape }}" data-event="site/action" data-event-action="contentCopied" data-event-action-location="install-panel"
+                    data-event-content-id="{{ o.id }}-all" data-event-content-type="command">{{ o.copy_all }}</button>
+            {%- endif %}
           </div>
         </div>
       </dialog>
+      {%- endfor %}
     </div>
   </section>
-
-  {%- assign ct = page.containers %}
-  {%- if ct %}
-  <section id="containers" class="ctr" aria-labelledby="ctr-title">
-    <div class="w">
-      <div class="ctr-head"><h2 id="ctr-title">{{ ct.heading }}</h2><span class="qs-badge">{{ ct.pill }}</span></div>
-      <p class="ctr-sub">{{ ct.text }}</p>
-      <div class="ctr-cards">
-        {%- for c in ct.cards %}
-        <div class="ctr-card"{% if c.tab == 'agent' %} id="containers-agent"{% endif %}>
-          {{ c.icon }}
-          <h3>{{ c.title }}</h3>
-          <p>{{ c.text }}</p>
-          <a class="ctr-go" href="#container-setup" data-setup-open="cs-tab-{{ c.tab }}" aria-haspopup="dialog"
-             data-event="site/action" data-event-action="contentOpened" data-event-action-location="containers"
-             data-event-content-id="container-setup{% if c.tab == 'agent' %}-agent{% endif %}" data-event-content-type="setup-guide">{{ c.link }}&nbsp;<span aria-hidden="true">&rarr;</span></a>
-        </div>
-        {%- endfor %}
-      </div>
-      {%- assign cs = page.container_setup %}
-      <nav class="ctr-links" aria-label="{{ ct.links_label }}">
-        <a href="{{ ct.image.href }}" target="_blank" rel="noopener" data-event="site/action" data-event-action="outboundClicked"
-           data-event-destination-id="container-image" data-event-destination-type="other">{{ ct.image.label }}<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17L17 7M9 7h8v8"/></svg></a>
-        <a href="{{ cs.prerequisites.href | relative_url }}" data-event="site/action" data-event-action="pathSelected" data-event-path-id="container-prerequisites">{{ ct.prerequisites }}</a>
-        <a href="{{ cs.limitations.href | relative_url }}" data-event="site/action" data-event-action="pathSelected" data-event-path-id="container-limitations">{{ cs.limitations.label }}</a>
-        <a href="{{ cs.troubleshooting.href | relative_url }}" data-event="site/action" data-event-action="pathSelected" data-event-path-id="container-troubleshooting">{{ cs.troubleshooting.label }}</a>
-        <a href="{{ cs.faq.href | relative_url }}" data-event="site/action" data-event-action="pathSelected" data-event-path-id="container-faq">{{ cs.faq.label }}</a>
-      </nav>
-    </div>
-  </section>
-  {%- endif %}
 
   <section id="build" class="tpl" data-tpl-show="apps"><span id="prompts" aria-hidden="true"></span><span id="samples" aria-hidden="true"></span><span id="existing" aria-hidden="true"></span>
     <div class="w">
@@ -725,7 +624,7 @@ html:has(.qs-dialog[open]){overflow:hidden}
         <article class="tpl-card" id="{{ t.slug }}">
           <a class="tpl-shot" href="{{ prompt_href }}" data-tpl-open="tpl-{{ t.slug }}" tabindex="-1" aria-hidden="true"><div class="ha-app">{% include app-shot.html key=t.shot window=true %}</div></a>
           <div class="tpl-body">
-            <div class="tpl-top"><h3>{{ t.title }}</h3><span class="tpl-tag">{{ t.tag }}</span></div>
+            <div class="tpl-top"><h3>{{ t.title }}</h3></div>
             <p>{{ t.blurb }}</p>
             <div class="tpl-act">
               <button class="tpl-link" type="button" data-hprompt="{{ '/build/' | append: t.slug | append: '.md' | relative_url }}"
@@ -909,23 +808,8 @@ html:has(.qs-dialog[open]){overflow:hidden}
   function trackCopy(b,ok){if(!ok||typeof window.trackHubEvent!=='function')return;window.trackHubEvent(b.getAttribute('data-event'),eventProps(b),{clarityEvent:b.getAttribute('data-clarity-event')})}
   document.querySelectorAll('[data-hcopy]').forEach(function(b){b.addEventListener('click',function(){copyText(b.getAttribute('data-hcopy'),function(ok){flash(b,ok);trackCopy(b,ok)})})});
   document.querySelectorAll('[data-hprompt]').forEach(function(b){b.addEventListener('click',function(){fetch(b.getAttribute('data-hprompt')).then(function(r){if(!r.ok)throw 0;return r.text()}).then(function(t){copyText(t,function(ok){flash(b,ok);trackCopy(b,ok)})}).catch(function(){window.open(b.getAttribute('data-hprompt'),'_blank')})})});
-  // Tabs: the quickstart's and the setup guide's. A click, or an arrow key,
-  // Home, or End, selects a tab and shows its panel; only the selected tab sits
-  // in the Tab order. tabGroup returns a function that selects a tab.
-  function tabGroup(list){
-    var tabs=[].slice.call(list.querySelectorAll('[role="tab"]'));
-    function pick(t){tabs.forEach(function(x){var on=x===t;x.setAttribute('aria-selected',String(on));x.tabIndex=on?0:-1;document.getElementById(x.getAttribute('aria-controls')).classList.toggle('on',on)})}
-    tabs.forEach(function(t,i){
-      t.addEventListener('click',function(){pick(t)});
-      t.addEventListener('keydown',function(e){var j={ArrowRight:i+1,ArrowLeft:i-1,Home:0,End:tabs.length-1}[e.key];if(j===undefined)return;e.preventDefault();var n=tabs[(j+tabs.length)%tabs.length];n.click();n.focus()});
-    });
-    pick(tabs.filter(function(t){return t.getAttribute('aria-selected')==='true'})[0]||tabs[0]);
-    return pick;
-  }
-  document.querySelectorAll('.qs-tabs').forEach(tabGroup);
   // Build templates: the filter shows one group, and opens the other when the
-  // address names a card in it, on load or from a link on the page. Each app's details open as a modal dialog;
-  // without one, View details goes on to the prompt.
+  // address names a card in it, on load or from a link on the page.
   var tpl=document.querySelector('.tpl');
   if(tpl){
     var tplChips=tpl.querySelectorAll('[data-tpl-group]');
@@ -933,30 +817,24 @@ html:has(.qs-dialog[open]){overflow:hidden}
     tplChips.forEach(function(c){c.addEventListener('click',function(){tplShow(c.getAttribute('data-tpl-group'))})});
     var tplFollow=function(){var el=location.hash&&document.getElementById(decodeURIComponent(location.hash.slice(1)));var g=el&&el.closest&&el.closest('[data-tpl]');if(g){tplShow(g.getAttribute('data-tpl'));el.scrollIntoView()}};
     tplFollow();window.addEventListener('hashchange',tplFollow);
-    tpl.querySelectorAll('dialog.tpl-dialog').forEach(function(d){
-      if(!d.showModal)return;
-      d.querySelector('.qs-x').addEventListener('click',function(){d.close()});
-      d.addEventListener('click',function(e){if(e.target===d)d.close()});
-      d.querySelectorAll('a[href^="#"]').forEach(function(a){a.addEventListener('click',function(){d.close()})});
-    });
-    tpl.querySelectorAll('[data-tpl-open]').forEach(function(a){a.addEventListener('click',function(e){var d=document.getElementById(a.getAttribute('data-tpl-open'));if(!d||!d.showModal)return;e.preventDefault();d.showModal();d.scrollTop=0;d.focus()})});
   }
-  // Setup guides, the free tier's and the container's: modal dialogs, each
-  // opened on the tab its link names (data-setup-open is the tab's id). Links
-  // within the page close it first. Without scripts they show in place.
-  var setupPick=new Map();
-  ['free-setup','container-setup'].forEach(function(id){
-    var d=document.getElementById(id);
-    if(!d||!d.showModal)return;
-    setupPick.set(d,tabGroup(d.querySelector('[role="tablist"]')));
+  // Details dialogs: the setup guides and the apps' details. Each opens as a
+  // modal from any link that names it in data-tpl-open, the banner's Try it
+  // among them, closing any other first. Links within the page close it.
+  // Without dialog support the links go where their href points.
+  document.querySelectorAll('dialog.tpl-dialog').forEach(function(d){
+    if(!d.showModal)return;
     d.querySelector('.qs-x').addEventListener('click',function(){d.close()});
     d.addEventListener('click',function(e){if(e.target===d)d.close()});
     d.querySelectorAll('a[href^="#"]').forEach(function(a){a.addEventListener('click',function(){d.close()})});
   });
-  document.querySelectorAll('[data-setup-open]').forEach(function(a){a.addEventListener('click',function(e){
-    var t=document.getElementById(a.getAttribute('data-setup-open')),d=t&&t.closest('dialog'),pick=d&&setupPick.get(d);
-    if(!pick)return;
-    e.preventDefault();pick(t);d.showModal();d.scrollTop=0;d.focus();
+  document.querySelectorAll('[data-tpl-open]').forEach(function(a){a.addEventListener('click',function(e){
+    var d=document.getElementById(a.getAttribute('data-tpl-open'));
+    if(!d||!d.showModal)return;
+    e.preventDefault();
+    document.querySelectorAll('dialog[open]').forEach(function(x){if(x!==d)x.close()});
+    if(!d.open)d.showModal();
+    d.scrollTop=0;d.focus();
   })});
   var cmdEl=document.getElementById('hInstall'),copyEl=document.getElementById('hInstallCopy');
   document.querySelectorAll('[data-agent]').forEach(function(a){a.addEventListener('click',function(){var agent=a.getAttribute('data-agent');document.querySelectorAll('[data-agent]').forEach(function(x){x.setAttribute('aria-pressed','false')});a.setAttribute('aria-pressed','true');cmdEl.textContent=a.getAttribute('data-cmd');copyEl.setAttribute('data-hcopy',a.getAttribute('data-cmd'));copyEl.setAttribute('data-event-harness-id',agent);copyEl.setAttribute('data-clarity-event','copy_skill_install_'+agent)})});
