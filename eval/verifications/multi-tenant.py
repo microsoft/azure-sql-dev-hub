@@ -23,7 +23,7 @@ def validate(
     project = project_with(workspace, "package.json")
     runner = CommandRunner(evidence, reporter=reporter)
     result = runner.run(
-        ["npx", "vitest", "run"],
+        ["npx", "vitest", "run", "tests/rls.test.ts"],
         cwd=project,
         env=database_environment(resources),
         timeout=timeout,

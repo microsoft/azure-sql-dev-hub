@@ -17,7 +17,7 @@ Curated by the Azure SQL Database product team.
 
 | Scenario | Framework | Prompt |
 |---|---|---|
-| Scaffold a new app | JavaScript, Next.js | [javascript-app.md](build/javascript-app.md) |
+| Build a task-tracking app | JavaScript, Next.js | [javascript-app.md](build/javascript-app.md) |
 | Build a Python API | Python, FastAPI | [python-api.md](build/python-api.md) |
 | Build a RAG workflow | Python, native `VECTOR` | [rag-app.md](build/rag-app.md) |
 | Go serverless | .NET, Azure Functions SQL bindings | [serverless-api.md](build/serverless-api.md) |

@@ -94,7 +94,7 @@ scenarios:
   slug: javascript-app
   title: Build a task-tracking app
   tag: JavaScript
-  blurb: Build a web app that displays tasks stored in Azure SQL. Start with sample data and make it your own.
+  blurb: Add, edit, complete, reopen, and delete tasks in a web app, with changes saved in Azure SQL.
   art:
     bg: '#eaf3fc'
     svg: <svg viewBox="0 0 120 90" aria-hidden="true"><rect x="10" y="12" width="100" height="66" rx="8" fill="#fff" stroke="#0067b8" stroke-width="2"/><rect x="10" y="12" width="100" height="14" rx="8" fill="#0067b8"/><rect x="22" y="36" width="50" height="6" rx="3" fill="#c7dcf0"/><rect x="22" y="48" width="70" height="6" rx="3" fill="#c7dcf0"/><rect x="22" y="60" width="40" height="6" rx="3" fill="#0067b8"/></svg>

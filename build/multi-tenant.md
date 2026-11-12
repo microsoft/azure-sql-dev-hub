@@ -14,7 +14,7 @@ validated: false
 **Purpose:** Add a `tenant_id` column to `dbo.tasks`, create a filter predicate and security policy keyed on `SESSION_CONTEXT`, set the tenant from the app on every connection, and write a test that shows tenant A cannot read tenant B's rows even when it asks for them.
 
 **Scope:**
-- Assumes the scaffold scenario's project exists (Next.js, `mssql` driver, `src/lib/db.ts` with one pool). If not, create it first.
+- Assumes the task-tracking scenario's project exists (Next.js, `mssql` driver, `src/lib/db.ts` with one pool and a server-side task API). If not, create it first.
 - Isolation is enforced by the engine. Application code sets the tenant; it does not filter rows.
 - The security policy filters reads and blocks writes for the wrong tenant.
 
@@ -102,7 +102,9 @@ export async function withTenant<T>(tenantId: number, work: (req: () => sql.Requ
 }
 ```
 
-Update `src/app/page.tsx` to get the caller's object id from the Entra session (whatever auth library the project uses; for the demo, read it from a server-side environment variable `DEMO_OID`), map it with `tenantFor`, and run the `SELECT` inside `withTenant`.
+Resolve the caller's object id inside the server-side task API from the Entra session (whatever auth library the project uses; for the local demo, read it from a server-side environment variable `DEMO_OID`), then map it with `tenantFor`. The browser must not choose the identity or tenant. The demo identity is not authentication for public deployment.
+
+Update every task data-access operation, not just the page's read: list, create, rename, complete, reopen, and delete must execute inside `withTenant` using its `req()` factory on the pinned connection. Do not call `pool.request()` inside that work. Inserts must include `tenant_id` bound from the server-resolved tenant, because the column is now required; ignore or reject a client-supplied tenant. Keep updates and deletes scoped to the requested task id, with RLS enforcing tenant visibility. A task belonging to another tenant returns the same 404 as a missing task.
 
 ### 4. Write the isolation tests
 
@@ -155,10 +157,10 @@ describe("row-level security", () => {
 Run:
 
 ```bash
-npx vitest run
+npx vitest run tests/rls.test.ts
 ```
 
-All four pass.
+All four SQL isolation tests and the added task API isolation tests must pass. Keep these tests in `tests/rls.test.ts`; the focused Vitest command avoids collecting the task app's separate Node test-runner files.
 
 ---
 
@@ -167,8 +169,9 @@ All four pass.
 - `Security.TenantPolicy` exists with `STATE = ON`, a filter predicate, and block predicates for both `AFTER INSERT` and `AFTER UPDATE` on `dbo.tasks`.
 - The cross-tenant read test returns zero and the cross-tenant update test throws. That is the isolation proof.
 - The tenant is resolved server-side from the signed-in identity. Nothing in the request chooses it.
+- Every task API operation uses the pinned tenant connection. A tenant can create and manage its own task, but cannot read, rename, complete, reopen, or delete another tenant's task by id; cross-tenant mutations return 404 and leave the row unchanged. Add API tests for these cases alongside the SQL isolation tests.
 - Session context is set and cleared on one pinned connection per unit of work; the interleaved test passes.
-- No password in config; the connection is unchanged from the scaffold scenario.
+- No password in config; the connection is unchanged from the task-tracking scenario.
 
 ## Do not
 

@@ -6,9 +6,9 @@ description: Cloud-first application prompts for Azure SQL.
 
 Choose an application example for Azure SQL Database. Open a page for the complete prompt, prerequisites and expected result.
 
-## Build a JavaScript app
+## Build a task-tracking app
 
-Build a small task-tracking web app with a supported JavaScript framework and Azure SQL Database.
+Build a Next.js web app to add, edit, complete, reopen, and delete tasks, with changes saved in Azure SQL Database.
 
 [View and copy the prompt](build/javascript-app.html) · [Markdown](build/javascript-app.md)
 

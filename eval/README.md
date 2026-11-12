@@ -36,7 +36,7 @@ Install and sign in to:
 2. [GitHub Copilot CLI](https://docs.github.com/copilot/how-tos/set-up/install-copilot-cli)
 3. [Claude Code](https://docs.anthropic.com/en/docs/claude-code/setup)
 4. [Codex CLI](https://developers.openai.com/codex/cli)
-5. Node.js 20 or newer and npm
+5. Node.js 22 or newer and npm
 6. Python 3.10 or newer
 7. .NET SDK 8 or newer
 8. [Azure Functions Core Tools v4](https://learn.microsoft.com/azure/azure-functions/functions-run-local)
@@ -250,7 +250,7 @@ python run_evals.py \
 
 | Scenario | Validated result |
 |---|---|
-| `javascript-app` | A Next.js application returns rows from an Azure SQL table. |
+| `javascript-app` | A Next.js task API creates, lists, renames, completes, reopens, and deletes rows; independent SQL checks and a server restart verify persistence. Invalid requests leave rows unchanged. |
 | `python-api` | A Python API lists, creates, and completes task rows. |
 | `rag-app` | Azure SQL stores native vectors and returns ranked similarity results. |
 | `serverless-api` | An Azure Function returns rows through an Azure SQL binding. |

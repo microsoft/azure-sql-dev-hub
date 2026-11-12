@@ -6,6 +6,7 @@ import json
 import shutil
 import urllib.error
 import urllib.request
+from collections.abc import Mapping
 from pathlib import Path
 
 from .command import CommandError, merged_environment
@@ -53,6 +54,8 @@ def http_json(
     method: str = "GET",
     payload: dict | None = None,
     timeout: int = 30,
+    headers: Mapping[str, str] | None = None,
+    expected_status: int | None = None,
 ):
     """Send one JSON HTTP request and decode its JSON response."""
     data = json.dumps(payload).encode() if payload is not None else None
@@ -60,14 +63,27 @@ def http_json(
         url,
         data=data,
         method=method,
-        headers={"content-type": "application/json"} if payload is not None else {},
+        headers={
+            **({"content-type": "application/json"} if payload is not None else {}),
+            **(headers or {}),
+        },
     )
     try:
         with urllib.request.urlopen(request, timeout=timeout) as response:
-            return response.status, json.loads(response.read().decode())
+            status, body = response.status, response.read().decode()
     except urllib.error.HTTPError as exc:
-        body = exc.read().decode("utf-8", errors="replace")
-        raise CommandError(f"{method} {url} returned {exc.code}: {body}") from exc
+        if expected_status is None or exc.code != expected_status:
+            body = exc.read().decode("utf-8", errors="replace")
+            raise CommandError(f"{method} {url} returned {exc.code}: {body}") from exc
+        status, body = exc.code, exc.read().decode()
+    if expected_status is not None and status != expected_status:
+        raise CommandError(
+            f"{method} {url} returned {status}, expected {expected_status}: {body}"
+        )
+    try:
+        return status, json.loads(body)
+    except json.JSONDecodeError as exc:
+        raise CommandError(f"{method} {url} did not return JSON: {body}") from exc
 
 
 def database_environment(resources: AzureResources) -> dict[str, str]:
