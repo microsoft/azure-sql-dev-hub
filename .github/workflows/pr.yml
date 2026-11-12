@@ -25,7 +25,6 @@ defaults:
 env:
   PR: ${{ github.event.pull_request.number }}
   HEAD_SHA: ${{ github.event.pull_request.head.sha }}
-  REPORT: ${{ github.workspace }}/../report
 
 jobs:
   checks:
@@ -41,7 +40,11 @@ jobs:
       - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
         with:
           node-version: "22"
-      - run: npm ci && mkdir -p "$REPORT"
+      # Results collect outside the checkout, so no check scans or builds them.
+      - run: |
+          npm ci
+          echo "REPORT=$RUNNER_TEMP/report" >> "$GITHUB_ENV"
+          mkdir -p "$RUNNER_TEMP/report"
 
       # Each check records its outcome and keeps going, so the report shows
       # every result. The last step fails the job if a blocking check failed.
@@ -113,7 +116,7 @@ jobs:
         if: always()
         with:
           name: pr-report
-          path: ${{ env.REPORT }}
+          path: ${{ runner.temp }}/report
           retention-days: 7
 
       - name: Fail on blocking checks
@@ -188,22 +191,30 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git worktree add --detach "$RUNNER_TEMP/previews" && cd "$RUNNER_TEMP/previews"
+          # Full ref names throughout: git matches a short name like
+          # "pr-previews" against the end of other branch names too.
+          ref=refs/heads/pr-previews
+          git worktree add --detach "$RUNNER_TEMP/previews"
+          cd "$RUNNER_TEMP/previews"
           # Other PRs write other folders, so when a push is rejected, start
           # again from the branch as it is now and copy this folder in again.
           for i in 1 2 3 4; do
-            if git ls-remote --exit-code --heads origin pr-previews >/dev/null; then
-              git fetch -q --no-tags --depth=1 origin pr-previews && git checkout -qf -B pr-previews FETCH_HEAD
+            if git ls-remote --exit-code origin "$ref" >/dev/null; then
+              git fetch -q --no-tags --depth=1 origin "$ref"
+              git checkout -qf -B pr-previews FETCH_HEAD
             else
-              git checkout -q --orphan pr-previews && git rm -rfq .
+              git checkout -qf --orphan "pr-previews-$i"
+              git rm -rfq --ignore-unmatch .
               printf '%s\n' "# PR previews" "" "Built by .github/workflows/pr.yml, one folder per open pull request," \
                 "and published by pages.yml at <site>/pr/<number>/. Do not edit by hand." > README.md
             fi
-            rm -rf "pr/$PR" && mkdir -p "pr/$PR" && cp -R "$GITHUB_WORKSPACE/_site/." "pr/$PR/"
+            rm -rf "pr/$PR"
+            mkdir -p "pr/$PR"
+            cp -R "$GITHUB_WORKSPACE/_site/." "pr/$PR/"
             git add -A
-            git diff --cached --quiet && { echo "Preview unchanged"; exit 0; }
+            if git diff --cached --quiet; then echo "Preview unchanged"; exit 0; fi
             git commit -qm "Preview #$PR at ${HEAD_SHA:0:7}"
-            git push -q origin pr-previews && exit 0
+            if git push -q origin "HEAD:$ref"; then echo "Published pr/$PR"; exit 0; fi
             sleep $((i * 3))
           done
           exit 1
@@ -275,15 +286,19 @@ jobs:
           ref: ${{ github.event.repository.default_branch }}
       - name: Delete the preview folder and redeploy
         run: |
-          git ls-remote --exit-code --heads origin pr-previews >/dev/null || { echo "No previews branch"; exit 0; }
+          ref=refs/heads/pr-previews
+          git ls-remote --exit-code origin "$ref" >/dev/null || { echo "No previews branch"; exit 0; }
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git worktree add --detach "$RUNNER_TEMP/previews" && cd "$RUNNER_TEMP/previews"
+          git worktree add --detach "$RUNNER_TEMP/previews"
+          cd "$RUNNER_TEMP/previews"
           for i in 1 2 3 4; do
-            git fetch -q --no-tags --depth=1 origin pr-previews && git checkout -qf -B pr-previews FETCH_HEAD
-            [ -d "pr/$PR" ] || { echo "No preview for #$PR"; break; }
-            git rm -rq "pr/$PR" && git commit -qm "Remove preview #$PR"
-            git push -q origin pr-previews && break
+            git fetch -q --no-tags --depth=1 origin "$ref"
+            git checkout -qf -B pr-previews FETCH_HEAD
+            if [ ! -d "pr/$PR" ]; then echo "No preview for #$PR"; break; fi
+            git rm -rq "pr/$PR"
+            git commit -qm "Remove preview #$PR"
+            if git push -q origin "HEAD:$ref"; then echo "Removed pr/$PR"; break; fi
             sleep $((i * 3))
           done
           # The deploy publishes open PRs only, so it drops this one even if

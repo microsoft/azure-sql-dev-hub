@@ -66,8 +66,10 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          git ls-remote --exit-code --heads origin pr-previews >/dev/null || { echo "No pr-previews branch yet"; exit 0; }
-          git fetch -q --no-tags --depth=1 origin pr-previews
+          # Full ref name: a short "pr-previews" also matches other branches' tails.
+          ref=refs/heads/pr-previews
+          git ls-remote --exit-code origin "$ref" >/dev/null || { echo "No pr-previews branch yet"; exit 0; }
+          git fetch -q --no-tags --depth=1 origin "$ref"
           for n in $(gh pr list --state open --limit 200 --json number --jq '.[].number'); do
             if git cat-file -e "FETCH_HEAD:pr/$n" 2>/dev/null; then
               git archive FETCH_HEAD "pr/$n" | tar -x -C _site
