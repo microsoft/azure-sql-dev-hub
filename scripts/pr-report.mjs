@@ -9,7 +9,12 @@
 //   node scripts/pr-report.mjs --images <report-dir>   "<source>\t<name>" per changed screenshot
 //
 // Environment: HEAD_SHA, RUN_URL, IMAGE_BASE (where --images files were
-// published; without it the comment links the run's artifact instead).
+// published; without it the comment points at the run's artifact instead).
+//
+// Layout: a one-line verdict, the blocking checks on one line, the scores in a
+// table against main, one line each for links and screenshots, then one
+// merged list of what would raise the scores, so the three scorers' overlapping
+// findings read as a to-do list rather than three reports.
 
 import { readFileSync, existsSync } from 'node:fs';
 import { join, posix } from 'node:path';
@@ -24,6 +29,7 @@ const MAX_SHOTS = 8;
 // Visual diff: BackstopJS's JSON report, with image paths relative to its
 // json folder. Each changed pair publishes as <slug>-main/pr/diff.png.
 const visual = json('visual/json/jsonReport.json');
+const visualPages = json('visual-pages.json');
 const slug = (s) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 const pairs = (visual?.tests || []).map((t) => {
   const p = t.pair || {};
@@ -45,97 +51,102 @@ if (listImages) {
 }
 
 const out = json('outcomes.json') || {};
-const icon = (o) => (o === 'success' ? '✅' : o === 'failure' ? '❌' : '⏭️');
 const tail = (s, n = 15) => s.trim().split('\n').slice(-n).join('\n');
 // Details quote markup ("no <link rel=canonical>"), which GitHub would drop.
-const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-const delta = (now, base) => (typeof base === 'number' ? ` (main ${base}, ${now - base >= 0 ? '+' : ''}${Math.round((now - base) * 10) / 10})` : '');
+const esc = (s) => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+const plural = (n, one, many = `${one}s`) => `${n} ${n === 1 ? one : many}`;
 
-// open-agent-readiness: its own total_score is the number reported. It grades
-// through the Cloudflare quick tunnel, whose edge on trycloudflare.com rewrites
-// robots.txt with Cloudflare's AI-crawler rules and answers AI crawlers with
-// 403. The checks below grade that edge, not this site; they are listed apart
-// so nobody tries to fix them here. Both PR and base go through the same edge,
-// so the difference between them is still fair.
-const TUNNEL_CHECKS = new Set(['ai_bot_rules', 'content_signals', 'browse_bot_access', 'multi_bot_fetch']);
-function agentScore(o) {
-  if (!o || typeof o.total_score !== 'number') return null;
-  const open = (o.checks || []).filter((c) => c.status === 'fail' || c.status === 'warn');
-  return {
-    score: o.total_score,
-    grade: o.grade,
-    site: open.filter((c) => !TUNNEL_CHECKS.has(c.id)),
-    tunnel: open.filter((c) => TUNNEL_CHECKS.has(c.id)),
-  };
-}
-
-// Vercel's Agent Readability audit: score, rating, and checks by category.
-function vercelAudit(o) {
-  if (!o || typeof o.score !== 'number') return null;
-  const failed = [];
-  for (const [, cat] of Object.entries(o.categories || {})) {
-    for (const c of cat.checks || []) if (!c.passed && !c.skipped) failed.push(c);
-  }
-  return { score: o.score, rating: o.rating, failed };
-}
-
-const rows = [];
-rows.push(['House rules and telemetry', icon(out.tests), out.tests === 'failure' ? 'see Failures' : '']);
-rows.push(['Build', icon(out.build), '']);
-const linksOk = /links OK, (\d+)/.exec(text('links.log'));
-rows.push(['Internal links and anchors', icon(out.links), linksOk ? `${linksOk[1]} checked` : out.links === 'failure' ? 'see Failures' : '']);
+// ---------- inputs ----------
 
 const pages = json('pages.json');
-rows.push(['Page checks', icon(out.pages), pages ? `score **${pages.score}/100**${delta(pages.score, pages.baseline)}, ${pages.pages} pages` : '']);
-
-const oarPr = agentScore(json('oar-pr.json'));
-const oarBase = agentScore(json('oar-base.json'));
-rows.push(['Agent readiness (open-agent-readiness)', oarPr ? '📊' : '⚠️',
-  oarPr ? `score **${oarPr.score}/100**, grade ${oarPr.grade}${delta(oarPr.score, oarBase?.score)} · report only`
-    : 'unavailable this run (the tunnel or scan did not finish); not blocking']);
-
-const vcPr = vercelAudit(json('vercel-pr.json'));
-const vcBase = vercelAudit(json('vercel-base.json'));
-rows.push(['Agent readability (Vercel)', vcPr ? '📊' : '⏭️',
-  vcPr ? `score **${vcPr.score}/100**, ${vcPr.rating}${delta(vcPr.score, vcBase?.score)} · report only` : 'did not run']);
-
 const lumar = json('lumar.json');
-rows.push(['Agent files (Lumar)', icon(out.agentfiles),
-  lumar && lumar.reach ? `${lumar.adopted} of ${lumar.checked} published, ${lumar.broken} broken` : out.agentfiles === 'failure' ? 'see Failures' : '']);
+const linksOk = /links OK, (\d+)/.exec(text('links.log'));
+
+// open-agent-readiness: its own total_score. It grades through the Cloudflare
+// quick tunnel, whose edge on trycloudflare.com rewrites robots.txt with
+// Cloudflare's AI-crawler rules and answers AI crawlers with 403; the checks
+// below grade that edge, not this site. PR and base go through the same edge.
+const TUNNEL_CHECKS = new Set(['ai_bot_rules', 'content_signals', 'browse_bot_access', 'multi_bot_fetch']);
+const oar = (o) => (o && typeof o.total_score === 'number'
+  ? { score: o.total_score, label: o.grade, open: (o.checks || []).filter((c) => c.status === 'fail' || c.status === 'warn') }
+  : null);
+const vercel = (o) => {
+  if (!o || typeof o.score !== 'number') return null;
+  const failed = [];
+  for (const cat of Object.values(o.categories || {})) for (const c of cat.checks || []) if (!c.passed && !c.skipped) failed.push(c);
+  return { score: o.score, label: o.rating, failed };
+};
+const oarPr = oar(json('oar-pr.json')), oarBase = oar(json('oar-base.json'));
+const vcPr = vercel(json('vercel-pr.json')), vcBase = vercel(json('vercel-base.json'));
 
 const lk = json('linkinator.json');
 const lkLinks = lk?.links || [];
-const isLocal = (u) => /^http:\/\/localhost:8080\b/.test(u);
 const broken = lkLinks.filter((l) => l.state === 'BROKEN');
-const brokenExt = broken.filter((l) => !isLocal(l.url));
-const brokenInt = broken.filter((l) => isLocal(l.url));
 // The workflow passes 401/403/429 as warnings: the site turned a bot away.
 const blocked = lkLinks.filter((l) => l.state !== 'BROKEN' && [401, 403, 429].includes(l.status));
-rows.push(['Links (linkinator)', lk ? (broken.length ? '⚠️' : '✅') : '⏭️',
-  lk ? `${lkLinks.length} checked, ${brokenInt.length} internal and ${brokenExt.length} external broken${blocked.length ? `, ${blocked.length} blocked bots` : ''} · report only` : '']);
 
-const visualPages = json('visual-pages.json');
-rows.push(['Visual diff (BackstopJS)', visual ? (changed.length ? '🖼️' : '✅') : visualPages ? '✅' : '⏭️',
-  visual ? `${changed.length} of ${pairs.length} screenshots changed, on ${visualPages?.length ?? '?'} page(s) whose output changed`
-    : visualPages ? 'no page changed from main, so nothing to capture' : 'no base build to compare']);
+// ---------- verdict and blocking checks ----------
+
+const BLOCKING = [
+  ['tests', 'House rules', 'tests.log'],
+  ['build', 'Build', 'build.log'],
+  ['links', linksOk ? `Internal links (${linksOk[1]})` : 'Internal links', 'links.log'],
+  ['pages', 'Page checks', 'pages.log'],
+  ['agentfiles', 'Agent files', 'lumar.log'],
+];
+const mark = (o) => (o === 'success' ? '✅' : o === 'failure' ? '❌' : '⏭️');
+const failedChecks = BLOCKING.filter(([k]) => out[k] === 'failure');
+
+const scores = [
+  ['Page checks', pages && { score: pages.score }, pages && typeof pages.baseline === 'number' ? { score: pages.baseline } : null],
+  ['Agent readiness', oarPr, oarBase],
+  ['Agent readability (Vercel)', vcPr, vcBase],
+];
+const moved = scores.filter(([, pr, base]) => pr && base && pr.score !== base.score);
+const change = (pr, base) => {
+  if (!pr || !base) return '';
+  const d = Math.round((pr.score - base.score) * 10) / 10;
+  return d > 0 ? `▲ +${d}` : d < 0 ? `▼ ${d}` : '–';
+};
 
 const sha = (env.HEAD_SHA || '').slice(0, 7);
-const lines = [
-  '<!-- hub-pr-report -->',
-  `### PR checks${sha ? ` for \`${sha}\`` : ''}`,
-  '',
-  '| Check | | Result |',
-  '|---|:-:|---|',
-  ...rows.map((r) => `| ${r.join(' | ')} |`),
-  '',
-];
+const lines = ['<!-- hub-pr-report -->', `### PR checks${sha ? ` for \`${sha}\`` : ''}`, ''];
+
+const verdict = failedChecks.length
+  ? `❌ **${plural(failedChecks.length, 'blocking check')} failed:** ${failedChecks.map(([, label]) => label).join(', ')}.`
+  : `✅ **All ${BLOCKING.length} blocking checks pass.**`;
+const scoreNote = moved.length
+  ? ` Scores changed: ${moved.map(([name, pr, base]) => `${name} ${change(pr, base)}`).join(', ')}.`
+  : scores.some(([, pr, base]) => pr && base) ? ' Scores unchanged from main.' : '';
+lines.push(verdict + scoreNote, '', BLOCKING.map(([k, label]) => `${mark(out[k])} ${label}`).join(' · '), '');
+
+// ---------- scores ----------
+
+lines.push('**Scores**', '', '| | This PR | main | Change |', '|---|--:|--:|:-:|');
+for (const [name, pr, base] of scores) {
+  const fmt = (s) => (s ? `${s.score}${s.label ? ` (${esc(s.label)})` : ''}` : '');
+  lines.push(`| ${name} | ${pr ? fmt(pr) : 'unavailable'} | ${fmt(base) || '–'} | ${change(pr, base)} |`);
+}
+lines.push('');
+
+// ---------- links and screenshots ----------
+
+// Each on its own paragraph: consecutive lines would run together on GitHub.
+if (lk) {
+  const extra = blocked.length ? ` (${plural(blocked.length, 'site blocks', 'sites block')} bots)` : '';
+  lines.push(broken.length
+    ? `🔗 ${lkLinks.length} links checked, **${broken.length} broken**${extra}`
+    : `🔗 ${lkLinks.length} links checked, none broken${extra}`, '');
+}
+if (visual) lines.push(changed.length ? `🖼️ **${plural(changed.length, 'screenshot')} changed** of ${pairs.length}, on the pages this PR changed` : `🖼️ ${pairs.length} screenshots of changed pages, none look different`, '');
+else if (visualPages) lines.push('🖼️ No page changed, so no screenshots', '');
 
 lines.push('<!-- visual -->');
 if (changed.length) {
   const img = (p, k) => (env.IMAGE_BASE && p.files[k] ? `<img src="${env.IMAGE_BASE}/${p.name}-${k}.png" width="260" alt="${esc(p.label)}, ${p.viewport}, ${k}">` : '');
-  lines.push(`<details><summary><b>${changed.length} changed screenshot${changed.length > 1 ? 's' : ''}</b></summary>`, '');
+  lines.push(`<details open><summary>Changed screenshots</summary>`, '');
   if (env.IMAGE_BASE) {
-    lines.push('| Page | main | this PR | difference |', '|---|---|---|---|');
+    lines.push('| Page | main | This PR | Difference |', '|---|---|---|---|');
     for (const p of changed.slice(0, MAX_SHOTS)) {
       lines.push(`| ${esc(p.label)}, ${p.viewport} (${p.mismatch}%) | ${img(p, 'main')} | ${img(p, 'pr')} | ${img(p, 'diff')} |`);
     }
@@ -148,29 +159,111 @@ if (changed.length) {
 }
 lines.push('<!-- /visual -->', '');
 
-if (pages) {
-  const lost = [
-    ...pages.site.filter((c) => !c.pass).map((c) => `- ${c.label}: ${esc(c.detail)} (-${c.points})`),
-    ...pages.checks.filter((c) => c.passing < c.total).map((c) =>
-      `- ${c.label}: fails on ${c.total - c.passing} of ${c.total} pages (-${Math.round((c.points - c.earned) * 10) / 10}), e.g. \`${c.failing[0].path}\`: ${esc(c.failing[0].detail)}`),
-  ];
-  if (lost.length) lines.push(`<details><summary>Page checks: where the other ${100 - pages.score} points went</summary>`, '', ...lost, '', '</details>', '');
-}
-if (oarPr) {
-  const mark = { fail: '❌', warn: '⚠️' };
-  const item = (c) => `- ${mark[c.status]} ${esc(c.title || c.id)} (${c.category}, weight ${c.weight}): ${esc(c.detail || '')}`;
-  lines.push(`<details><summary>Agent readiness (open-agent-readiness): ${oarPr.site.length + oarPr.tunnel.length} checks failed or warned</summary>`, '',
-    ...oarPr.site.map(item));
-  if (oarPr.tunnel.length) {
-    lines.push('', '**Graded the tunnel, not this site.** Cloudflare\'s edge in front of the scan rewrites robots.txt and refuses AI crawlers; GitHub Pages does neither. These count in the score above, for the PR and main alike:', '', ...oarPr.tunnel.map(item));
+// ---------- how to improve the scores ----------
+//
+// The three scorers overlap: a missing canonical link costs points in all of
+// them. Each finding is mapped to one issue, so the list reads once.
+// `page` ids are check-pages.mjs ids, `oar` ids are open-agent-readiness ids,
+// `vercel` entries are Vercel audit check names.
+
+const ISSUES = [
+  { group: 'fix', title: 'Fix broken links in llms.txt', oar: ['llms_links_live'], vercel: ['llms.txt links resolve'] },
+  { group: 'fix', title: 'Add a canonical link to every page', page: ['canonical'], oar: ['canonical_url'], vercel: ['Canonical URL'] },
+  { group: 'fix', title: 'Add JSON-LD to every page, inside `<head>`', page: ['json-ld'], oar: ['json_ld', 'jsonld_in_head', 'org_schema'], vercel: ['Structured data'] },
+  { group: 'fix', title: 'Add a 404 page', page: ['404'], vercel: ['Soft 404 detection'] },
+  { group: 'fix', title: 'Add `lastmod` dates to the sitemap, and a `sitemap.md`', page: ['sitemap'], oar: ['sitemap'], vercel: ['sitemap.xml', 'sitemap.md'] },
+  { group: 'fix', title: 'Use one h1 per page, with headings in order', page: ['h1', 'headings'], oar: ['h1_singular'] },
+  { group: 'fix', title: 'Give images meaningful alt text', page: ['alt'], oar: ['img_alt_coverage'] },
+  { group: 'fix', title: 'Write meta descriptions of 50 to 320 characters', page: ['description'], oar: ['meta_description'] },
+  { group: 'fix', title: 'Complete the Open Graph tags', page: ['og'], oar: ['open_graph'] },
+  { group: 'fix', title: 'Put more of each page in plain HTML', page: ['text'], oar: ['readable_html', 'early_facts', 'html_payload_size'] },
+  { group: 'fix', title: 'Link and publish a Markdown twin for every page', page: ['twin'], vercel: ['.md URL → markdown'] },
+  { group: 'fix', title: 'Fix llms.txt and llms-full.txt', page: ['llms-txt', 'llms-full'], oar: ['llms_txt', 'llms_full_txt', 'llms_link_notes', 'llms_describedby'], vercel: ['llms.txt', 'llms.txt size', 'llms.txt valid'] },
+  { group: 'host', title: 'Serve Markdown to agents that ask for it', oar: ['markdown_negotiation', 'json_negotiation'], vercel: ['Agent UA → markdown', 'Accept header → markdown', 'Missing page → markdown'] },
+  { group: 'host', title: 'robots.txt rules for AI crawlers (read only at the root of the host)', page: ['robots'], oar: ['robots_txt'], vercel: ['robots.txt'] },
+  { group: 'host', title: 'HTTP response headers (Link, rate limits)', oar: ['link_header', 'rate_limit_headers'] },
+  { group: 'na', title: 'APIs, MCP, OAuth, commerce and site search', oar: ['mcp_server_card', 'openapi_spec', 'oauth_discovery', 'offer_structured_data', 'payment_link_surface', 'commerce_surface', 'agentic_registration', 'site_search_action', 'a2a_agent_card', 'agent_skills', 'api_catalog', 'web_bot_auth', 'security_txt'] },
+];
+
+const pageFails = new Map();
+const cap = (s) => (s ? s[0].toUpperCase() + s.slice(1) : s);
+for (const c of pages?.site || []) if (!c.pass) pageFails.set(c.id, { lost: c.points, detail: esc(cap(c.detail)) });
+for (const c of pages?.checks || []) {
+  if (c.passing < c.total) {
+    pageFails.set(c.id, {
+      lost: Math.round((c.points - c.earned) * 10) / 10,
+      detail: `Fails on ${c.total - c.passing} of ${c.total} pages, e.g. \`${c.failing[0].path}\`: ${esc(c.failing[0].detail)}`,
+    });
   }
-  lines.push('', '</details>', '');
 }
-if (vcPr && vcPr.failed.length) {
-  lines.push(`<details><summary>Agent readability (Vercel): ${vcPr.failed.length} checks failed</summary>`, '',
-    ...vcPr.failed.map((c) => `- ❌ ${esc(c.name)} (${c.tier})${c.detail ? `: ${esc(c.detail)}` : ''}. ${esc(c.hint || '')}`),
-    '', 'Spec: [Agent Readability Spec](https://vercel.com/kb/guide/agent-readability-spec).', '', '</details>', '');
+const oarOpen = new Map((oarPr?.open || []).map((c) => [c.id, c]));
+const vcFailed = new Map((vcPr?.failed || []).map((c) => [c.name, c]));
+const used = { oar: new Set(), vercel: new Set() };
+
+// One tag per scorer, however many of its checks an issue covers: page checks
+// with the points lost, agent readiness with its worst status, Vercel with
+// whether any failed check is required.
+const found = [];
+for (const issue of ISSUES) {
+  let detail = '', weight = 0, lost = 0, oarWorst = null, vcWorst = null;
+  for (const id of issue.page || []) {
+    const f = pageFails.get(id);
+    if (f) { lost += f.lost; detail ||= f.detail; }
+  }
+  for (const id of issue.oar || []) {
+    const c = oarOpen.get(id);
+    used.oar.add(id);
+    if (c) { oarWorst = oarWorst === 'fail' ? 'fail' : c.status; detail ||= esc(cap(c.detail)); weight += c.weight || 1; }
+  }
+  for (const name of issue.vercel || []) {
+    const c = vcFailed.get(name);
+    used.vercel.add(name);
+    if (c) {
+      vcWorst = vcWorst === 'required' ? 'required' : c.tier;
+      detail ||= esc(cap(`${c.detail ? `${c.detail}. ` : ''}${c.hint || ''}`));
+      weight += c.tier === 'required' ? 3 : 1;
+    }
+  }
+  const hits = [
+    lost && `page checks −${Math.round(lost * 10) / 10}`,
+    oarWorst && `agent readiness ${oarWorst === 'fail' ? '❌' : '⚠️'}`,
+    vcWorst && `Vercel ❌ ${vcWorst}`,
+  ].filter(Boolean);
+  if (hits.length) found.push({ ...issue, hits, detail, weight: weight + lost });
 }
+// Anything a scorer reports that the map above does not know yet.
+for (const [id, c] of oarOpen) {
+  if (!used.oar.has(id) && !TUNNEL_CHECKS.has(id)) found.push({ group: 'other', title: esc(c.title || id), hits: ['agent readiness'], detail: esc(c.detail), weight: c.weight || 1 });
+}
+for (const [name, c] of vcFailed) {
+  if (!used.vercel.has(name)) found.push({ group: 'other', title: esc(name), hits: [`Vercel ${c.tier}`], detail: esc(c.detail || c.hint), weight: 1 });
+}
+const tunnel = [...oarOpen.values()].filter((c) => TUNNEL_CHECKS.has(c.id));
+
+const fix = found.filter((f) => f.group === 'fix' || f.group === 'other').sort((a, b) => b.weight - a.weight);
+const host = found.filter((f) => f.group === 'host');
+const na = found.filter((f) => f.group === 'na');
+if (fix.length || host.length || na.length || tunnel.length) {
+  lines.push(`<details><summary><b>How to improve the scores</b> (${plural(fix.length, 'fix', 'fixes')} possible here)</summary>`, '');
+  if (fix.length) {
+    lines.push('**Fixable in this repository**, most points first:', '');
+    for (const f of fix) lines.push(`- **${f.title}.** ${f.detail} <sub>(${f.hits.join(' · ')})</sub>`);
+    lines.push('');
+  }
+  if (host.length) {
+    lines.push('**Needs a different host.** GitHub Pages cannot set response headers or vary what it serves, and crawlers read robots.txt only at the root of `microsoft.github.io`:', '');
+    for (const f of host) lines.push(`- ${f.title} <sub>(${f.hits.join(' · ')})</sub>`);
+    lines.push('');
+  }
+  if (na.length) lines.push(`**Not relevant to this site:** ${na.map((f) => f.title).join('; ')}.`, '');
+  if (tunnel.length) {
+    lines.push(`**Graded the tunnel, not this site:** ${tunnel.map((c) => esc(c.title || c.id)).join('; ')}. Cloudflare's edge in front of the scan rewrites robots.txt and refuses AI crawlers. These cost points for the PR and main alike.`, '');
+  }
+  lines.push('</details>', '');
+}
+
+// ---------- problems ----------
+
 if (broken.length) {
   lines.push('<details><summary>Broken links</summary>', '',
     ...broken.slice(0, 30).map((l) => `- ${esc(l.url.replace('http://localhost:8080', ''))}: ${l.status || 'no response'}`), '', '</details>', '');
@@ -180,12 +273,14 @@ if (lumar && lumar.broken) {
   lines.push('<details><summary>Agent file defects</summary>', '',
     ...bad.flatMap((s) => s.defects.map((d) => `- ${s.label}: ${esc(typeof d === 'string' ? d : JSON.stringify(d))}`)), '', '</details>', '');
 }
-const failed = [['tests', 'House rules and telemetry', 'tests.log'], ['build', 'Build', 'build.log'], ['links', 'Internal links', 'links.log'],
-  ['pages', 'Page checks', 'pages.log'], ['agentfiles', 'Agent files', 'lumar.log']].filter(([k]) => out[k] === 'failure');
-if (failed.length) {
+if (failedChecks.length) {
   lines.push('<details open><summary>Failures</summary>', '');
-  for (const [, label, log] of failed) lines.push(`**${label}**`, '```', tail(text(log)) || '(no output)', '```', '');
+  for (const [, label, log] of failedChecks) lines.push(`**${label}**`, '```', tail(text(log)) || '(no output)', '```', '');
   lines.push('</details>', '');
 }
-if (env.RUN_URL) lines.push(`<sub>[Workflow run and full reports](${env.RUN_URL}). This comment updates on every push.</sub>`);
+
+// ---------- footer ----------
+
+const foot = [sha && `\`${sha}\``, env.RUN_URL && `[Run and full reports](${env.RUN_URL})`, 'updates on every push'].filter(Boolean).join(' · ');
+lines.push(`<sub>${foot}<br>Page checks: \`scripts/check-pages.mjs\` · Agent readiness: [open-agent-readiness](https://gitlab.com/startuphub-ai/open-agent-readiness), through a temporary Cloudflare tunnel · Agent readability: [Vercel's audit](https://vercel.com/kb/guide/agent-readability-spec) · Agent files: [Lumar](https://agentic-readiness.lumar.io/cli) · Links: linkinator · Screenshots: BackstopJS</sub>`);
 console.log(lines.join('\n'));
