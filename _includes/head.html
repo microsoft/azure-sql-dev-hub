@@ -8,6 +8,14 @@
 {%- else -%}
   {%- assign md_path = page.url | replace: '.html', '.md' -%}
 {%- endif -%}
+{%- comment -%}
+  Canonical URL: the page's address without .html, as the sitemap lists it
+  (build-agent-files.mjs). GitHub Pages serves /build/x from build/x.html, and
+  the twin is /build/x.md, so the canonical address plus .md finds it.
+{%- endcomment -%}
+{%- assign canonical = page.url | replace: '.html', '' | absolute_url -%}
+{%- assign page_title = page.head_title | default: page.title | default: site.title -%}
+{%- assign page_description = page.description | default: site.description | strip_newlines | strip -%}
 <head>
   <meta charset="utf-8">
   <meta name="msvalidate.01" content="A333E59012EAA3B44A57A4C7E5A69212" />
@@ -17,7 +25,13 @@
   <meta property="og:title" content="{{ page.head_title | default: page.title | default: site.title }}">
   <meta property="og:description" content="{{ page.description | default: site.description }}">
   <meta property="og:type" content="website">
-  <meta property="og:url" content="{{ page.url | absolute_url }}">
+  <meta property="og:url" content="{{ canonical }}">
+  <link rel="canonical" href="{{ canonical }}">
+{%- comment -%}
+  Structured data on every page, early in the head where agents look first:
+  the publisher, the site, and this page within it.
+{%- endcomment %}
+  <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://www.microsoft.com/#organization","name":"Microsoft","url":"https://www.microsoft.com"},{"@type":"WebSite","@id":"{{ '/' | absolute_url }}#website","name":{{ site.title | jsonify }},"url":"{{ '/' | absolute_url }}","description":{{ site.description | strip_newlines | strip | jsonify }},"inLanguage":"en","publisher":{"@id":"https://www.microsoft.com/#organization"}},{"@type":"WebPage","@id":"{{ canonical }}#webpage","url":"{{ canonical }}","name":{{ page_title | jsonify }},"description":{{ page_description | jsonify }},"inLanguage":"en","isPartOf":{"@id":"{{ '/' | absolute_url }}#website"}}]}</script>
 {%- comment -%}
   Link preview card. Absolute URLs, because the crawlers that read these tags do
   not resolve relative paths. The deploy workflow fills `url` from the Pages API
@@ -34,7 +48,9 @@
   <meta name="twitter:description" content="{{ page.description | default: site.description }}">
   <meta name="twitter:image" content="{{ '/assets/img/hero-idea-to-app-og.jpg' | absolute_url }}">
   <meta name="twitter:image:alt" content="From idea to app: a prompt builds a task app on Azure SQL.">
+{%- unless page.url == '/404.html' %}
   <link rel="alternate" type="text/markdown" href="{{ md_path | relative_url }}" title="Markdown version">
+{%- endunless %}
   <link rel="alternate" type="text/plain" href="{{ '/llms.txt' | relative_url }}" title="LLM index">
   <link rel="alternate" type="text/plain" href="{{ '/llms-full.txt' | relative_url }}" title="Full LLM corpus">
   <meta name="llms-txt" content="{{ '/llms.txt' | relative_url }}">

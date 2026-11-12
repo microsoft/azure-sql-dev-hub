@@ -10,7 +10,7 @@ _Last updated: September 2026._
 - [Get a database running](https://microsoft.github.io/azure-sql-dev-hub/#get-running): create a free Azure SQL Database or run the Azure SQL Database container locally, by hand or with your coding agent.
 - [Skills](https://aka.ms/azuresql-skills): what the agent skills do, per-tool install, and the full catalog.
 - [Before you build](https://microsoft.github.io/azure-sql-dev-hub/#faq): what you need, what it costs, whether you need the container, whether it is safe to let an agent write to your database.
-- [For agents](https://microsoft.github.io/azure-sql-dev-hub/for-agents.md): how this site is laid out for machine readers.
+- [Sitemap](https://microsoft.github.io/azure-sql-dev-hub/sitemap.md): every page on the site, linked to its Markdown version.
 - [Container: get started](https://microsoft.github.io/azure-sql-dev-hub/container/get-started.md): run the Azure SQL Database container locally with Docker, Podman, or WSL containers, connect, and troubleshoot.
 - [Container FAQ](https://microsoft.github.io/azure-sql-dev-hub/container/faq.md): what the container is for, which Azure SQL Database features it includes and leaves out, and moving to Azure.
 

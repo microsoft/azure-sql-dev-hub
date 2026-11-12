@@ -66,7 +66,8 @@ exclude:
   - vendor
 
   - outputs
-  - eval/.venv
+  # Prompt evaluation tooling, documented in eval/README.md; not a page of the site.
+  - eval
   - eval/__pycache__
   - eval/hub_eval/__pycache__
   - eval/runs

@@ -1,7 +1,7 @@
 ---
 layout: page
 title: Build prompt library
-description: Cloud-first application prompts for Azure SQL.
+description: "Cloud-first build prompts for Azure SQL Database. Copy one into your coding agent to build a working app, with checks to confirm it runs."
 ---
 
 Choose an application example for Azure SQL Database. Open a page for the complete prompt, prerequisites and expected result.

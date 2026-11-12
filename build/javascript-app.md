@@ -1,7 +1,7 @@
 ---
 layout: page
 title: Scaffold a JavaScript app
-description: Scaffold a JavaScript app on Azure SQL Database
+description: "Scaffold a JavaScript app on Azure SQL Database: a Next.js task list that signs in with Microsoft Entra, creates its schema, and seeds sample rows."
 tag: JavaScript
 last_verified: 2026-09-16
 validated: false

@@ -4,6 +4,9 @@
 //   1. A .md twin next to every .html page, so `curl <page>.md` returns the
 //      source the page was built from.
 //   2. llms-full.txt, the whole site concatenated into one document.
+//   3. sitemap.md, every page with its title, description and twin, and a
+//      sitemap.xml whose URLs drop .html and carry each page's last commit
+//      date, so `<page URL>.md` finds the twin and agents know what is fresh.
 //
 // Runs after `jekyll build`, writing into _site. It reads the same .md sources
 // Jekyll just consumed, so the twin cannot drift from the page: there is one
@@ -16,11 +19,13 @@
 
 import { readdirSync, statSync, readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs';
 import { join, dirname } from 'node:path';
+import { execFileSync } from 'node:child_process';
 import yaml from 'js-yaml';
 
 const SITE = '_site';
-const SKIP_FILES = new Set(['README.md', 'CONTRIBUTING.md', 'CODE_OF_CONDUCT.md', 'SECURITY.md', 'SUPPORT.md']);
-const SKIP_DIRS = new Set(['_site', '_includes', '_layouts', '__pycache__', 'docs', 'runs', 'scripts', 'node_modules', '.github', '.git', 'assets', 'vendor', '.jekyll-cache', 'outputs']);
+// 404.md is the not-found page: no twin, and not part of the site's content.
+const SKIP_FILES = new Set(['README.md', 'CONTRIBUTING.md', 'CODE_OF_CONDUCT.md', 'SECURITY.md', 'SUPPORT.md', '404.md']);
+const SKIP_DIRS = new Set(['_site', '_includes', '_layouts', '__pycache__', 'docs', 'runs', 'scripts', 'node_modules', '.github', '.git', 'assets', 'vendor', '.jekyll-cache', 'outputs', 'eval']);
 
 // Reading order for llms-full.txt. Anything discovered but not listed appends
 // alphabetically, so a new page is never silently dropped.
@@ -265,3 +270,62 @@ const header = [
 
 writeFileSync(join(SITE, 'llms-full.txt'), header + parts.join('\n\n---\n\n'), 'utf8');
 console.log(`  llms-full.txt  ${pages.length} page(s)`);
+
+// sitemap.md: the pages an agent can read, each with its Markdown twin. Links
+// are relative to this file at the site root, so they hold under any baseurl.
+const mapLines = [
+  `# ${config.title}: sitemap`,
+  '',
+  `> ${String(config.description || '').trim().replace(/\s+/g, ' ')}`,
+  '',
+  'Every page on this site, linked to its Markdown version. The whole site in one file is at llms-full.txt.',
+  '',
+];
+for (const file of pages) {
+  const { data } = splitFrontMatter(readFileSync(file, 'utf8'));
+  const title = file === 'index.md' ? `${config.title} (home page)` : data.head_title || data.title || file;
+  mapLines.push(`- [${title}](${file})${data.description ? `: ${String(data.description).trim()}` : ''}`);
+}
+writeFileSync(join(SITE, 'sitemap.md'), mapLines.join('\n') + '\n', 'utf8');
+console.log(`  sitemap.md     ${pages.length} page(s)`);
+
+// sitemap.xml, from jekyll-sitemap: drop .html from each URL and add the date
+// of the last commit that touched the page's source. GitHub Pages serves
+// /build/x from build/x.html, and the twin sits at /build/x.md, so a client
+// that appends .md to a sitemap URL finds it. Without git history (a shallow
+// clone, or no git), a page gets today's date.
+const sitemapFile = join(SITE, 'sitemap.xml');
+if (existsSync(sitemapFile)) {
+  const today = new Date().toISOString().slice(0, 10);
+  const lastCommit = (src) => {
+    try {
+      return execFileSync('git', ['log', '-1', '--format=%cs', '--', src], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim() || null;
+    } catch { return null; }
+  };
+  // The loc carries the site's url and baseurl; drop leading segments until
+  // the rest names a source file in this repository.
+  const sourceFor = (loc) => {
+    const segments = new URL(loc).pathname.split('/').filter(Boolean);
+    const trailing = loc.endsWith('/');
+    for (let i = 0; i <= segments.length; i++) {
+      const rest = segments.slice(i).join('/');
+      const candidates = rest === '' || trailing ? [join(rest, 'index.md'), join(rest, 'index.html')] : [rest.replace(/\.html$/, '.md'), rest];
+      const hit = candidates.find((c) => existsSync(c) && statSync(c).isFile());
+      if (hit) return hit;
+    }
+    return null;
+  };
+  let dated = 0;
+  const xml = readFileSync(sitemapFile, 'utf8').replace(/<url>([\s\S]*?)<\/url>/g, (block, inner) => {
+    const loc = (/<loc>([^<]+)<\/loc>/.exec(inner) || [])[1];
+    if (!loc) return block;
+    const src = sourceFor(loc);
+    const date = (src && lastCommit(src)) || today;
+    if (src && date !== today) dated++;
+    let next = inner.replace(`<loc>${loc}</loc>`, `<loc>${loc.replace(/\.html$/, '')}</loc>`);
+    if (!/<lastmod>/.test(next)) next = next.replace('</loc>', `</loc>\n<lastmod>${date}</lastmod>`);
+    return `<url>${next}</url>`;
+  });
+  writeFileSync(sitemapFile, xml, 'utf8');
+  console.log(`  sitemap.xml    URLs without .html, ${dated} dated from git`);
+}
