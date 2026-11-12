@@ -162,11 +162,7 @@ function homeToMarkdown(d) {
   return out.join('\n');
 }
 
-// The same config files Jekyll built with, later ones winning, so a deploy's
-// url and baseurl reach the twins too: `--config _config.yml,_config_pages.yml`.
-const configArg = process.argv.indexOf('--config');
-const configFiles = configArg > -1 ? process.argv[configArg + 1].split(',') : ['_config.yml'];
-const config = Object.assign({}, ...configFiles.map((f) => yaml.load(readFileSync(f, 'utf8')) || {}));
+const config = yaml.load(readFileSync('_config.yml', 'utf8')) || {};
 const found = findPages('.', '').filter(f => splitFrontMatter(readFileSync(f, 'utf8')).data.published !== false);
 const pages = [
   ...ORDER.filter((f) => found.includes(f)),
