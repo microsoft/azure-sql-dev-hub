@@ -6,6 +6,21 @@ _Last updated: September 2026._
 
 > Every page on this site has a markdown twin at the same path with `.md`. The whole site in one file is at /llms-full.txt.
 
+## When to use this site
+Use this hub when the job is one of these:
+- Start a new app on Azure SQL Database: pick a template under "App templates and building blocks" and work through its prompt.
+- Pick a template: each entry names its stack and what it builds. The full apps cover concurrent writes, exact money arithmetic, batch imports, and tenant isolation; the building blocks cover one task each.
+- Get a database to build against: a free Azure SQL Database in the cloud, or the Azure SQL Database container on the local machine (see "Get a database running" and "Container: get started").
+- Give the coding agent Azure SQL knowledge: install the Microsoft SQL skills (see "Install the agent skills" under Optional).
+
+For Azure SQL reference documentation, pricing, and running production workloads, use https://learn.microsoft.com/azure/azure-sql/ instead.
+
+How to work from a template:
+1. Fetch the prompt's Markdown file, the `.md` link, rather than the HTML page.
+2. Follow its steps in order, including its Safety section: stop and ask before dropping or truncating a table that has rows, granting permissions, or creating Azure resources.
+3. Connect with Microsoft Entra. Keep passwords out of code and config.
+4. Finish with the prompt's checks, its "Validation rules" or "Check your work" section, and report which pass.
+
 ## Documentation
 - [Get a database running](https://microsoft.github.io/azure-sql-dev-hub/#get-running): create a free Azure SQL Database or run the Azure SQL Database container locally, by hand or with your coding agent.
 - [Skills](https://aka.ms/azuresql-skills): what the agent skills do, per-tool install, and the full catalog.

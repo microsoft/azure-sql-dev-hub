@@ -29,9 +29,12 @@
   <link rel="canonical" href="{{ canonical }}">
 {%- comment -%}
   Structured data on every page, early in the head where agents look first:
-  the publisher, the site, and this page within it.
+  the publisher, the site, and this page within it. The publisher's facts are
+  public ones only: the logo is the avatar of Microsoft's GitHub organization,
+  and sameAs lists its official GitHub, LinkedIn and Wikipedia pages.
+  scripts/check-pages.mjs fails the build if any of these go missing.
 {%- endcomment %}
-  <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://www.microsoft.com/#organization","name":"Microsoft","url":"https://www.microsoft.com"},{"@type":"WebSite","@id":"{{ '/' | absolute_url }}#website","name":{{ site.title | jsonify }},"url":"{{ '/' | absolute_url }}","description":{{ site.description | strip_newlines | strip | jsonify }},"inLanguage":"en","publisher":{"@id":"https://www.microsoft.com/#organization"}},{"@type":"WebPage","@id":"{{ canonical }}#webpage","url":"{{ canonical }}","name":{{ page_title | jsonify }},"description":{{ page_description | jsonify }},"inLanguage":"en","isPartOf":{"@id":"{{ '/' | absolute_url }}#website"}}]}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://www.microsoft.com/#organization","name":"Microsoft","url":"https://www.microsoft.com","description":"Microsoft builds Azure, including Azure SQL Database, and publishes the Azure SQL Developer Hub.","logo":{"@type":"ImageObject","url":"https://avatars.githubusercontent.com/u/6154722?v=4"},"sameAs":["https://github.com/microsoft","https://www.linkedin.com/company/microsoft","https://en.wikipedia.org/wiki/Microsoft"]},{"@type":"WebSite","@id":"{{ '/' | absolute_url }}#website","name":{{ site.title | jsonify }},"url":"{{ '/' | absolute_url }}","description":{{ site.description | strip_newlines | strip | jsonify }},"inLanguage":"en","publisher":{"@id":"https://www.microsoft.com/#organization"}},{"@type":"WebPage","@id":"{{ canonical }}#webpage","url":"{{ canonical }}","name":{{ page_title | jsonify }},"description":{{ page_description | jsonify }},"inLanguage":"en","isPartOf":{"@id":"{{ '/' | absolute_url }}#website"}}]}</script>
 {%- comment -%}
   Link preview card. Absolute URLs, because the crawlers that read these tags do
   not resolve relative paths. The deploy workflow fills `url` from the Pages API

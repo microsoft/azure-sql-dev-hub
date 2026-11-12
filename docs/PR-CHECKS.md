@@ -46,3 +46,5 @@ npx linkinator@8.1.0 http://localhost:8080/ --recurse
 
 - **Site checks (30 points):** llms.txt, llms-full.txt, sitemap, robots.txt, and a helpful 404 page.
 - **Page checks (70 points):** `lang`, title, description, canonical link, Open Graph tags, JSON-LD, one h1, headings in order, text without JavaScript, image alt text, and a Markdown twin. Each check earns its points times the share of pages that pass.
+
+Two rules are required rather than scored, and fail the build: `llms.txt` keeps its "When to use this site" section (at least three jobs and numbered steps), and every page's JSON-LD keeps the publisher's Organization with its name, url, description, logo and three sameAs links.
