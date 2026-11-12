@@ -76,8 +76,18 @@ const vercel = (o) => {
   for (const cat of Object.values(o.categories || {})) for (const c of cat.checks || []) if (!c.passed && !c.skipped) failed.push(c);
   return { score: o.score, label: o.rating, failed };
 };
+// Vercel's audit samples 5 random pages from the sitemap, so the workflow runs
+// it three times per side; the run with the middle score is reported, and a
+// difference under VERCEL_NOISE points reads as unchanged.
+const VERCEL_NOISE = 5;
+const middle = (prefix) => {
+  const runs = [1, 2, 3].map((i) => vercel(json(`${prefix}-${i}.json`))).filter(Boolean);
+  if (!runs.length) return vercel(json(`${prefix}.json`));
+  runs.sort((a, b) => a.score - b.score);
+  return { ...runs[Math.floor((runs.length - 1) / 2)], runs: runs.map((r) => r.score) };
+};
 const oarPr = oar(json('oar-pr.json')), oarBase = oar(json('oar-base.json'));
-const vcPr = vercel(json('vercel-pr.json')), vcBase = vercel(json('vercel-base.json'));
+const vcPr = middle('vercel-pr'), vcBase = middle('vercel-base');
 
 const lk = json('linkinator.json');
 const lkLinks = lk?.links || [];
@@ -92,22 +102,28 @@ const BLOCKING = [
   ['build', 'Build', 'build.log'],
   ['links', linksOk ? `Internal links (${linksOk[1]})` : 'Internal links', 'links.log'],
   ['pages', 'Page checks', 'pages.log'],
-  ['agentfiles', 'Agent files', 'lumar.log'],
+  ['agentfiles', 'Agent files (Lumar)', 'lumar.log'],
 ];
 const mark = (o) => (o === 'success' ? '✅' : o === 'failure' ? '❌' : '⏭️');
 const failedChecks = BLOCKING.filter(([k]) => out[k] === 'failure');
 
+// [name, PR result, main result, points of difference that count as noise]
+const lumarBase = json('lumar-base.json');
+const lumarRow = (l) => (l && l.reach ? { score: l.adopted, text: `${l.adopted} of ${l.checked} published, ${l.broken} broken` } : null);
 const scores = [
-  ['Page checks', pages && { score: pages.score }, pages && typeof pages.baseline === 'number' ? { score: pages.baseline } : null],
-  ['Agent readiness', oarPr, oarBase],
-  ['Agent readability (Vercel)', vcPr, vcBase],
+  ['[Lumar agentic-readiness](https://agentic-readiness.lumar.io/cli)', lumarRow(lumar), lumarRow(lumarBase), 0],
+  ['[open-agent-readiness](https://gitlab.com/startuphub-ai/open-agent-readiness)', oarPr, oarBase, 0],
+  ['[Vercel agent readability](https://vercel.com/kb/guide/agent-readability-spec)', vcPr, vcBase, VERCEL_NOISE],
+  ['Page checks (ours)', pages && { score: pages.score }, pages && typeof pages.baseline === 'number' ? { score: pages.baseline } : null, 0],
 ];
-const moved = scores.filter(([, pr, base]) => pr && base && pr.score !== base.score);
-const change = (pr, base) => {
+const diff = (pr, base) => Math.round((pr.score - base.score) * 10) / 10;
+const moved = scores.filter(([, pr, base, noise]) => pr && base && Math.abs(diff(pr, base)) > noise);
+const change = (pr, base, noise = 0) => {
   if (!pr || !base) return '';
-  const d = Math.round((pr.score - base.score) * 10) / 10;
-  return d > 0 ? `▲ +${d}` : d < 0 ? `▼ ${d}` : '–';
+  const d = diff(pr, base);
+  return Math.abs(d) <= noise ? '–' : d > 0 ? `▲ +${d}` : `▼ ${d}`;
 };
+const plainName = (name) => name.replace(/\[([^\]]+)\]\([^)]+\)/, '$1');
 
 const sha = (env.HEAD_SHA || '').slice(0, 7);
 const lines = ['<!-- hub-pr-report -->', `### PR checks${sha ? ` for \`${sha}\`` : ''}`, ''];
@@ -116,16 +132,16 @@ const verdict = failedChecks.length
   ? `❌ **${plural(failedChecks.length, 'blocking check')} failed:** ${failedChecks.map(([, label]) => label).join(', ')}.`
   : `✅ **All ${BLOCKING.length} blocking checks pass.**`;
 const scoreNote = moved.length
-  ? ` Scores changed: ${moved.map(([name, pr, base]) => `${name} ${change(pr, base)}`).join(', ')}.`
+  ? ` Scores changed: ${moved.map(([name, pr, base, noise]) => `${plainName(name)} ${change(pr, base, noise)}`).join(', ')}.`
   : scores.some(([, pr, base]) => pr && base) ? ' Scores unchanged from main.' : '';
 lines.push(verdict + scoreNote, '', BLOCKING.map(([k, label]) => `${mark(out[k])} ${label}`).join(' · '), '');
 
 // ---------- scores ----------
 
-lines.push('**Scores**', '', '| | This PR | main | Change |', '|---|--:|--:|:-:|');
-for (const [name, pr, base] of scores) {
-  const fmt = (s) => (s ? `${s.score}${s.label ? ` (${esc(s.label)})` : ''}` : '');
-  lines.push(`| ${name} | ${pr ? fmt(pr) : 'unavailable'} | ${fmt(base) || '–'} | ${change(pr, base)} |`);
+lines.push('**Agent checks**', '', '| | This PR | main | Change |', '|---|--:|--:|:-:|');
+for (const [name, pr, base, noise] of scores) {
+  const fmt = (s) => (!s ? '' : s.text ? esc(s.text) : `${s.score}${s.label ? ` (${esc(s.label)})` : ''}`);
+  lines.push(`| ${name} | ${pr ? fmt(pr) : 'unavailable'} | ${fmt(base) || '–'} | ${change(pr, base, noise)} |`);
 }
 lines.push('');
 
@@ -172,14 +188,19 @@ const ISSUES = [
   { group: 'fix', title: 'Add JSON-LD to every page, inside `<head>`', page: ['json-ld'], oar: ['json_ld', 'jsonld_in_head', 'org_schema'], vercel: ['Structured data'] },
   { group: 'fix', title: 'Add a 404 page', page: ['404'], vercel: ['Soft 404 detection'] },
   { group: 'fix', title: 'Add `lastmod` dates to the sitemap, and a `sitemap.md`', page: ['sitemap'], oar: ['sitemap'], vercel: ['sitemap.xml', 'sitemap.md'] },
-  { group: 'fix', title: 'Use one h1 per page, with headings in order', page: ['h1', 'headings'], oar: ['h1_singular'] },
+  { group: 'fix', title: 'Use one h1 per page, with headings in order', page: ['h1', 'headings'], oar: ['h1_singular'], vercel: ['Heading structure'] },
   { group: 'fix', title: 'Give images meaningful alt text', page: ['alt'], oar: ['img_alt_coverage'] },
-  { group: 'fix', title: 'Write meta descriptions of 50 to 320 characters', page: ['description'], oar: ['meta_description'] },
+  { group: 'fix', title: 'Write meta descriptions of 50 to 320 characters', page: ['description'], oar: ['meta_description'], vercel: ['Meta description'] },
   { group: 'fix', title: 'Complete the Open Graph tags', page: ['og'], oar: ['open_graph'] },
-  { group: 'fix', title: 'Put more of each page in plain HTML', page: ['text'], oar: ['readable_html', 'early_facts', 'html_payload_size'] },
-  { group: 'fix', title: 'Link and publish a Markdown twin for every page', page: ['twin'], vercel: ['.md URL → markdown'] },
+  { group: 'fix', title: 'Put more of each page in plain HTML', page: ['text'], oar: ['readable_html', 'early_facts', 'html_payload_size'], vercel: ['Server-rendered content', 'Page size (HTML text)'] },
+  { group: 'fix', title: 'Keep every page reachable without redirects or sign-in', vercel: ['Redirect behavior', 'Auth gate detection'] },
+  { group: 'fix', title: 'Link and publish a Markdown twin for every page', page: ['twin'] },
+  // Vercel requests <page URL>.md. Twins sit at /build/x.md, so the sitemap's
+  // /build/x.html sends it to /build/x.html.md, a 404. Listing pages without
+  // .html (GitHub Pages serves /build/x from x.html) would make it find them.
+  { group: 'fix', title: 'List pages in the sitemap without `.html`, so `<page>.md` finds the Markdown twin', vercel: ['.md URL → markdown'] },
   { group: 'fix', title: 'Fix llms.txt and llms-full.txt', page: ['llms-txt', 'llms-full'], oar: ['llms_txt', 'llms_full_txt', 'llms_link_notes', 'llms_describedby'], vercel: ['llms.txt', 'llms.txt size', 'llms.txt valid'] },
-  { group: 'host', title: 'Serve Markdown to agents that ask for it', oar: ['markdown_negotiation', 'json_negotiation'], vercel: ['Agent UA → markdown', 'Accept header → markdown', 'Missing page → markdown'] },
+  { group: 'host', title: 'Serve Markdown to agents that ask for it', oar: ['markdown_negotiation', 'json_negotiation'], vercel: ['Agent UA → markdown', 'Accept header → markdown', 'Missing page → markdown', 'Vary: Accept'] },
   { group: 'host', title: 'robots.txt rules for AI crawlers (read only at the root of the host)', page: ['robots'], oar: ['robots_txt'], vercel: ['robots.txt'] },
   { group: 'host', title: 'HTTP response headers (Link, rate limits)', oar: ['link_header', 'rate_limit_headers'] },
   { group: 'na', title: 'APIs, MCP, OAuth, commerce and site search', oar: ['mcp_server_card', 'openapi_spec', 'oauth_discovery', 'offer_structured_data', 'payment_link_surface', 'commerce_surface', 'agentic_registration', 'site_search_action', 'a2a_agent_card', 'agent_skills', 'api_catalog', 'web_bot_auth', 'security_txt'] },
@@ -282,5 +303,6 @@ if (failedChecks.length) {
 // ---------- footer ----------
 
 const foot = [sha && `\`${sha}\``, env.RUN_URL && `[Run and full reports](${env.RUN_URL})`, 'updates on every push'].filter(Boolean).join(' · ');
-lines.push(`<sub>${foot}<br>Page checks: \`scripts/check-pages.mjs\` · Agent readiness: [open-agent-readiness](https://gitlab.com/startuphub-ai/open-agent-readiness), through a temporary Cloudflare tunnel · Agent readability: [Vercel's audit](https://vercel.com/kb/guide/agent-readability-spec) · Agent files: [Lumar](https://agentic-readiness.lumar.io/cli) · Links: linkinator · Screenshots: BackstopJS</sub>`);
+const vercelRuns = vcPr?.runs ? ` (this PR scored ${vcPr.runs.join(', ')})` : '';
+lines.push(`<sub>${foot}<br>open-agent-readiness scans through a temporary Cloudflare tunnel. Vercel's audit grades 5 pages picked at random, so it runs 3 times and reports the middle score${vercelRuns}; a difference under ${VERCEL_NOISE} points counts as unchanged. Links: linkinator. Screenshots: BackstopJS. Page checks: \`scripts/check-pages.mjs\`.</sub>`);
 console.log(lines.join('\n'));

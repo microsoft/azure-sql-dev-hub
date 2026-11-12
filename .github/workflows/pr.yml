@@ -119,17 +119,22 @@ jobs:
         id: agentfiles
         if: steps.build.outcome == 'success'
         continue-on-error: true
-        run: npx -y "$AGENTIC_READINESS" localhost:8080 --allow-private --json > "$REPORT/lumar.json" 2> "$REPORT/lumar.log"
+        run: |
+          if [ -d "$BASE_SITE" ]; then npx -y "$AGENTIC_READINESS" localhost:8081 --allow-private --json > "$REPORT/lumar-base.json" 2>/dev/null || true; fi
+          npx -y "$AGENTIC_READINESS" localhost:8080 --allow-private --json > "$REPORT/lumar.json" 2> "$REPORT/lumar.log"
 
-      # Vercel's Agent Readability Spec audit (@vercel/agent-readability, MIT):
-      # 25 weighted checks, run from this job against both builds, no tunnel
-      # needed. Report only.
+      # Vercel's Agent Readability Spec audit (@vercel/agent-readability, MIT),
+      # run from this job against both builds, no tunnel needed. Report only.
+      # It audits 5 pages picked at random from the sitemap, so each side runs
+      # three times and the report takes the middle score.
       - name: Agent readability (Vercel)
         if: steps.build.outcome == 'success'
         continue-on-error: true
         run: |
-          npx -y "$VERCEL_AUDIT" audit http://localhost:8080/ --json > "$REPORT/vercel-pr.json" 2> "$REPORT/vercel-pr.log" || true
-          if [ -d "$BASE_SITE" ]; then npx -y "$VERCEL_AUDIT" audit http://localhost:8081/ --json > "$REPORT/vercel-base.json" 2>/dev/null || true; fi
+          for i in 1 2 3; do
+            npx -y "$VERCEL_AUDIT" audit http://localhost:8080/ --json > "$REPORT/vercel-pr-$i.json" 2>> "$REPORT/vercel.log" || true
+            if [ -d "$BASE_SITE" ]; then npx -y "$VERCEL_AUDIT" audit http://localhost:8081/ --json > "$REPORT/vercel-base-$i.json" 2>> "$REPORT/vercel.log" || true; fi
+          done
 
       # open-agent-readiness (MIT) grades a whole public host and refuses
       # private addresses, so each build gets a Cloudflare quick tunnel: a
