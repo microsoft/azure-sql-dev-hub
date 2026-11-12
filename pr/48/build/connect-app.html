@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="msvalidate.01" content="A333E59012EAA3B44A57A4C7E5A69212" />
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- A pull request's preview: kept out of search, and marked with its commit
+       so the PR workflow can tell when this build is the one being served. -->
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="hub-preview-sha" content="297fa4b77a69035dc8681563f2cfb84bad352865">
+  <title>Connect your app · Azure SQL Developer Hub</title>
+  <meta name="description" content="Keep the application pointed at one configuration value so local and Azure targets stay interchangeable.">
+  <meta property="og:title" content="Connect your app">
+  <meta property="og:description" content="Keep the application pointed at one configuration value so local and Azure targets stay interchangeable.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://microsoft.github.io/azure-sql-dev-hub/pr/48/build/connect-app.html"><meta property="og:image" content="https://microsoft.github.io/azure-sql-dev-hub/pr/48/assets/img/hero-idea-to-app-og.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="From idea to app: a prompt builds a task app on Azure SQL.">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Connect your app">
+  <meta name="twitter:description" content="Keep the application pointed at one configuration value so local and Azure targets stay interchangeable.">
+  <meta name="twitter:image" content="https://microsoft.github.io/azure-sql-dev-hub/pr/48/assets/img/hero-idea-to-app-og.jpg">
+  <meta name="twitter:image:alt" content="From idea to app: a prompt builds a task app on Azure SQL.">
+  <link rel="alternate" type="text/markdown" href="/azure-sql-dev-hub/pr/48/build/connect-app.md" title="Markdown version">
+  <link rel="alternate" type="text/plain" href="/azure-sql-dev-hub/pr/48/llms.txt" title="LLM index">
+  <link rel="alternate" type="text/plain" href="/azure-sql-dev-hub/pr/48/llms-full.txt" title="Full LLM corpus">
+  <meta name="llms-txt" content="/azure-sql-dev-hub/pr/48/llms.txt">
+  <link rel="icon" type="image/svg+xml" href="/azure-sql-dev-hub/pr/48/assets/img/azure-sql-database.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400..900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/azure-sql-dev-hub/pr/48/assets/css/main.css">
+  
+</head>
+
+<body data-view="scenarioPage" data-scenario="connect-app">
+<a class="skip-link" href="#main">Skip to content</a>
+<div role="note" style="position:relative;z-index:60;padding:8px 16px;background:#fff4ce;color:#3b2e00;border-bottom:1px solid #e3c766;font:500 14px/1.4 system-ui,sans-serif;text-align:center">
+  Preview of <a href="https://github.com/microsoft/azure-sql-dev-hub/pull/48" style="color:inherit;text-decoration:underline">pull request #48</a> at <code>297fa4b</code>. This is not the live site:
+  <a href="https://microsoft.github.io/azure-sql-dev-hub/" style="color:inherit;text-decoration:underline">go to the live site</a>.
+</div>
+<nav class="nav" aria-label="Primary">
+  <div class="wrap navin">
+    <a class="brand" href="/azure-sql-dev-hub/pr/48/">
+      <img class="logo" src="/azure-sql-dev-hub/pr/48/assets/img/azure-sql-database.svg" alt="" width="28" height="28" aria-hidden="true">
+      <span>Azure SQL Developer Hub</span>
+    </a>
+    <div class="navlinks">
+      <a href="/azure-sql-dev-hub/pr/48/#get-running">Quickstarts</a>
+      <a href="/azure-sql-dev-hub/pr/48/#build">Build</a>
+      <a href="/azure-sql-dev-hub/pr/48/#skills">Skills</a>
+      <a href="/azure-sql-dev-hub/pr/48/#watch">Videos</a>
+    </div>
+    <div class="navright">
+      <a class="utility" href="https://microsoft.qualtrics.com/jfe/form/SV_9ytUzrnNnbcxPlI" target="_blank" rel="noopener"
+         data-event="site/action" data-event-action="outboundClicked" data-event-destination-id="qualtrics-feedback" data-event-destination-type="feedback">Submit feedback</a>
+      <a class="utility github" href="https://github.com/microsoft/azure-sql-dev-hub" target="_blank" rel="noopener"
+         data-event="site/action" data-event-action="outboundClicked" data-event-destination-id="dev-hub-repository" data-event-destination-type="github"><span class="github-mark" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 .7a11.3 11.3 0 0 0-3.57 22c.57.1.78-.25.78-.55v-2.1c-3.17.69-3.84-1.34-3.84-1.34-.52-1.32-1.27-1.67-1.27-1.67-1.04-.71.08-.7.08-.7 1.15.08 1.75 1.18 1.75 1.18 1.02 1.75 2.67 1.25 3.32.96.1-.74.4-1.25.72-1.54-2.53-.29-5.2-1.27-5.2-5.65 0-1.25.45-2.27 1.18-3.07-.12-.29-.51-1.45.11-3.02 0 0 .96-.31 3.12 1.17a10.8 10.8 0 0 1 5.68 0c2.16-1.48 3.12-1.17 3.12-1.17.62 1.57.23 2.73.11 3.02.73.8 1.18 1.82 1.18 3.07 0 4.39-2.67 5.36-5.21 5.64.41.36.77 1.06.77 2.14v3.17c0 .3.21.66.79.55A11.3 11.3 0 0 0 12 .7Z"/></svg></span>GitHub repo</a>
+    </div>
+  </div>
+</nav>
+
+
+<main id="main"><div class="scenarioPage">
+    <div class="wrap">
+      <div class="scenarioHead">
+        <div class="crumbs"><a href="/azure-sql-dev-hub/pr/48/#build">Build</a> / Connect your app</div>
+        <div class="sectionLabel">Scenario</div>
+        <h1>Connect your app</h1>
+        <p class="intro">Keep the application pointed at one configuration value so local and Azure targets stay interchangeable.</p>
+      </div>
+
+      <div class="scenarioGrid2">
+        <div class="scenarioMain">
+          <div class="blockCard">
+            <div class="blockHead">Copy prompt</div>
+            <div class="blockBody">
+              <div class="promptSurface">
+                <span id="scenario-prompt">Connect this application to Azure SQL using the current supported driver. Put the connection string in environment configuration, verify the connection, and show one parameterized query.</span>
+                <button class="promptCopy" type="button" data-copy="#scenario-prompt"
+                        data-copy-kind="prompt"
+                        data-event-action="copyPrompt"
+                        data-event-action-location="scenario"
+                        data-event-scenario="connect-app"
+                        data-clarity-event="copy_prompt_connect-app"
+                        aria-label="Copy the scenario prompt">Copy prompt</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="blockCard">
+            <div class="blockHead">Starter</div>
+            <div class="blockBody">
+              <div class="codeBox">
+                <pre id="scenario-code">const pool = await sql.connect(process.env.SQL_CONNECTION_STRING)
+const result = await pool.query`SELECT TOP 5 * FROM dbo.Users`</pre>
+                <button class="copyBtn" type="button" data-copy="#scenario-code"
+                        data-event-action-location="scenario"
+                        data-event-content-id="connect-app-starter"
+                        data-event-content-type="code"
+                        aria-label="Copy the starter code">Copy</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <aside class="scenarioAside">
+          <div class="asideCard">
+            <h4>Skill</h4>
+            <p>The connections skill knows the current driver and connection pattern for each stack, including how authentication differs between local and Azure.</p>
+            <div class="codeBox">
+              <pre id="scenario-skill">npx skills add microsoft/azure-sql-database-container --skill azuresql-db-connections</pre>
+              <button class="copyBtn" type="button" data-copy="#scenario-skill"
+                      data-event-action-location="scenario"
+                      data-event-content-id="connect-app-skill"
+                      data-event-content-type="skill-install"
+                      aria-label="Copy the skill install command">Copy</button>
+            </div>
+          </div>
+
+          <div class="asideCard">
+            <h4>Go deeper</h4>
+            <div class="asideActions">
+              <a class="actionLink primary" href="https://learn.microsoft.com/azure/azure-sql/database/connect-query-content-reference-guide" rel="noopener"
+                 data-event="site/action" data-event-action="outboundClicked"
+                 data-event-destination-id="connect-app-docs"
+                 data-event-destination-type="docs">Connect and query guide <span aria-hidden="true">→</span></a>
+              <a class="actionLink" href="/azure-sql-dev-hub/pr/48/build/connect-app.md"
+                 data-event="site/action" data-event-action="viewPrompt"
+                 data-event-action-location="scenario"
+                 data-event-scenario="connect-app"
+                 data-clarity-event="view_prompt_connect-app">View as Markdown <span class="hint">.md</span></a>
+            </div>
+          </div>
+        </aside>
+      </div>
+
+      <div class="scenarioProse prose">
+        <h2 id="the-one-rule-that-matters">The one rule that matters</h2>
+
+<p>Read the connection string from configuration, never from code. The starter
+shows the Node.js <code class="language-plaintext highlighter-rouge">mssql</code> driver doing exactly that: <code class="language-plaintext highlighter-rouge">SQL_CONNECTION_STRING</code>
+comes from the environment, and the tagged-template query is parameterized by
+construction. Every supported language has the same shape with its own driver;
+the <a href="https://learn.microsoft.com/azure/azure-sql/database/connect-query-content-reference-guide">connect and query guide</a>
+lists them per language and tool.</p>
+
+<p>Locally the container listens on <code class="language-plaintext highlighter-rouge">localhost,1433</code> with SQL authentication. In
+Azure the same application authenticates with Microsoft Entra. Because the app
+only ever reads one configuration value, that difference stays in <code class="language-plaintext highlighter-rouge">.env</code>, which
+is the whole local-to-cloud story: see
+<a href="local-to-cloud.html">Ship local to cloud</a> when you are ready to move.</p>
+
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="footTop">
+      <div class="footBrand">Azure SQL Developer Hub<p>Build applications with Azure SQL.</p></div>
+      <div class="footLinks">
+        <a href="/azure-sql-dev-hub/pr/48/#get-running" data-event="site/action" data-event-action="pathSelected" data-event-path-id="get-running">Get started</a>
+        <a href="/azure-sql-dev-hub/pr/48/#build" data-event="site/action" data-event-action="pathSelected" data-event-path-id="build">Build examples</a>
+        <a href="/azure-sql-dev-hub/pr/48/#watch" data-event="site/action" data-event-action="pathSelected" data-event-path-id="watch">Videos</a>
+        <a href="https://learn.microsoft.com/azure/azure-sql/" data-event="site/action" data-event-action="outboundClicked" data-event-destination-id="azure-sql-docs" data-event-destination-type="docs">Documentation</a>
+      </div>
+    </div>
+    <div class="footBottom">
+      <span>Microsoft Azure SQL</span>
+      <span>
+        <a href="/azure-sql-dev-hub/pr/48/privacy.html">Privacy</a>
+        <a href="https://github.com/microsoft/azure-sql-dev-hub/issues/new" data-event="site/action" data-event-action="outboundClicked" data-event-destination-id="github-issues" data-event-destination-type="feedback">Feedback</a>
+        <a href="https://github.com/microsoft/azure-sql-dev-hub" data-event="site/action" data-event-action="outboundClicked" data-event-destination-id="dev-hub-repository" data-event-destination-type="github">GitHub</a>
+      </span>
+    </div>
+  </div>
+</footer>
+
+<script src="/azure-sql-dev-hub/pr/48/assets/js/main.js" defer></script>
+</body>
+</html>

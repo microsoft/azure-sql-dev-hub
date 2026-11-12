@@ -1,0 +1,435 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="msvalidate.01" content="A333E59012EAA3B44A57A4C7E5A69212" />
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- A pull request's preview: kept out of search, and marked with its commit
+       so the PR workflow can tell when this build is the one being served. -->
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="hub-preview-sha" content="297fa4b77a69035dc8681563f2cfb84bad352865">
+  <title>Prompt end-to-end evaluation · Azure SQL Developer Hub</title>
+  <meta name="description" content="The front door for building with Azure SQL Database in the age of AI-assisted development. Start locally or in Azure, build with the coding agent you already use, and move from first prompt to production on Azure SQL.">
+  <meta property="og:title" content="Prompt end-to-end evaluation">
+  <meta property="og:description" content="The front door for building with Azure SQL Database in the age of AI-assisted development. Start locally or in Azure, build with the coding agent you already use, and move from first prompt to production on Azure SQL.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://microsoft.github.io/azure-sql-dev-hub/pr/48/eval/"><meta property="og:image" content="https://microsoft.github.io/azure-sql-dev-hub/pr/48/assets/img/hero-idea-to-app-og.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="From idea to app: a prompt builds a task app on Azure SQL.">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Prompt end-to-end evaluation">
+  <meta name="twitter:description" content="The front door for building with Azure SQL Database in the age of AI-assisted development. Start locally or in Azure, build with the coding agent you already use, and move from first prompt to production on Azure SQL.">
+  <meta name="twitter:image" content="https://microsoft.github.io/azure-sql-dev-hub/pr/48/assets/img/hero-idea-to-app-og.jpg">
+  <meta name="twitter:image:alt" content="From idea to app: a prompt builds a task app on Azure SQL.">
+  <link rel="alternate" type="text/markdown" href="/azure-sql-dev-hub/pr/48/eval/" title="Markdown version">
+  <link rel="alternate" type="text/plain" href="/azure-sql-dev-hub/pr/48/llms.txt" title="LLM index">
+  <link rel="alternate" type="text/plain" href="/azure-sql-dev-hub/pr/48/llms-full.txt" title="Full LLM corpus">
+  <meta name="llms-txt" content="/azure-sql-dev-hub/pr/48/llms.txt">
+  <link rel="icon" type="image/svg+xml" href="/azure-sql-dev-hub/pr/48/assets/img/azure-sql-database.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400..900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/azure-sql-dev-hub/pr/48/assets/css/main.css">
+  
+</head>
+<body data-view="README"><a class="skip-link" href="#main">Skip to content</a>
+<div role="note" style="position:relative;z-index:60;padding:8px 16px;background:#fff4ce;color:#3b2e00;border-bottom:1px solid #e3c766;font:500 14px/1.4 system-ui,sans-serif;text-align:center">
+  Preview of <a href="https://github.com/microsoft/azure-sql-dev-hub/pull/48" style="color:inherit;text-decoration:underline">pull request #48</a> at <code>297fa4b</code>. This is not the live site:
+  <a href="https://microsoft.github.io/azure-sql-dev-hub/" style="color:inherit;text-decoration:underline">go to the live site</a>.
+</div>
+<nav class="nav" aria-label="Primary">
+  <div class="wrap navin">
+    <a class="brand" href="/azure-sql-dev-hub/pr/48/">
+      <img class="logo" src="/azure-sql-dev-hub/pr/48/assets/img/azure-sql-database.svg" alt="" width="28" height="28" aria-hidden="true">
+      <span>Azure SQL Developer Hub</span>
+    </a>
+    <div class="navlinks">
+      <a href="/azure-sql-dev-hub/pr/48/#get-running">Quickstarts</a>
+      <a href="/azure-sql-dev-hub/pr/48/#build">Build</a>
+      <a href="/azure-sql-dev-hub/pr/48/#skills">Skills</a>
+      <a href="/azure-sql-dev-hub/pr/48/#watch">Videos</a>
+    </div>
+    <div class="navright">
+      <a class="utility" href="https://microsoft.qualtrics.com/jfe/form/SV_9ytUzrnNnbcxPlI" target="_blank" rel="noopener"
+         data-event="site/action" data-event-action="outboundClicked" data-event-destination-id="qualtrics-feedback" data-event-destination-type="feedback">Submit feedback</a>
+      <a class="utility github" href="https://github.com/microsoft/azure-sql-dev-hub" target="_blank" rel="noopener"
+         data-event="site/action" data-event-action="outboundClicked" data-event-destination-id="dev-hub-repository" data-event-destination-type="github"><span class="github-mark" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 .7a11.3 11.3 0 0 0-3.57 22c.57.1.78-.25.78-.55v-2.1c-3.17.69-3.84-1.34-3.84-1.34-.52-1.32-1.27-1.67-1.27-1.67-1.04-.71.08-.7.08-.7 1.15.08 1.75 1.18 1.75 1.18 1.02 1.75 2.67 1.25 3.32.96.1-.74.4-1.25.72-1.54-2.53-.29-5.2-1.27-5.2-5.65 0-1.25.45-2.27 1.18-3.07-.12-.29-.51-1.45.11-3.02 0 0 .96-.31 3.12 1.17a10.8 10.8 0 0 1 5.68 0c2.16-1.48 3.12-1.17 3.12-1.17.62 1.57.23 2.73.11 3.02.73.8 1.18 1.82 1.18 3.07 0 4.39-2.67 5.36-5.21 5.64.41.36.77 1.06.77 2.14v3.17c0 .3.21.66.79.55A11.3 11.3 0 0 0 12 .7Z"/></svg></span>GitHub repo</a>
+    </div>
+  </div>
+</nav>
+
+<main id="main">
+  <div class="prosePage">
+    <div class="wrap prose"><h1>Prompt end-to-end evaluation</h1>
+      <h1 id="prompt-end-to-end-evaluation">Prompt end-to-end evaluation</h1>
+
+<p>This harness sends Azure SQL Developer Hub build prompts to GitHub Copilot CLI,
+Claude Code, or Codex CLI and validates the resulting applications against
+Azure SQL Database.</p>
+
+<h2 id="set-up">Set up</h2>
+
+<p>Run the evaluation commands from this directory:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">cd eval</span>
+</code></pre></div></div>
+
+<p>Create and activate a virtual environment, then install the pinned dependencies:</p>
+
+<h3 id="macos-and-linux">macOS and Linux</h3>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>python3 <span class="nt">-m</span> venv .venv
+<span class="nb">source</span> .venv/bin/activate
+python <span class="nt">-m</span> pip <span class="nb">install</span> <span class="nt">-r</span> requirements.txt
+</code></pre></div></div>
+
+<h3 id="windows">Windows</h3>
+
+<div class="language-powershell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">py</span><span class="w"> </span><span class="nt">-m</span><span class="w"> </span><span class="nx">venv</span><span class="w"> </span><span class="o">.</span><span class="nf">venv</span><span class="w">
+</span><span class="o">.</span><span class="nf">venv</span><span class="nx">\Scripts\Activate.ps1</span><span class="w">
+</span><span class="n">python</span><span class="w"> </span><span class="nt">-m</span><span class="w"> </span><span class="nx">pip</span><span class="w"> </span><span class="nx">install</span><span class="w"> </span><span class="nt">-r</span><span class="w"> </span><span class="nx">requirements.txt</span><span class="w">
+</span></code></pre></div></div>
+
+<p>Install and sign in to:</p>
+
+<ol>
+  <li><a href="https://learn.microsoft.com/cli/azure/install-azure-cli">Azure CLI</a></li>
+  <li><a href="https://docs.github.com/copilot/how-tos/set-up/install-copilot-cli">GitHub Copilot CLI</a></li>
+  <li><a href="https://docs.anthropic.com/en/docs/claude-code/setup">Claude Code</a></li>
+  <li><a href="https://developers.openai.com/codex/cli">Codex CLI</a></li>
+  <li>Node.js 20 or newer and npm</li>
+  <li>Python 3.10 or newer</li>
+  <li>.NET SDK 8 or newer</li>
+  <li><a href="https://learn.microsoft.com/azure/azure-functions/functions-run-local">Azure Functions Core Tools v4</a></li>
+  <li><a href="https://learn.microsoft.com/azure/storage/common/storage-use-azurite">Azurite</a></li>
+</ol>
+
+<p>The harness uses each agent CLI’s existing authentication and does not sign in
+on your behalf.</p>
+
+<p>On macOS:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>brew tap azure/functions
+brew <span class="nb">install </span>azure-functions-core-tools@4
+npm <span class="nb">install</span> <span class="nt">-g</span> azurite
+</code></pre></div></div>
+
+<h2 id="configure-azure">Configure Azure</h2>
+
+<p>Create the local configuration file:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">cp </span>validation.EXAMPLE.env validation.env
+</code></pre></div></div>
+
+<p><code class="language-plaintext highlighter-rouge">validation.env</code> is ignored by Git and supports these settings:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Setting</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">HUB_EVAL_AZURE_TENANT_ID</code></td>
+      <td>Microsoft Entra tenant ID for the authenticated Azure CLI account.</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">HUB_EVAL_AZURE_SUBSCRIPTION_ID</code></td>
+      <td>Azure subscription used by the evaluation.</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">HUB_EVAL_AZURE_LOCATION</code></td>
+      <td>Region for Azure SQL resources.</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">HUB_EVAL_EXISTING_RESOURCE_GROUP</code></td>
+      <td>Existing resource group to use, or blank for a harness-provisioned group.</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">HUB_EVAL_EXISTING_SQL_SERVER</code></td>
+      <td>Existing Azure SQL logical server to use, or blank for a harness-provisioned server.</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">HUB_EVAL_EMBEDDING_LOCATION</code></td>
+      <td>Region for an Azure OpenAI resource.</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">HUB_EVAL_EMBEDDING_ENDPOINT</code></td>
+      <td>Existing Azure OpenAI endpoint, or blank for harness provisioning.</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">HUB_EVAL_EMBEDDING_DEPLOYMENT</code></td>
+      <td>Existing embedding deployment name.</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">HUB_EVAL_EMBEDDING_DIMENSION</code></td>
+      <td>Existing embedding deployment output dimension.</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Set both existing SQL values or leave both blank. Set all three existing
+embedding values or leave all three blank.</p>
+
+<p>Verify the Azure CLI context:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>az cloud show <span class="nt">--query</span> name <span class="nt">--output</span> tsv
+az account show <span class="se">\</span>
+  <span class="nt">--query</span> <span class="s1">'{tenant:tenantId,subscription:id,state:state}'</span> <span class="se">\</span>
+  <span class="nt">--output</span> table
+</code></pre></div></div>
+
+<h3 id="required-resource-providers">Required resource providers</h3>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">Microsoft.Sql</code></li>
+  <li><code class="language-plaintext highlighter-rouge">Microsoft.CognitiveServices</code> when <code class="language-plaintext highlighter-rouge">rag-app</code> requires a harness-provisioned
+Azure OpenAI resource</li>
+</ul>
+
+<p>Register providers when needed:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>az provider register <span class="nt">--namespace</span> Microsoft.Sql <span class="nt">--wait</span>
+az provider register <span class="nt">--namespace</span> Microsoft.CognitiveServices <span class="nt">--wait</span>
+</code></pre></div></div>
+
+<h3 id="required-permissions">Required permissions</h3>
+
+<h4 id="harness-provisioned-resource-group-and-sql-server">Harness-provisioned resource group and SQL server</h4>
+
+<ul>
+  <li><strong>Contributor</strong> at subscription scope.</li>
+  <li>For a harness-provisioned Azure OpenAI resource: <strong>Role Based Access Control
+Administrator</strong> at subscription scope.</li>
+  <li>For an existing Azure OpenAI deployment: <strong>Cognitive Services OpenAI User</strong>
+on that Azure OpenAI account.</li>
+</ul>
+
+<h4 id="existing-resource-group-and-sql-server">Existing resource group and SQL server</h4>
+
+<ul>
+  <li><strong>SQL Server Contributor</strong> at resource-group scope.</li>
+  <li>A Microsoft Entra server login and mapped user in virtual <code class="language-plaintext highlighter-rouge">master</code>, with the
+login assigned to <code class="language-plaintext highlighter-rouge">##MS_DatabaseManager##</code>.</li>
+  <li>An existing server firewall rule that permits the client IP.</li>
+  <li>For a harness-provisioned Azure OpenAI resource: <strong>Cognitive Services
+Contributor</strong> at subscription scope and <strong>Role Based Access Control
+Administrator</strong> at resource-group scope.</li>
+  <li>For an existing Azure OpenAI deployment: <strong>Cognitive Services OpenAI User</strong>
+on that Azure OpenAI account.</li>
+</ul>
+
+<h2 id="configure-a-run">Configure a run</h2>
+
+<p>Copy the example configuration:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">cp </span>configuration.EXAMPLE.yml configuration.yml
+</code></pre></div></div>
+
+<p><code class="language-plaintext highlighter-rouge">configuration.yml</code> is ignored by Git. It defines the ordered harnesses,
+models, scenarios, timeouts, and workspace retention setting for a run.
+<code class="language-plaintext highlighter-rouge">validation.env</code> remains separate and contains the Azure settings.</p>
+
+<p>Use either <code class="language-plaintext highlighter-rouge">--configuration</code> or repeatable <code class="language-plaintext highlighter-rouge">--target HARNESS:MODEL</code> options,
+not both. Any <code class="language-plaintext highlighter-rouge">--scenario</code> options replace the scenarios in the YAML file.</p>
+
+<h2 id="commands">Commands</h2>
+
+<h3 id="preview-a-run">Preview a run</h3>
+
+<p>Shows the selected targets and scenarios without running them:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>python run_evals.py <span class="nt">--configuration</span> configuration.yml <span class="nt">--dry-run</span>
+</code></pre></div></div>
+
+<h3 id="run-from-the-configuration-file">Run from the configuration file</h3>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>python run_evals.py <span class="nt">--configuration</span> configuration.yml
+</code></pre></div></div>
+
+<h3 id="run-selected-targets-directly">Run selected targets directly</h3>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>python run_evals.py <span class="se">\</span>
+  <span class="nt">--target</span> copilot:gpt-5.4 <span class="se">\</span>
+  <span class="nt">--target</span> claude:claude-sonnet-5 <span class="se">\</span>
+  <span class="nt">--target</span> codex:gpt-6-sol
+</code></pre></div></div>
+
+<p>Without <code class="language-plaintext highlighter-rouge">--configuration</code> or <code class="language-plaintext highlighter-rouge">--target</code>, the default target is
+<code class="language-plaintext highlighter-rouge">copilot:gpt-5.4</code>.</p>
+
+<h3 id="list-models">List models</h3>
+
+<p>Lists the documented model options for a harness:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>python run_evals.py <span class="nt">--list-models</span> copilot
+python run_evals.py <span class="nt">--list-models</span> claude
+python run_evals.py <span class="nt">--list-models</span> codex
+</code></pre></div></div>
+
+<p>Account policy may limit availability. Use agent preflight to verify access.</p>
+
+<h3 id="run-preflight">Run preflight</h3>
+
+<p>Check agent installation, authentication, and model access:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>python run_evals.py <span class="se">\</span>
+  <span class="nt">--configuration</span> configuration.yml <span class="se">\</span>
+  <span class="nt">--preflight</span>:agents
+</code></pre></div></div>
+
+<p>Check Azure configuration and permissions:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>python run_evals.py <span class="se">\</span>
+  <span class="nt">--configuration</span> configuration.yml <span class="se">\</span>
+  <span class="nt">--preflight</span>:permissions
+</code></pre></div></div>
+
+<p>Run both checks:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>python run_evals.py <span class="se">\</span>
+  <span class="nt">--configuration</span> configuration.yml <span class="se">\</span>
+  <span class="nt">--preflight</span>
+</code></pre></div></div>
+
+<p>The result is written to <code class="language-plaintext highlighter-rouge">runs/&lt;run-id&gt;/preflight.json</code>. Agent-only preflight
+does not require <code class="language-plaintext highlighter-rouge">validation.env</code>.</p>
+
+<h3 id="run-selected-scenarios">Run selected scenarios</h3>
+
+<p>Repeat <code class="language-plaintext highlighter-rouge">--scenario</code> to select more than one:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>python run_evals.py <span class="se">\</span>
+  <span class="nt">--configuration</span> configuration.yml <span class="se">\</span>
+  <span class="nt">--scenario</span> javascript-app <span class="se">\</span>
+  <span class="nt">--scenario</span> rag-app
+</code></pre></div></div>
+
+<p>Available scenarios:</p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">javascript-app</code></li>
+  <li><code class="language-plaintext highlighter-rouge">python-api</code></li>
+  <li><code class="language-plaintext highlighter-rouge">rag-app</code></li>
+  <li><code class="language-plaintext highlighter-rouge">serverless-api</code></li>
+  <li><code class="language-plaintext highlighter-rouge">event-driven-app</code></li>
+  <li><code class="language-plaintext highlighter-rouge">multi-tenant</code></li>
+</ul>
+
+<p>Scenario dependencies are included automatically. <code class="language-plaintext highlighter-rouge">multi-tenant</code> includes
+<code class="language-plaintext highlighter-rouge">javascript-app</code>; <code class="language-plaintext highlighter-rouge">event-driven-app</code> includes <code class="language-plaintext highlighter-rouge">serverless-api</code>.</p>
+
+<h3 id="run-with-longer-timeouts">Run with longer timeouts</h3>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>python run_evals.py <span class="se">\</span>
+  <span class="nt">--configuration</span> configuration.yml <span class="se">\</span>
+  <span class="nt">--agent-timeout-seconds</span> 3600 <span class="se">\</span>
+  <span class="nt">--validation-timeout-seconds</span> 1200
+</code></pre></div></div>
+
+<h3 id="retain-generated-workspaces">Retain generated workspaces</h3>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>python run_evals.py <span class="se">\</span>
+  <span class="nt">--configuration</span> configuration.yml <span class="se">\</span>
+  <span class="nt">--keep-workspaces</span>
+</code></pre></div></div>
+
+<h2 id="scenario-coverage">Scenario coverage</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Scenario</th>
+      <th>Validated result</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">javascript-app</code></td>
+      <td>A Next.js application returns rows from an Azure SQL table.</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">python-api</code></td>
+      <td>A Python API lists, creates, and completes task rows.</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">rag-app</code></td>
+      <td>Azure SQL stores native vectors and returns ranked similarity results.</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">serverless-api</code></td>
+      <td>An Azure Function returns rows through an Azure SQL binding.</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">event-driven-app</code></td>
+      <td>A database insert triggers the expected function invocation.</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">multi-tenant</code></td>
+      <td>Row-level security isolates data between tenants.</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="run-artifacts">Run artifacts</h2>
+
+<p>Runs are written under <code class="language-plaintext highlighter-rouge">runs/&lt;UTC timestamp&gt;-&lt;unique suffix&gt;/</code>:</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>runs/&lt;run-id&gt;/
+├── manifest.json
+├── preflight.json
+├── results.json
+├── summary.md
+└── &lt;harness&gt;/
+    └── &lt;model&gt;/
+        ├── azure/
+        ├── resources.json
+        ├── results.json
+        ├── scenarios/
+        │   └── &lt;scenario&gt;/
+        │       ├── prompt.md
+        │       ├── result.json
+        │       ├── agent/
+        │       └── validation/
+        └── workspaces/                  # Present when --keep-workspaces is used
+</code></pre></div></div>
+
+<h2 id="run-the-harness-tests">Run the harness tests</h2>
+
+<p>The harness tests use fake agent executables and do not invoke real coding
+agents or create Azure resources:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>python <span class="nt">-m</span> unittest discover <span class="nt">-s</span> tests <span class="nt">-v</span>
+</code></pre></div></div>
+
+    </div>
+  </div>
+</main>
+<footer>
+  <div class="wrap">
+    <div class="footTop">
+      <div class="footBrand">Azure SQL Developer Hub<p>Build applications with Azure SQL.</p></div>
+      <div class="footLinks">
+        <a href="/azure-sql-dev-hub/pr/48/#get-running" data-event="site/action" data-event-action="pathSelected" data-event-path-id="get-running">Get started</a>
+        <a href="/azure-sql-dev-hub/pr/48/#build" data-event="site/action" data-event-action="pathSelected" data-event-path-id="build">Build examples</a>
+        <a href="/azure-sql-dev-hub/pr/48/#watch" data-event="site/action" data-event-action="pathSelected" data-event-path-id="watch">Videos</a>
+        <a href="https://learn.microsoft.com/azure/azure-sql/" data-event="site/action" data-event-action="outboundClicked" data-event-destination-id="azure-sql-docs" data-event-destination-type="docs">Documentation</a>
+      </div>
+    </div>
+    <div class="footBottom">
+      <span>Microsoft Azure SQL</span>
+      <span>
+        <a href="/azure-sql-dev-hub/pr/48/privacy.html">Privacy</a>
+        <a href="https://github.com/microsoft/azure-sql-dev-hub/issues/new" data-event="site/action" data-event-action="outboundClicked" data-event-destination-id="github-issues" data-event-destination-type="feedback">Feedback</a>
+        <a href="https://github.com/microsoft/azure-sql-dev-hub" data-event="site/action" data-event-action="outboundClicked" data-event-destination-id="dev-hub-repository" data-event-destination-type="github">GitHub</a>
+      </span>
+    </div>
+  </div>
+</footer>
+
+<script src="/azure-sql-dev-hub/pr/48/assets/js/main.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="msvalidate.01" content="A333E59012EAA3B44A57A4C7E5A69212" />
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- A pull request's preview: kept out of search, and marked with its commit
+       so the PR workflow can tell when this build is the one being served. -->
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="hub-preview-sha" content="297fa4b77a69035dc8681563f2cfb84bad352865">
+  <title>Start a database · Azure SQL Developer Hub</title>
+  <meta name="description" content="Get Azure SQL running, connect, and prove the first query before adding application complexity.">
+  <meta property="og:title" content="Start a database">
+  <meta property="og:description" content="Get Azure SQL running, connect, and prove the first query before adding application complexity.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://microsoft.github.io/azure-sql-dev-hub/pr/48/build/start-database.html"><meta property="og:image" content="https://microsoft.github.io/azure-sql-dev-hub/pr/48/assets/img/hero-idea-to-app-og.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="From idea to app: a prompt builds a task app on Azure SQL.">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Start a database">
+  <meta name="twitter:description" content="Get Azure SQL running, connect, and prove the first query before adding application complexity.">
+  <meta name="twitter:image" content="https://microsoft.github.io/azure-sql-dev-hub/pr/48/assets/img/hero-idea-to-app-og.jpg">
+  <meta name="twitter:image:alt" content="From idea to app: a prompt builds a task app on Azure SQL.">
+  <link rel="alternate" type="text/markdown" href="/azure-sql-dev-hub/pr/48/build/start-database.md" title="Markdown version">
+  <link rel="alternate" type="text/plain" href="/azure-sql-dev-hub/pr/48/llms.txt" title="LLM index">
+  <link rel="alternate" type="text/plain" href="/azure-sql-dev-hub/pr/48/llms-full.txt" title="Full LLM corpus">
+  <meta name="llms-txt" content="/azure-sql-dev-hub/pr/48/llms.txt">
+  <link rel="icon" type="image/svg+xml" href="/azure-sql-dev-hub/pr/48/assets/img/azure-sql-database.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400..900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/azure-sql-dev-hub/pr/48/assets/css/main.css">
+  
+</head>
+
+<body data-view="scenarioPage" data-scenario="start-database">
+<a class="skip-link" href="#main">Skip to content</a>
+<div role="note" style="position:relative;z-index:60;padding:8px 16px;background:#fff4ce;color:#3b2e00;border-bottom:1px solid #e3c766;font:500 14px/1.4 system-ui,sans-serif;text-align:center">
+  Preview of <a href="https://github.com/microsoft/azure-sql-dev-hub/pull/48" style="color:inherit;text-decoration:underline">pull request #48</a> at <code>297fa4b</code>. This is not the live site:
+  <a href="https://microsoft.github.io/azure-sql-dev-hub/" style="color:inherit;text-decoration:underline">go to the live site</a>.
+</div>
+<nav class="nav" aria-label="Primary">
+  <div class="wrap navin">
+    <a class="brand" href="/azure-sql-dev-hub/pr/48/">
+      <img class="logo" src="/azure-sql-dev-hub/pr/48/assets/img/azure-sql-database.svg" alt="" width="28" height="28" aria-hidden="true">
+      <span>Azure SQL Developer Hub</span>
+    </a>
+    <div class="navlinks">
+      <a href="/azure-sql-dev-hub/pr/48/#get-running">Quickstarts</a>
+      <a href="/azure-sql-dev-hub/pr/48/#build">Build</a>
+      <a href="/azure-sql-dev-hub/pr/48/#skills">Skills</a>
+      <a href="/azure-sql-dev-hub/pr/48/#watch">Videos</a>
+    </div>
+    <div class="navright">
+      <a class="utility" href="https://microsoft.qualtrics.com/jfe/form/SV_9ytUzrnNnbcxPlI" target="_blank" rel="noopener"
+         data-event="site/action" data-event-action="outboundClicked" data-event-destination-id="qualtrics-feedback" data-event-destination-type="feedback">Submit feedback</a>
+      <a class="utility github" href="https://github.com/microsoft/azure-sql-dev-hub" target="_blank" rel="noopener"
+         data-event="site/action" data-event-action="outboundClicked" data-event-destination-id="dev-hub-repository" data-event-destination-type="github"><span class="github-mark" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 .7a11.3 11.3 0 0 0-3.57 22c.57.1.78-.25.78-.55v-2.1c-3.17.69-3.84-1.34-3.84-1.34-.52-1.32-1.27-1.67-1.27-1.67-1.04-.71.08-.7.08-.7 1.15.08 1.75 1.18 1.75 1.18 1.02 1.75 2.67 1.25 3.32.96.1-.74.4-1.25.72-1.54-2.53-.29-5.2-1.27-5.2-5.65 0-1.25.45-2.27 1.18-3.07-.12-.29-.51-1.45.11-3.02 0 0 .96-.31 3.12 1.17a10.8 10.8 0 0 1 5.68 0c2.16-1.48 3.12-1.17 3.12-1.17.62 1.57.23 2.73.11 3.02.73.8 1.18 1.82 1.18 3.07 0 4.39-2.67 5.36-5.21 5.64.41.36.77 1.06.77 2.14v3.17c0 .3.21.66.79.55A11.3 11.3 0 0 0 12 .7Z"/></svg></span>GitHub repo</a>
+    </div>
+  </div>
+</nav>
+
+
+<main id="main"><div class="scenarioPage">
+    <div class="wrap">
+      <div class="scenarioHead">
+        <div class="crumbs"><a href="/azure-sql-dev-hub/pr/48/#build">Build</a> / Start a database</div>
+        <div class="sectionLabel">Scenario</div>
+        <h1>Start a database</h1>
+        <p class="intro">Get Azure SQL running, connect, and prove the first query before adding application complexity.</p>
+      </div>
+
+      <div class="scenarioGrid2">
+        <div class="scenarioMain">
+          <div class="blockCard">
+            <div class="blockHead">Copy prompt</div>
+            <div class="blockBody">
+              <div class="promptSurface">
+                <span id="scenario-prompt">Set up Azure SQL locally for this app. Start the database, connect to it, create a small appdb database, and verify the first query.</span>
+                <button class="promptCopy" type="button" data-copy="#scenario-prompt"
+                        data-copy-kind="prompt"
+                        data-event-action="copyPrompt"
+                        data-event-action-location="scenario"
+                        data-event-scenario="start-database"
+                        data-clarity-event="copy_prompt_start-database"
+                        aria-label="Copy the scenario prompt">Copy prompt</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="blockCard">
+            <div class="blockHead">Starter</div>
+            <div class="blockBody">
+              <div class="codeBox">
+                <pre id="scenario-code">docker exec sqldb /opt/mssql-tools18/bin/sqlcmd \
+  -S localhost -U sa -P "YourStr0ng_Passw0rd" -C -Q "SELECT @@VERSION;"</pre>
+                <button class="copyBtn" type="button" data-copy="#scenario-code"
+                        data-event-action-location="scenario"
+                        data-event-content-id="start-database-starter"
+                        data-event-content-type="code"
+                        aria-label="Copy the starter code">Copy</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <aside class="scenarioAside">
+          <div class="asideCard">
+            <h4>Skill</h4>
+            <p>The container skill knows the preview registry, the readiness wait, and the fact that the engine does not auto-create databases.</p>
+            <div class="codeBox">
+              <pre id="scenario-skill">npx skills add microsoft/azure-sql-database-container --skill azuresql-db-container</pre>
+              <button class="copyBtn" type="button" data-copy="#scenario-skill"
+                      data-event-action-location="scenario"
+                      data-event-content-id="start-database-skill"
+                      data-event-content-type="skill-install"
+                      aria-label="Copy the skill install command">Copy</button>
+            </div>
+          </div>
+
+          <div class="asideCard">
+            <h4>Go deeper</h4>
+            <div class="asideActions">
+              <a class="actionLink primary" href="https://microsoft.github.io/azure-sql-database-container/getting-started.html" rel="noopener"
+                 data-event="site/action" data-event-action="outboundClicked"
+                 data-event-destination-id="start-database-docs"
+                 data-event-destination-type="docs">Container getting started <span aria-hidden="true">→</span></a>
+              <a class="actionLink" href="/azure-sql-dev-hub/pr/48/build/start-database.md"
+                 data-event="site/action" data-event-action="viewPrompt"
+                 data-event-action-location="scenario"
+                 data-event-scenario="start-database"
+                 data-clarity-event="view_prompt_start-database">View as Markdown <span class="hint">.md</span></a>
+            </div>
+          </div>
+        </aside>
+      </div>
+
+      <div class="scenarioProse prose">
+        <h2 id="local-path">Local path</h2>
+
+<p>The starter above verifies a running container. Getting there is three commands,
+covered end to end in the <a href="https://microsoft.github.io/azure-sql-database-container/getting-started.html">getting started guide</a>:
+sign in to the preview registry, start the container on port 1433, then run the
+verification query. The registry credentials come from
+<a href="https://aka.ms/sqldbcontainerpreview-signup">signing up for the Preview</a>.
+The container bundles sqlcmd, so nothing needs installing on your machine, and
+the <code class="language-plaintext highlighter-rouge">-C</code> flag trusts the container’s self-signed certificate.</p>
+
+<p>The engine does not create application databases on its own. Create one, named
+<code class="language-plaintext highlighter-rouge">appdb</code> in these examples or whatever you choose, before pointing an app at it.
+The container skill handles this for you when an agent drives the setup.</p>
+
+<h2 id="cloud-path">Cloud path</h2>
+
+<p>Prefer a managed database from the start? The Azure SQL Database free tier
+gives each database 100,000 vCore seconds of serverless compute, 32 GB of data,
+and 32 GB of backup storage per month, for up to 10 databases per subscription.
+You need an Azure account and subscription.</p>
+
+<ol>
+  <li>Open the <a href="https://aka.ms/azuresqlhub">Azure SQL hub in the portal</a>.</li>
+  <li>In the <strong>Create a database</strong> pane, select <strong>Start free</strong>.</li>
+  <li>Confirm the <strong>Free tier</strong> applied, fill in the Basics tab, then
+select <strong>Review + create</strong>.</li>
+</ol>
+
+<p>The <a href="https://learn.microsoft.com/azure/azure-sql/database/free-tier">free tier documentation</a>
+has the current limits and what happens when a database reaches its monthly cap.
+The same creation is scriptable with the Azure CLI; the Cloud tab on the
+<a href="/azure-sql-dev-hub/pr/48/">home page</a> carries the command.</p>
+
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="footTop">
+      <div class="footBrand">Azure SQL Developer Hub<p>Build applications with Azure SQL.</p></div>
+      <div class="footLinks">
+        <a href="/azure-sql-dev-hub/pr/48/#get-running" data-event="site/action" data-event-action="pathSelected" data-event-path-id="get-running">Get started</a>
+        <a href="/azure-sql-dev-hub/pr/48/#build" data-event="site/action" data-event-action="pathSelected" data-event-path-id="build">Build examples</a>
+        <a href="/azure-sql-dev-hub/pr/48/#watch" data-event="site/action" data-event-action="pathSelected" data-event-path-id="watch">Videos</a>
+        <a href="https://learn.microsoft.com/azure/azure-sql/" data-event="site/action" data-event-action="outboundClicked" data-event-destination-id="azure-sql-docs" data-event-destination-type="docs">Documentation</a>
+      </div>
+    </div>
+    <div class="footBottom">
+      <span>Microsoft Azure SQL</span>
+      <span>
+        <a href="/azure-sql-dev-hub/pr/48/privacy.html">Privacy</a>
+        <a href="https://github.com/microsoft/azure-sql-dev-hub/issues/new" data-event="site/action" data-event-action="outboundClicked" data-event-destination-id="github-issues" data-event-destination-type="feedback">Feedback</a>
+        <a href="https://github.com/microsoft/azure-sql-dev-hub" data-event="site/action" data-event-action="outboundClicked" data-event-destination-id="dev-hub-repository" data-event-destination-type="github">GitHub</a>
+      </span>
+    </div>
+  </div>
+</footer>
+
+<script src="/azure-sql-dev-hub/pr/48/assets/js/main.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,645 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="msvalidate.01" content="A333E59012EAA3B44A57A4C7E5A69212" />
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- A pull request's preview: kept out of search, and marked with its commit
+       so the PR workflow can tell when this build is the one being served. -->
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="hub-preview-sha" content="297fa4b77a69035dc8681563f2cfb84bad352865">
+  <title>Azure SQL Developer Hub</title>
+  <meta name="description" content="The front door for building applications on Azure SQL Database with an AI coding agent. Start free in the cloud, hand your agent a build prompt, verify a working app.">
+  <meta property="og:title" content="Azure SQL Developer Hub">
+  <meta property="og:description" content="The front door for building applications on Azure SQL Database with an AI coding agent. Start free in the cloud, hand your agent a build prompt, verify a working app.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://microsoft.github.io/azure-sql-dev-hub/pr/48/"><meta property="og:image" content="https://microsoft.github.io/azure-sql-dev-hub/pr/48/assets/img/hero-idea-to-app-og.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="From idea to app: a prompt builds a task app on Azure SQL.">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Azure SQL Developer Hub">
+  <meta name="twitter:description" content="The front door for building applications on Azure SQL Database with an AI coding agent. Start free in the cloud, hand your agent a build prompt, verify a working app.">
+  <meta name="twitter:image" content="https://microsoft.github.io/azure-sql-dev-hub/pr/48/assets/img/hero-idea-to-app-og.jpg">
+  <meta name="twitter:image:alt" content="From idea to app: a prompt builds a task app on Azure SQL.">
+  <link rel="alternate" type="text/markdown" href="/azure-sql-dev-hub/pr/48/index.md" title="Markdown version">
+  <link rel="alternate" type="text/plain" href="/azure-sql-dev-hub/pr/48/llms.txt" title="LLM index">
+  <link rel="alternate" type="text/plain" href="/azure-sql-dev-hub/pr/48/llms-full.txt" title="Full LLM corpus">
+  <meta name="llms-txt" content="/azure-sql-dev-hub/pr/48/llms.txt">
+  <link rel="icon" type="image/svg+xml" href="/azure-sql-dev-hub/pr/48/assets/img/azure-sql-database.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400..900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/azure-sql-dev-hub/pr/48/assets/css/main.css">
+  
+</head>
+
+<style>
+.h{--ink:#1a1a1a;--muted:#5a626c;--faint:#8a919a;--line:#e1e6eb;--accent:#0067b8;--accent-ink:#00508f;--tint:#eff6fc;--ok:#107c10;--dark:#0e1a2b;--dark2:#162538;--panel:#f5f7fa;--panel2:#fafbfd;--r:12px;color:var(--ink);line-height:1.55}
+.h *{box-sizing:border-box}
+.h .w{max-width:1080px;margin:0 auto;padding:0 24px}
+.h h1,.h h2,.h h3{margin:0;line-height:1.15;letter-spacing:-0.02em}
+.h h2{font-size:34px;font-weight:700}.h h3{font-size:18px;font-weight:600}.h p{margin:0}
+.h .muted{color:var(--muted)}.h .faint{color:var(--faint);font-size:13px}
+.h code,.h pre,.h .mono{font-family:ui-monospace,"Cascadia Code",Menlo,Consolas,monospace}
+.h a{color:var(--accent);text-decoration:none}.h a:hover{text-decoration:underline}
+.h [id]{scroll-margin-top:80px}
+.h .btn{display:inline-flex;align-items:center;gap:8px;padding:12px 22px;border-radius:9px;font-weight:600;font-size:15px;border:1px solid transparent;cursor:pointer;font-family:inherit}
+.h .btn-p{background:var(--accent);color:#fff}.h .btn-p:hover{background:var(--accent-ink);text-decoration:none}
+.h .btn-s{background:#fff;color:var(--ink);border-color:#c7ced6}.h .btn-s:hover{border-color:var(--ink);text-decoration:none}
+.h .cp{padding:6px 12px;font-size:13px;border-radius:6px;background:#fff;color:var(--accent);border:1px solid var(--line);cursor:pointer;font-family:inherit}
+.h .cp:hover{border-color:var(--accent)}.h .cp.ok{color:var(--ok);border-color:var(--ok)}.h .cp.bad,.h .chip.bad{color:#b0244a;border-color:#b0244a}
+.h .hero{padding:64px 0;text-align:left;background:linear-gradient(120deg,#fff 30%,#f0f7ff 100%)}
+.h .hero .hero-grid{max-width:1280px;display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:48px;align-items:center}
+.h .hero h1{font-size:clamp(40px,4.2vw,58px);font-weight:700;max-width:15ch;margin:0 0 22px}
+.h .hero .sub{font-size:18px;color:var(--muted);max-width:43ch;margin:0 0 26px}
+.h .hero .tagline{font-size:21px;line-height:1.4;font-weight:600;color:var(--ink);margin:0 0 12px}
+.h .hero .ctas{justify-content:flex-start}
+.h .hero-copy{min-width:0}
+.h .ctas{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-bottom:22px}
+.h .agentline{font-size:13px;color:var(--faint)}.h .agentline span{color:var(--muted)}
+.h .vid{width:100%;min-width:0;margin:0}
+.h .hero-art{display:block;width:100%;height:auto;border-radius:var(--r);border:1px solid var(--line)}
+.h .hero-figure{margin:0}
+.h .hero-player{position:relative;aspect-ratio:16/9;overflow:hidden;border-radius:var(--r)}
+.h .hero-player .hero-art{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:var(--r)}
+.h .hero-play{position:absolute;inset:0;width:100%;height:100%;padding:24px;border:0;border-radius:var(--r);background:transparent;cursor:pointer;display:flex;align-items:flex-end;justify-content:flex-start;font:inherit}
+.h .hero-play[hidden]{display:none}
+.h .hero-play > span{display:inline-flex;align-items:center;gap:10px;padding:12px 18px;border-radius:999px;background:#fff;color:var(--accent-ink);box-shadow:0 3px 18px #0e1a2b33;font-weight:600}
+.h .hero-play:hover > span{background:var(--tint)}
+.h .hero-play:focus-visible{outline:3px solid var(--accent);outline-offset:4px}
+.h .hero-play i{font-style:normal}
+.h .hero-error{margin-top:8px;font-size:14px;color:var(--muted)}
+.h .poster img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.h .poster .pplay{position:relative;z-index:1;box-shadow:0 4px 24px #0e1a2b33}
+.h .vframe{position:relative;padding-top:56.25%;border-radius:var(--r) var(--r) 0 0;overflow:hidden;background:var(--dark)}
+.h .vframe iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.h .poster{position:absolute;inset:0;width:100%;height:100%;border:0;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;color:#fff;background:linear-gradient(180deg,#0b1526 0%,#1a2f52 100%);font-family:inherit;padding:0}
+.h .poster:hover .pplay{transform:scale(1.06)}
+.h .pplay{width:68px;height:68px;border-radius:50%;background:#fff;color:#0e1a2b;display:flex;align-items:center;justify-content:center;font-size:26px;padding-left:5px;margin-bottom:10px;transition:transform .15s}
+.h .ptitle{font-size:24px;font-weight:700}.h .psub{font-size:14px;color:#9fb0c3}.h .pph{font-size:12px;color:#6b7d93;margin-top:6px}
+.h .chapters{display:grid;grid-template-columns:repeat(3,1fr);border:1px solid var(--line);border-top:0;border-radius:0 0 var(--r) var(--r);overflow:hidden;background:#fff}
+.h .chapter{padding:14px 10px;text-align:center;border-right:1px solid var(--line);cursor:pointer;background:#fff;border-top:0;border-bottom:0;border-left:0;font-family:inherit}
+.h .chapter:last-child{border-right:0}.h .chapter:hover{background:var(--tint)}
+.h .chapter time{display:block;font-size:12px;color:var(--faint)}.h .chapter b{display:block;font-size:14px;font-weight:600;margin-top:2px}
+.h section{padding:60px 0}.h section.alt{background:var(--panel)}
+.h .sh{margin-bottom:26px;max-width:64ch}.h .sh p{font-size:17px;color:var(--muted);margin-top:10px}
+.h .tabs{display:flex;gap:8px;margin-bottom:22px;flex-wrap:wrap}
+.h .tab{padding:9px 16px;border-radius:999px;border:1px solid var(--line);background:#fff;font-size:14px;font-weight:600;cursor:pointer;color:var(--muted);font-family:inherit}
+.h .tab[aria-selected="true"]{background:var(--accent);color:#fff;border-color:var(--accent)}
+.h .tab .pill{font-size:11px;font-weight:600;margin-left:8px;padding:2px 7px;border-radius:5px;background:#fff3cd;color:#7a5a00}
+.h .tab[aria-selected="true"] .pill{background:rgba(255,255,255,.22);color:#fff}
+.h .panel{display:none;border:1px solid var(--line);border-radius:var(--r);overflow:hidden;background:#fff}
+.h .panel.on{display:grid;grid-template-columns:1.1fr 1fr}
+.h .pdark{background:var(--dark);color:#e6edf3;padding:32px}.h .pdark h3{color:#fff;font-size:20px;margin-bottom:8px}.h .pdark p{color:#9fb0c3;font-size:14px}
+.h .cmd{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;background:var(--dark2);border:1px solid #24374e;border-radius:8px;padding:12px 14px;margin-top:16px;font-size:13.5px;color:#e6edf3}
+.h .cmd code{white-space:pre-wrap;word-break:break-all}
+.h .cmd .cp{background:#24374e;border-color:#31485f;color:#e6edf3;flex:none}.h .cmd .cp.ok{color:#7bd88f;border-color:#7bd88f}
+.h .plight{padding:32px}
+.h .steps{list-style:none;padding:0;margin:20px 0 0}.h .steps li{display:flex;gap:12px;padding:12px 0;border-bottom:1px solid var(--line);font-size:14px}.h .steps li:last-child{border-bottom:0}
+.h .steps .n{flex:none;width:24px;height:24px;border-radius:50%;background:var(--tint);color:var(--accent);font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center}
+.h .steps b{display:block;font-weight:600}.h .steps span{color:var(--muted)}
+.h .then{display:flex;align-items:center;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:22px;padding:12px;background:var(--panel2);border:1px solid var(--line);border-radius:9px;font-size:13px;color:var(--muted)}
+.h .then .node{padding:6px 12px;border:1px solid var(--line);border-radius:7px;background:#fff;font-weight:600;color:var(--ink)}.h .then .arrow{color:var(--accent);font-size:16px}
+.h .build-note{margin:0 0 18px;max-width:64ch;color:var(--muted);font-size:14px}
+.h .build-flow{list-style:none;display:flex;flex-wrap:wrap;gap:12px 24px;padding:0;margin:0 0 28px;color:var(--muted);font-size:14px}.h .build-flow li{display:flex;align-items:center;gap:9px}.h .build-flow span{display:inline-grid;place-items:center;width:25px;height:25px;border:1px solid var(--line);border-radius:50%;color:var(--ink);font-size:12px;font-weight:600;background:var(--panel)}
+.h .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:18px}
+.h .card{border:1px solid var(--line);border-radius:var(--r);overflow:hidden;background:#fff;display:flex;flex-direction:column}
+.h .art{height:150px;position:relative;display:flex;align-items:center;justify-content:center}.h .art svg{width:120px;height:90px}
+.h .tag{position:absolute;top:12px;left:14px;font-size:12px;font-weight:600;color:var(--ink);background:rgba(255,255,255,.85);padding:3px 9px;border-radius:6px}
+.h .cbody{padding:20px 20px 18px;display:flex;flex-direction:column;gap:10px;flex:1}.h .cbody p{font-size:14px;color:var(--muted);flex:1}
+.h .cact{display:flex;align-items:center;gap:12px;margin-top:6px}.h .cact .cp{padding:8px 14px;font-size:14px}.h .cact a{font-size:14px;font-weight:600}
+.h .tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
+.h .tile{background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:22px}.h .tile b{display:block;font-size:16px;margin-bottom:4px}.h .tile p{font-size:14px;color:var(--muted)}
+.h .tile .g{width:36px;height:36px;border-radius:9px;background:var(--tint);display:flex;align-items:center;justify-content:center;margin-bottom:14px}.h .tile .g svg{width:20px;height:20px;stroke:var(--accent);fill:none;stroke-width:2}
+.h .tile .tl{display:inline-block;margin-top:14px;font-size:14px;font-weight:600}
+.h .skills{text-align:center}
+.h .agents{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;max-width:760px;margin:30px auto 20px}
+.h .agent{border:1px solid var(--line);border-radius:var(--r);padding:20px 12px;background:#fff;cursor:pointer;text-align:center;position:relative;font-family:inherit}
+.h .agent:hover{border-color:#b9c4d0}.h .agent[aria-pressed="true"]{border:2px solid var(--accent);background:#f7fbff}
+.h .agent[aria-pressed="true"]::after{content:"\2713";position:absolute;top:8px;right:10px;color:var(--accent);font-size:13px;font-weight:700}
+.h .agent .logo{width:48px;height:48px;border-radius:12px;background:#1a1a2e;display:flex;align-items:center;justify-content:center;margin:0 auto 12px}.h .agent .logo svg{width:26px;height:26px}
+.h .agent b{display:block;font-size:14px}.h .agent span{font-size:12px;color:var(--faint)}
+.h .install{max-width:620px;margin:0 auto}.h .install .cmd{margin-top:0}.h .inote{margin-top:10px;font-size:13px;color:var(--faint)}
+.h .ask{max-width:760px;margin:26px auto 0;padding-top:22px;border-top:1px solid var(--line)}.h .asklabel{font-weight:600;margin-bottom:12px}
+.h .chips{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-bottom:10px}
+.h .chip{border:1px solid var(--line);background:#fff;border-radius:999px;padding:10px 16px;font-size:14px;cursor:pointer;color:var(--ink);font-family:inherit}
+.h .chip:hover{border-color:var(--accent);background:var(--tint)}.h .chip.ok{border-color:var(--ok);color:var(--ok)}
+.h .reel{display:flex;gap:16px;overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:10px;scrollbar-width:thin}
+.h .v{flex:0 0 320px;scroll-snap-align:start;border:1px solid var(--line);border-radius:var(--r);overflow:hidden;background:#fff;color:var(--ink)}.h .v:hover{text-decoration:none;border-color:#b9c4d0}
+.h .v .thumb{position:relative;aspect-ratio:16/9;background:linear-gradient(160deg,#0e1a2b,#1f3556);overflow:hidden}.h .v .thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.h .v .play{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}.h .v .play i{width:46px;height:46px;border-radius:50%;background:rgba(255,255,255,.92);display:flex;align-items:center;justify-content:center;color:var(--accent);font-style:normal;font-size:17px;padding-left:3px}
+.h .v .dur{position:absolute;bottom:8px;right:10px;font-size:11px;background:rgba(0,0,0,.6);color:#fff;padding:2px 7px;border-radius:4px}
+.h .v .meta{padding:14px 16px}.h .v .meta b{display:block;font-size:14px;line-height:1.35}.h .v .meta span{font-size:12px;color:var(--faint)}
+.h .vmore{flex:0 0 160px;scroll-snap-align:start;display:flex;align-items:center;justify-content:center;border:1px dashed var(--line);border-radius:var(--r);font-size:14px;font-weight:600;text-align:center;padding:16px}
+.h .two{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.h .aud{border:1px solid var(--line);border-radius:var(--r);padding:22px 24px;background:#fff}.h .aud h3{font-size:22px;margin-bottom:10px}.h .aud p{font-size:15px;color:var(--muted);margin-bottom:16px}.h .aud .links a{font-weight:600;font-size:14px;margin-right:16px}
+.h .badge{display:inline-block;font-size:11px;font-weight:600;padding:3px 9px;border-radius:5px;background:#fff3cd;color:#7a5a00;margin-left:8px;vertical-align:middle}
+.h .faq{max-width:760px}.h .faq details{border-bottom:1px solid var(--line);padding:14px 0}
+.h .faq summary{cursor:pointer;font-size:16px;font-weight:600;list-style:none;display:flex;justify-content:space-between;align-items:center}.h .faq summary::-webkit-details-marker{display:none}
+.h .faq summary::after{content:"+";color:var(--accent);font-size:20px;font-weight:400}.h .faq details[open] summary::after{content:"\2013"}
+.h .faq details p{margin-top:10px;font-size:15px;color:var(--muted);max-width:66ch}
+.h .close{text-align:center;padding:48px 0 56px}.h .close h2{margin-bottom:22px}.h .close .install{margin-bottom:20px}
+@media (max-width:820px){.h .panel.on{grid-template-columns:1fr}.h .agents{grid-template-columns:repeat(2,1fr)}.h .two{grid-template-columns:1fr}.h section{padding:44px 0}.h .hero{padding-top:44px}.h .ptitle{font-size:18px}.h .psub{font-size:12px}}
+@media (max-width:820px){.h #top{scroll-margin-top:144px}}
+@media (max-width:820px){.h .hero .hero-grid{grid-template-columns:1fr;gap:28px}.h .hero{padding:36px 0}.h .hero h1{font-size:clamp(36px,7vw,52px);max-width:18ch}.h .hero .sub{max-width:52ch}.h .hero .agentline{font-size:12px}}
+</style>
+<body data-view="mainPage">
+<a class="skip-link" href="#main">Skip to content</a>
+<div role="note" style="position:relative;z-index:60;padding:8px 16px;background:#fff4ce;color:#3b2e00;border-bottom:1px solid #e3c766;font:500 14px/1.4 system-ui,sans-serif;text-align:center">
+  Preview of <a href="https://github.com/microsoft/azure-sql-dev-hub/pull/48" style="color:inherit;text-decoration:underline">pull request #48</a> at <code>297fa4b</code>. This is not the live site:
+  <a href="https://microsoft.github.io/azure-sql-dev-hub/" style="color:inherit;text-decoration:underline">go to the live site</a>.
+</div>
+<nav class="nav" aria-label="Primary">
+  <div class="wrap navin">
+    <a class="brand" href="/azure-sql-dev-hub/pr/48/">
+      <img class="logo" src="/azure-sql-dev-hub/pr/48/assets/img/azure-sql-database.svg" alt="" width="28" height="28" aria-hidden="true">
+      <span>Azure SQL Developer Hub</span>
+    </a>
+    <div class="navlinks">
+      <a href="/azure-sql-dev-hub/pr/48/#get-running">Quickstarts</a>
+      <a href="/azure-sql-dev-hub/pr/48/#build">Build</a>
+      <a href="/azure-sql-dev-hub/pr/48/#skills">Skills</a>
+      <a href="/azure-sql-dev-hub/pr/48/#watch">Videos</a>
+    </div>
+    <div class="navright">
+      <a class="utility" href="https://microsoft.qualtrics.com/jfe/form/SV_9ytUzrnNnbcxPlI" target="_blank" rel="noopener"
+         data-event="site/action" data-event-action="outboundClicked" data-event-destination-id="qualtrics-feedback" data-event-destination-type="feedback">Submit feedback</a>
+      <a class="utility github" href="https://github.com/microsoft/azure-sql-dev-hub" target="_blank" rel="noopener"
+         data-event="site/action" data-event-action="outboundClicked" data-event-destination-id="dev-hub-repository" data-event-destination-type="github"><span class="github-mark" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 .7a11.3 11.3 0 0 0-3.57 22c.57.1.78-.25.78-.55v-2.1c-3.17.69-3.84-1.34-3.84-1.34-.52-1.32-1.27-1.67-1.27-1.67-1.04-.71.08-.7.08-.7 1.15.08 1.75 1.18 1.75 1.18 1.02 1.75 2.67 1.25 3.32.96.1-.74.4-1.25.72-1.54-2.53-.29-5.2-1.27-5.2-5.65 0-1.25.45-2.27 1.18-3.07-.12-.29-.51-1.45.11-3.02 0 0 .96-.31 3.12 1.17a10.8 10.8 0 0 1 5.68 0c2.16-1.48 3.12-1.17 3.12-1.17.62 1.57.23 2.73.11 3.02.73.8 1.18 1.82 1.18 3.07 0 4.39-2.67 5.36-5.21 5.64.41.36.77 1.06.77 2.14v3.17c0 .3.21.66.79.55A11.3 11.3 0 0 0 12 .7Z"/></svg></span>GitHub repo</a>
+    </div>
+  </div>
+</nav>
+
+
+<main id="main" class="h">
+
+  <header class="hero" id="top">
+    <div class="w hero-grid">
+      <div class="hero-copy">
+      <h1>Azure SQL, built for AI workloads</h1><p class="tagline">Bring the idea. Build with Azure SQL.</p>
+      <p class="sub">Start with a prompt. Give your AI coding agent SQL skills, and make your next app yours.</p>
+      <div class="ctas">
+        <a class="btn btn-p" href="#get-running" data-event="site/action" data-event-action="pathSelected" data-event-path-id="get-running">Get started</a>
+        <a class="btn btn-s" href="#get-running" data-htab-go="agent">Install skills</a>
+      </div>
+      <p class="agentline">Works with <span>Claude Code, GitHub Copilot, Codex, and Cursor.</span></p>
+      </div>
+
+        <div class="vid">
+          <figure class="hero-figure">
+          <div class="hero-player">
+          <video class="hero-art" id="hDemo" poster="/azure-sql-dev-hub/pr/48/assets/img/hero-idea-to-app.jpg" aria-label="From idea to app demo" muted playsinline preload="metadata">
+            <source src="/azure-sql-dev-hub/pr/48/assets/video/hero-idea-to-app.webm" type="video/webm">
+            <source src="/azure-sql-dev-hub/pr/48/assets/video/hero-idea-to-app.mp4" type="video/mp4">
+          </video>
+          <button class="hero-play" id="hDemoPlay" type="button" aria-label="Play demo: From idea to app" aria-controls="hDemo" data-title="From idea to app"
+                  data-event="site/action" data-event-action="mediaEngaged" data-event-content-id="hero-demo" data-event-media-action="start" hidden><span><i aria-hidden="true">&#9654;</i> <span class="hero-play-label" id="hDemoPlayLabel">Play demo</span></span></button>
+          </div>
+          <p class="hero-error" id="hDemoError" role="status" hidden>Could not play the demo. Please try again.</p>
+          </figure>
+      </div>
+    </div>
+  </header>
+
+  <section id="get-running" class="alt">
+    <span id="start" aria-hidden="true"></span><span id="connect" aria-hidden="true"></span>
+    <div class="w">
+      <div class="sh"><h2>Power your next app with Azure SQL.</h2><p>Choose your starting point: the cloud, local development, or your coding agent.</p></div>
+      <div class="tabs" role="tablist">
+        <button class="tab" type="button" role="tab" aria-selected="true"
+                data-htab="cloud" data-event="site/action" data-event-action="pathSelected" data-event-path-id="cloud">Cloud, free tier</button>
+        <button class="tab" type="button" role="tab" aria-selected="false"
+                data-htab="local" data-event="site/action" data-event-action="pathSelected" data-event-path-id="local">Local container<span class="pill">Preview</span></button>
+        <button class="tab" type="button" role="tab" aria-selected="false"
+                data-htab="agent" data-event="site/action" data-event-action="pathSelected" data-event-path-id="agent">With your coding agent</button>
+      </div>
+      <div class="panel on" role="tabpanel" data-hpanel="cloud">
+        <div class="pdark">
+          <h3>Create a free Azure SQL database.</h3>
+          <p>Create it in the Azure portal with the free tier, then verify from any SQL editor. Prerequisites and tier limits are in the setup guide.</p>
+          <div class="cmd"><code>SELECT 1 AS connected;</code><button class="cp" type="button" data-hcopy="SELECT 1 AS connected;"
+            data-event="site/action" data-event-action="contentCopied" data-event-action-location="install-panel"
+            data-event-content-id="quickstart-cloud"
+            data-event-content-type="command">Copy</button></div>
+        </div>
+        <div class="plight">
+          <h3>Three steps, then you are live.</h3>
+          <ol class="steps">
+            <li><span class="n">1</span><div><b>Create the database</b><span>You need an Azure subscription with permission to create resources. Follow the free-tier guide and pick the free tier when prompted.</span></div></li>
+            <li><span class="n">2</span><div><b>Open access</b><span>Add your IP to the firewall and sign in with Microsoft Entra.</span></div></li>
+            <li><span class="n">3</span><div><b>Verify</b><span>Run SELECT 1. A result of 1 means your connection works and you are ready for a build prompt.</span></div></li>
+          </ol>
+          <p style="margin-top:16px"><a href="https://learn.microsoft.com/azure/azure-sql/database/free-tier" data-event="site/action" data-event-action="outboundClicked"
+            data-event-destination-id="quickstart-cloud-docs"
+            data-event-destination-type="docs">Free tier: setup guide, prerequisites, and limits</a></p>
+        </div>
+      </div>
+      <div class="panel" role="tabpanel" data-hpanel="local">
+        <div class="pdark">
+          <h3>Run the Azure SQL Database engine on your laptop.</h3>
+          <p>Same engine as the cloud, in a container, offline. Preview today. Sign up and we send registry access.</p><p style="margin-top:18px"><a class="btn btn-s" href="https://aka.ms/sqldbcontainerpreview-signup"
+            data-event="site/action" data-event-action="outboundClicked" data-event-destination-id="container-preview"
+            data-event-destination-type="signup">Sign up for the Preview</a></p>
+        </div>
+        <div class="plight">
+          <h3>What you get once you are in.</h3>
+          <ol class="steps">
+            <li><span class="n">1</span><div><b>One docker run</b><span>Sign in to the preview registry, pull the image, start the engine.</span></div></li>
+            <li><span class="n">2</span><div><b>Agent skills included</b><span>Skills teach your agent to provision, connect, migrate, seed, and ship, with you reviewing each step.</span></div></li>
+            <li><span class="n">3</span><div><b>Ship to Azure unchanged</b><span>Only the connection string changes.</span></div></li>
+          </ol>
+          <p style="margin-top:16px"><a href="https://microsoft.github.io/azure-sql-database-container/getting-started.html" data-event="site/action" data-event-action="outboundClicked"
+            data-event-destination-id="quickstart-local-docs"
+            data-event-destination-type="docs">Container quickstart</a></p>
+        </div>
+      </div>
+      <div class="panel" role="tabpanel" data-hpanel="agent">
+        <div class="pdark">
+          <h3>Install the skills, then ask in plain English.</h3>
+          <p>One command teaches Claude Code, Copilot, Codex, or Cursor how Azure SQL works. You stay in the loop on every step.</p>
+          <div class="cmd"><code>npx skills add microsoft/microsoft-sql</code><button class="cp" type="button" data-hcopy="npx skills add microsoft/microsoft-sql"
+            data-event="site/action" data-event-action="contentCopied" data-event-action-location="install-panel"
+            data-event-content-id="quickstart-agent"
+            data-event-content-type="collection-install">Copy</button></div>
+        </div>
+        <div class="plight">
+          <h3>Then say what you want.</h3>
+          <ol class="steps">
+            <li><span class="n">1</span><div><b>Create a free database first</b><span>Provisioning is still your step today. The agent takes it from there.</span></div></li>
+            <li><span class="n">2</span><div><b>Prompt your agent</b><span>"Connect to my Azure SQL database and scaffold the schema, migrations, and data layer for my stack."</span></div></li>
+            <li><span class="n">3</span><div><b>Verify</b><span>The agent runs the first query and shows you the result.</span></div></li>
+          </ol>
+          <p style="margin-top:16px"><a href="https://aka.ms/azuresql-skills" data-event="site/action" data-event-action="outboundClicked"
+            data-event-destination-id="quickstart-agent-docs"
+            data-event-destination-type="docs">What the skills teach, per agent</a></p>
+        </div>
+      </div>
+      <div class="then">
+        <span>Then:</span><span class="node">Local or free tier</span><span class="arrow">&rarr;</span><span class="node">Azure SQL Database</span><span>Same code, connection string changes, app goes live.</span>
+      </div>
+    </div>
+  </section>
+
+  <section id="build"><span id="prompts" aria-hidden="true"></span><span id="samples" aria-hidden="true"></span>
+    <div class="w">
+      <div class="sh"><h2>Bring your app idea to life</h2><p>Start with a task app, an API, or search over your content. Choose a scenario and use its prompt with your coding agent to build on Azure SQL.</p></div>
+      <p class="build-note">Each prompt works against a database you already have. No database yet? <a href="#get-running">Get a database running</a> takes three steps.</p>
+      <ol class="build-flow" aria-label="From idea to app">
+        <li><span aria-hidden="true">1</span>Choose a scenario</li><li><span aria-hidden="true">2</span>Copy the prompt</li><li><span aria-hidden="true">3</span>Build and verify</li>
+      </ol>
+      <div class="cards">
+        <article class="card" id="javascript-app">
+          <div class="art" style="background:#eaf3fc"><span class="tag">JavaScript</span><svg viewBox="0 0 120 90" aria-hidden="true"><rect x="10" y="12" width="100" height="66" rx="8" fill="#fff" stroke="#0067b8" stroke-width="2"/><rect x="10" y="12" width="100" height="14" rx="8" fill="#0067b8"/><rect x="22" y="36" width="50" height="6" rx="3" fill="#c7dcf0"/><rect x="22" y="48" width="70" height="6" rx="3" fill="#c7dcf0"/><rect x="22" y="60" width="40" height="6" rx="3" fill="#0067b8"/></svg></div>
+          <div class="cbody">
+            <h3>Build a task-tracking app</h3>
+            <p>Build a web app that displays tasks stored in Azure SQL. Start with sample data and make it your own.</p>
+            <div class="cact">
+              <button class="cp" type="button" data-hprompt="/azure-sql-dev-hub/pr/48/build/javascript-app.md"
+                      data-event="site/action" data-event-action="copyPrompt" data-event-action-location="skill-card"
+                      data-event-scenario="javascript-app"
+                      data-clarity-event="copy_prompt_javascript-app">Copy prompt</button>
+              <a href="https://github.com/microsoft/azure-sql-dev-hub/blob/main/build/javascript-app.md" target="_blank" rel="noopener"
+                 data-event="site/action" data-event-action="viewPrompt" data-event-action-location="skill-card"
+                 data-event-scenario="javascript-app"
+                 data-clarity-event="view_prompt_javascript-app">View prompt</a>
+            </div>
+          </div>
+        </article>
+        <article class="card" id="python-api">
+          <div class="art" style="background:#eaf6ec"><span class="tag">Python</span><svg viewBox="0 0 120 90" aria-hidden="true"><rect x="14" y="20" width="92" height="50" rx="8" fill="#fff" stroke="#107c10" stroke-width="2"/><path d="M30 45h20M60 45h30M30 57h40" stroke="#107c10" stroke-width="4" stroke-linecap="round"/><circle cx="34" cy="33" r="3" fill="#107c10"/><circle cx="44" cy="33" r="3" fill="#a9d8ab"/><circle cx="54" cy="33" r="3" fill="#a9d8ab"/></svg></div>
+          <div class="cbody">
+            <h3>Build an API for your app</h3>
+            <p>Give your app a way to create, complete, and retrieve tasks. Build a Python API that connects to Azure SQL with Microsoft Entra, no passwords.</p>
+            <div class="cact">
+              <button class="cp" type="button" data-hprompt="/azure-sql-dev-hub/pr/48/build/python-api.md"
+                      data-event="site/action" data-event-action="copyPrompt" data-event-action-location="skill-card"
+                      data-event-scenario="python-api"
+                      data-clarity-event="copy_prompt_python-api">Copy prompt</button>
+              <a href="https://github.com/microsoft/azure-sql-dev-hub/blob/main/build/python-api.md" target="_blank" rel="noopener"
+                 data-event="site/action" data-event-action="viewPrompt" data-event-action-location="skill-card"
+                 data-event-scenario="python-api"
+                 data-clarity-event="view_prompt_python-api">View prompt</a>
+            </div>
+          </div>
+        </article>
+        <article class="card" id="rag-app">
+          <div class="art" style="background:#f2ecfa"><span class="tag">Python / AI</span><svg viewBox="0 0 120 90" aria-hidden="true"><circle cx="40" cy="45" r="16" fill="#fff" stroke="#7719aa" stroke-width="2"/><circle cx="80" cy="30" r="9" fill="#fff" stroke="#7719aa" stroke-width="2"/><circle cx="84" cy="62" r="9" fill="#fff" stroke="#7719aa" stroke-width="2"/><path d="M54 40l17-7M55 51l20 8" stroke="#7719aa" stroke-width="2"/><circle cx="40" cy="45" r="5" fill="#7719aa"/></svg></div>
+          <div class="cbody">
+            <h3>Search your content by meaning</h3>
+            <p>Find relevant text with vector search in Azure SQL. Build the retrieval layer for a RAG app using sample text and an embedding model you provide.</p>
+            <div class="cact">
+              <button class="cp" type="button" data-hprompt="/azure-sql-dev-hub/pr/48/build/rag-app.md"
+                      data-event="site/action" data-event-action="copyPrompt" data-event-action-location="skill-card"
+                      data-event-scenario="rag-app"
+                      data-clarity-event="copy_prompt_rag-app">Copy prompt</button>
+              <a href="https://github.com/microsoft/azure-sql-dev-hub/blob/main/build/rag-app.md" target="_blank" rel="noopener"
+                 data-event="site/action" data-event-action="viewPrompt" data-event-action-location="skill-card"
+                 data-event-scenario="rag-app"
+                 data-clarity-event="view_prompt_rag-app">View prompt</a>
+            </div>
+          </div>
+        </article>
+        <article class="card" id="serverless-api">
+          <div class="art" style="background:#fdf1e7"><span class="tag">.NET</span><svg viewBox="0 0 120 90" aria-hidden="true"><path d="M52 12l-18 40h16l-8 26 30-42H56z" fill="#fff" stroke="#c05612" stroke-width="2" stroke-linejoin="round"/><rect x="14" y="66" width="30" height="10" rx="5" fill="#f5d8c2"/><rect x="78" y="14" width="28" height="10" rx="5" fill="#f5d8c2"/></svg></div>
+          <div class="cbody">
+            <h3>Create a serverless task API</h3>
+            <p>Read and save tasks through an Azure Functions API backed by Azure SQL. Build and test the functions locally.</p>
+            <div class="cact">
+              <button class="cp" type="button" data-hprompt="/azure-sql-dev-hub/pr/48/build/serverless-api.md"
+                      data-event="site/action" data-event-action="copyPrompt" data-event-action-location="skill-card"
+                      data-event-scenario="serverless-api"
+                      data-clarity-event="copy_prompt_serverless-api">Copy prompt</button>
+              <a href="https://github.com/microsoft/azure-sql-dev-hub/blob/main/build/serverless-api.md" target="_blank" rel="noopener"
+                 data-event="site/action" data-event-action="viewPrompt" data-event-action-location="skill-card"
+                 data-event-scenario="serverless-api"
+                 data-clarity-event="view_prompt_serverless-api">View prompt</a>
+            </div>
+          </div>
+        </article>
+        <article class="card" id="event-driven-app">
+          <div class="art" style="background:#fdeef1"><span class="tag">.NET</span><svg viewBox="0 0 120 90" aria-hidden="true"><rect x="14" y="30" width="40" height="30" rx="6" fill="#fff" stroke="#b0244a" stroke-width="2"/><rect x="66" y="30" width="40" height="30" rx="6" fill="#fff" stroke="#b0244a" stroke-width="2"/><path d="M54 45h12" stroke="#b0244a" stroke-width="3"/><path d="M62 40l6 5-6 5" fill="none" stroke="#b0244a" stroke-width="3"/><circle cx="34" cy="45" r="5" fill="#b0244a"/><path d="M80 40v10M86 40v10M92 40v10" stroke="#f3c3ce" stroke-width="3"/></svg></div>
+          <div class="cbody">
+            <h3>Respond to data changes</h3>
+            <p>Extend the serverless API with a function that reacts when tasks change in Azure SQL. Log inserts, updates, and deletes as a starting point for automation.</p>
+            <div class="cact">
+              <button class="cp" type="button" data-hprompt="/azure-sql-dev-hub/pr/48/build/event-driven-app.md"
+                      data-event="site/action" data-event-action="copyPrompt" data-event-action-location="skill-card"
+                      data-event-scenario="event-driven-app"
+                      data-clarity-event="copy_prompt_event-driven-app">Copy prompt</button>
+              <a href="https://github.com/microsoft/azure-sql-dev-hub/blob/main/build/event-driven-app.md" target="_blank" rel="noopener"
+                 data-event="site/action" data-event-action="viewPrompt" data-event-action-location="skill-card"
+                 data-event-scenario="event-driven-app"
+                 data-clarity-event="view_prompt_event-driven-app">View prompt</a>
+            </div>
+          </div>
+        </article>
+        <article class="card" id="multi-tenant">
+          <div class="art" style="background:#e8f4f4"><span class="tag">JavaScript</span><svg viewBox="0 0 120 90" aria-hidden="true"><path d="M60 12l30 10v22c0 16-13 28-30 34-17-6-30-18-30-34V22z" fill="#fff" stroke="#0e7c7c" stroke-width="2"/><path d="M46 46l9 9 19-19" fill="none" stroke="#0e7c7c" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="cbody">
+            <h3>Separate each customer's data</h3>
+            <p>Extend a task app for multiple customers. Add row-level security and test that one tenant cannot read another tenant's tasks.</p>
+            <div class="cact">
+              <button class="cp" type="button" data-hprompt="/azure-sql-dev-hub/pr/48/build/multi-tenant.md"
+                      data-event="site/action" data-event-action="copyPrompt" data-event-action-location="skill-card"
+                      data-event-scenario="multi-tenant"
+                      data-clarity-event="copy_prompt_multi-tenant">Copy prompt</button>
+              <a href="https://github.com/microsoft/azure-sql-dev-hub/blob/main/build/multi-tenant.md" target="_blank" rel="noopener"
+                 data-event="site/action" data-event-action="viewPrompt" data-event-action-location="skill-card"
+                 data-event-scenario="multi-tenant"
+                 data-clarity-event="view_prompt_multi-tenant">View prompt</a>
+            </div>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section id="workloads" class="alt">
+    <div class="w">
+      <div class="sh"><h2>Built for AI workloads</h2><p>The pieces an AI app needs, inside the engine.</p></div>
+      <div class="tiles">
+        <div class="tile"><div class="g"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h10"/></svg></div><b>Vector search</b><p>A native VECTOR type and VECTOR_DISTANCE. Store embeddings next to the rows they describe.</p><a class="tl" href="https://learn.microsoft.com/sql/relational-databases/vectors/vectors-sql-server"
+          data-event="site/action" data-event-action="outboundClicked" data-event-destination-id="workload-vector-search" data-event-destination-type="docs"
+          >Vector docs</a></div>
+        <div class="tile"><div class="g"><svg viewBox="0 0 24 24"><path d="M12 3v18M3 12h18"/><circle cx="12" cy="12" r="8"/></svg></div><b>Embeddings in T-SQL</b><p>Generate and chunk from inside the database with external model calls. No separate pipeline.</p><a class="tl" href="https://learn.microsoft.com/sql/t-sql/functions/ai-generate-embeddings-transact-sql"
+          data-event="site/action" data-event-action="outboundClicked" data-event-destination-id="workload-embeddings-in-t-sql" data-event-destination-type="docs"
+          >AI_GENERATE_EMBEDDINGS</a></div>
+        <div class="tile"><div class="g"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M8 10h8M8 14h5"/></svg></div><b>RAG, end to end</b><p>Chunk, embed, store, retrieve, ground. One skill walks your agent through all five.</p><a class="tl" href="#rag-app"
+          data-event="site/action" data-event-action="pathSelected" data-event-path-id="rag-app">Copy the RAG prompt</a></div>
+        <div class="tile"><div class="g"><svg viewBox="0 0 24 24"><path d="M12 3l8 4v6c0 4-3.5 7-8 8-4.5-1-8-4-8-8V7z"/></svg></div><b>Safe for agents to write</b><p>Row-level security, Entra identity, and injection-safe patterns the skills enforce by default.</p><a class="tl" href="https://learn.microsoft.com/sql/relational-databases/security/row-level-security"
+          data-event="site/action" data-event-action="outboundClicked" data-event-destination-id="workload-safe-for-agents-to-write" data-event-destination-type="docs"
+          >Row-level security docs</a></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="skills">
+    <div class="w skills">
+      <h2>Microsoft SQL Agent Skills</h2>
+      <p class="muted" style="font-size:17px;margin-top:10px">Pick your agent. One install. The skills load themselves when the work matches.</p>
+      <div class="agents" role="group" aria-label="Choose your coding agent">
+        <button class="agent" type="button" aria-pressed="true" data-agent="claude" data-cmd="claude plugin marketplace add microsoft/microsoft-sql
+claude plugin install microsoft-sql@microsoft-sql" data-note="Two commands: register the marketplace, then install the plugin with every skill. Or the portable form: &lt;code&gt;gh skill install microsoft/microsoft-sql --all --agent claude-code&lt;/code&gt;."
+                data-event="site/action" data-event-action="harnessSelected" data-event-action-location="install-panel"
+                data-event-harness-id="claude">
+          <span class="logo"><svg aria-hidden="true" fill="#ffffff" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="m4.7144 15.9555 4.7174-2.6471.079-.2307-.079-.1275h-.2307l-.7893-.0486-2.6956-.0729-2.3375-.0971-2.2646-.1214-.5707-.1215-.5343-.7042.0546-.3522.4797-.3218.686.0608 1.5179.1032 2.2767.1578 1.6514.0972 2.4468.255h.3886l.0546-.1579-.1336-.0971-.1032-.0972L6.973 9.8356l-2.55-1.6879-1.3356-.9714-.7225-.4918-.3643-.4614-.1578-1.0078.6557-.7225.8803.0607.2246.0607.8925.686 1.9064 1.4754 2.4893 1.8336.3643.3035.1457-.1032.0182-.0728-.164-.2733-1.3539-2.4467-1.445-2.4893-.6435-1.032-.17-.6194c-.0607-.255-.1032-.4674-.1032-.7285L6.287.1335 6.6997 0l.9957.1336.419.3642.6192 1.4147 1.0018 2.2282 1.5543 3.0296.4553.8985.2429.8318.091.255h.1579v-.1457l.1275-1.706.2368-2.0947.2307-2.6957.0789-.7589.3764-.9107.7468-.4918.5828.2793.4797.686-.0668.4433-.2853 1.8517-.5586 2.9021-.3643 1.9429h.2125l.2429-.2429.9835-1.3053 1.6514-2.0643.7286-.8196.85-.9046.5464-.4311h1.0321l.759 1.1293-.34 1.1657-1.0625 1.3478-.8804 1.1414-1.2628 1.7-.7893 1.36.0729.1093.1882-.0183 2.8535-.607 1.5421-.2794 1.8396-.3157.8318.3886.091.3946-.3278.8075-1.967.4857-2.3072.4614-3.4364.8136-.0425.0304.0486.0607 1.5482.1457.6618.0364h1.621l3.0175.2247.7892.522.4736.6376-.079.4857-1.2142.6193-1.6393-.3886-3.825-.9107-1.3113-.3279h-.1822v.1093l1.0929 1.0686 2.0035 1.8092 2.5075 2.3314.1275.5768-.3218.4554-.34-.0486-2.2039-1.6575-.85-.7468-1.9246-1.621h-.1275v.17l.4432.6496 2.3436 3.5214.1214 1.0807-.17.3521-.6071.2125-.6679-.1214-1.3721-1.9246L14.38 17.959l-1.1414-1.9428-.1397.079-.674 7.2552-.3156.3703-.7286.2793-.6071-.4614-.3218-.7468.3218-1.4753.3886-1.9246.3157-1.53.2853-1.9004.17-.6314-.0121-.0425-.1397.0182-1.4328 1.9672-2.1796 2.9446-1.7243 1.8456-.4128.164-.7164-.3704.0667-.6618.4008-.5889 2.386-3.0357 1.4389-1.882.929-1.0868-.0062-.1579h-.0546l-6.3385 4.1164-1.1293.1457-.4857-.4554.0608-.7467.2307-.2429 1.9064-1.3114Z"/></svg></span><b>Claude Code</b><span>native plugin</span>
+        </button>
+        <button class="agent" type="button" aria-pressed="false" data-agent="vscode-copilot" data-cmd="npx skills add microsoft/microsoft-sql" data-note="Or &lt;code&gt;gh skill install microsoft/microsoft-sql --all --agent github-copilot&lt;/code&gt;. Find them in Copilot Chat under Configure Chat, Skills tab, or type &lt;code&gt;/skills&lt;/code&gt;. Committed to &lt;code&gt;.github/skills/&lt;/code&gt; in your repo, they also reach the Copilot coding agent with no install."
+                data-event="site/action" data-event-action="harnessSelected" data-event-action-location="install-panel"
+                data-event-harness-id="vscode-copilot">
+          <span class="logo"><svg aria-hidden="true" fill="#ffffff" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M23.922 16.997C23.061 18.492 18.063 22.02 12 22.02 5.937 22.02.939 18.492.078 16.997A.641.641 0 0 1 0 16.741v-2.869a.883.883 0 0 1 .053-.22c.372-.935 1.347-2.292 2.605-2.656.167-.429.414-1.055.644-1.517a10.098 10.098 0 0 1-.052-1.086c0-1.331.282-2.499 1.132-3.368.397-.406.89-.717 1.474-.952C7.255 2.937 9.248 1.98 11.978 1.98c2.731 0 4.767.957 6.166 2.093.584.235 1.077.546 1.474.952.85.869 1.132 2.037 1.132 3.368 0 .368-.014.733-.052 1.086.23.462.477 1.088.644 1.517 1.258.364 2.233 1.721 2.605 2.656a.841.841 0 0 1 .053.22v2.869a.641.641 0 0 1-.078.256Zm-11.75-5.992h-.344a4.359 4.359 0 0 1-.355.508c-.77.947-1.918 1.492-3.508 1.492-1.725 0-2.989-.359-3.782-1.259a2.137 2.137 0 0 1-.085-.104L4 11.746v6.585c1.435.779 4.514 2.179 8 2.179 3.486 0 6.565-1.4 8-2.179v-6.585l-.098-.104s-.033.045-.085.104c-.793.9-2.057 1.259-3.782 1.259-1.59 0-2.738-.545-3.508-1.492a4.359 4.359 0 0 1-.355-.508Zm2.328 3.25c.549 0 1 .451 1 1v2c0 .549-.451 1-1 1-.549 0-1-.451-1-1v-2c0-.549.451-1 1-1Zm-5 0c.549 0 1 .451 1 1v2c0 .549-.451 1-1 1-.549 0-1-.451-1-1v-2c0-.549.451-1 1-1Zm3.313-6.185c.136 1.057.403 1.913.878 2.497.442.544 1.134.938 2.344.938 1.573 0 2.292-.337 2.657-.751.384-.435.558-1.15.558-2.361 0-1.14-.243-1.847-.705-2.319-.477-.488-1.319-.862-2.824-1.025-1.487-.161-2.192.138-2.533.529-.269.307-.437.808-.438 1.578v.021c0 .265.021.562.063.893Zm-1.626 0c.042-.331.063-.628.063-.894v-.02c-.001-.77-.169-1.271-.438-1.578-.341-.391-1.046-.69-2.533-.529-1.505.163-2.347.537-2.824 1.025-.462.472-.705 1.179-.705 2.319 0 1.211.175 1.926.558 2.361.365.414 1.084.751 2.657.751 1.21 0 1.902-.394 2.344-.938.475-.584.742-1.44.878-2.497Z"/></svg></span><b>GitHub Copilot</b><span>VS Code, CLI, app</span>
+        </button>
+        <button class="agent" type="button" aria-pressed="false" data-agent="codex" data-cmd="npx skills add microsoft/microsoft-sql" data-note="The repository is an Agent Plugins package, so Codex installs it directly. Confirm with &lt;code&gt;ls .codex/skills&lt;/code&gt;."
+                data-event="site/action" data-event-action="harnessSelected" data-event-action-location="install-panel"
+                data-event-harness-id="codex">
+          <span class="logo"><svg aria-hidden="true" role="img" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="1.3" xmlns="http://www.w3.org/2000/svg">    <g>    <ellipse cx="12" cy="12" rx="3.4" ry="8.4"/>    <ellipse cx="12" cy="12" rx="3.4" ry="8.4" transform="rotate(60 12 12)"/>    <ellipse cx="12" cy="12" rx="3.4" ry="8.4" transform="rotate(120 12 12)"/>  </g>  <circle cx="12" cy="12" r="1.5" fill="#ffffff" stroke="none"/></svg></span><b>Codex</b><span>Agent Plugins client</span>
+        </button>
+        <button class="agent" type="button" aria-pressed="false" data-agent="cursor" data-cmd="npx skills add microsoft/microsoft-sql" data-note="Or &lt;code&gt;gh skill install microsoft/microsoft-sql --all --agent cursor&lt;/code&gt;. Confirm with &lt;code&gt;ls .cursor/skills&lt;/code&gt;."
+                data-event="site/action" data-event-action="harnessSelected" data-event-action-location="install-panel"
+                data-event-harness-id="cursor">
+          <span class="logo"><svg aria-hidden="true" fill="#ffffff" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M11.503.131 1.891 5.678a.84.84 0 0 0-.42.726v11.188c0 .3.162.575.42.724l9.609 5.55a1 1 0 0 0 .998 0l9.61-5.55a.84.84 0 0 0 .42-.724V6.404a.84.84 0 0 0-.42-.726L12.497.131a1.01 1.01 0 0 0-.996 0M2.657 6.338h18.55c.263 0 .43.287.297.515L12.23 22.918c-.062.107-.229.064-.229-.06V12.335a.59.59 0 0 0-.295-.51l-9.11-5.257c-.109-.063-.064-.23.061-.23"/></svg></span><b>Cursor</b><span>AI-native editor</span>
+        </button>
+      </div>
+      <div class="install">
+        <div class="cmd"><code id="hInstall">claude plugin marketplace add microsoft/microsoft-sql
+claude plugin install microsoft-sql@microsoft-sql</code><button class="cp" type="button" id="hInstallCopy" data-hcopy="claude plugin marketplace add microsoft/microsoft-sql
+claude plugin install microsoft-sql@microsoft-sql"
+          data-event="site/action" data-event-action="contentCopied" data-event-action-location="install-panel"
+          data-event-content-id="microsoft-sql" data-event-content-type="harness-install"
+          data-event-harness-id="claude" data-clarity-event="copy_skill_install_claude">Copy</button></div>
+        <p class="inote" id="hInstallNote">Two commands: register the marketplace, then install the plugin with every skill. Or the portable form: <code>gh skill install microsoft/microsoft-sql --all --agent claude-code</code>.</p>
+      </div>
+      <div class="ask">
+        <p class="asklabel">Then just ask:</p>
+        <div class="chips">
+          <button class="chip" type="button" data-hcopy="Connect my Node app to Azure SQL Database without a password"
+                  data-event="site/action" data-event-action="contentCopied" data-event-action-location="install-panel"
+                  data-event-content-id="connect_node_passwordless" data-event-content-type="suggested-ask"
+                  data-clarity-event="copy_ask_connect_node_passwordless">Connect my Node app to Azure SQL Database without a password</button>
+          <button class="chip" type="button" data-hcopy="Scaffold the schema, migrations, and data layer for this app"
+                  data-event="site/action" data-event-action="contentCopied" data-event-action-location="install-panel"
+                  data-event-content-id="scaffold_data_layer" data-event-content-type="suggested-ask"
+                  data-clarity-event="copy_ask_scaffold_data_layer">Scaffold the schema, migrations, and data layer for this app</button>
+          <button class="chip" type="button" data-hcopy="Add vector search to this table and make it use the index"
+                  data-event="site/action" data-event-action="contentCopied" data-event-action-location="install-panel"
+                  data-event-content-id="add_vector_search" data-event-content-type="suggested-ask"
+                  data-clarity-event="copy_ask_add_vector_search">Add vector search to this table and make it use the index</button>
+          <button class="chip" type="button" data-hcopy="Why does my first query after idle fail with 40613"
+                  data-event="site/action" data-event-action="contentCopied" data-event-action-location="install-panel"
+                  data-event-content-id="troubleshoot_40613" data-event-content-type="suggested-ask"
+                  data-clarity-event="copy_ask_troubleshoot_40613">Why does my first query after idle fail with 40613</button>
+        </div>
+        <p class="faint">Click to copy. Paste into your agent.</p>
+      </div>
+      <div class="ctas" style="margin-top:24px">
+        <a class="btn btn-s" href="https://aka.ms/azuresql-skills" data-event="site/action" data-event-action="outboundClicked"
+           data-event-destination-id="skills-catalog" data-event-destination-type="github"
+           data-clarity-event="browse_skills">Browse the skills</a>
+        <a class="btn btn-s" href="https://aka.ms/azuresql-skills#installation" data-event="site/action" data-event-action="outboundClicked"
+           data-event-destination-id="skills-install-guide" data-event-destination-type="github">Per-tool install guide</a>
+      </div>
+      <p class="faint" style="margin-top:14px">Full catalog, every skill's source, and the feedback form at aka.ms/azuresql-skills. Skills teach your agent the engine; they do not grant access to the Preview container.</p>
+    </div>
+  </section>
+
+  <section id="watch" class="alt">
+    <div class="w">
+      <div class="sh"><h2>See it in action</h2><p>Longer walkthroughs from the Microsoft SQL team. Scroll for more.</p></div>
+      <div class="reel" aria-label="Video walkthroughs">
+        <a class="v" href="https://www.youtube.com/watch?v=pq2drN2Qw5w" target="_blank" rel="noopener"
+           data-event="site/action" data-event-action="mediaEngaged" data-event-content-id="pq2drN2Qw5w" data-event-media-action="start">
+          <div class="thumb"><img src="https://img.youtube.com/vi/pq2drN2Qw5w/hqdefault.jpg" alt="" loading="lazy" onerror="this.style.display='none'"><span class="play"><i>&#9654;</i></span><span class="dur">VS Code Live</span></div>
+          <div class="meta"><b>Boost your SQL development in VS Code: Copilot, containers, and more</b><span>Carlos Robles, VS Code Live, Aug 2025</span></div>
+        </a>
+        <a class="v" href="https://www.youtube.com/watch?v=wZUPFCCByfw" target="_blank" rel="noopener"
+           data-event="site/action" data-event-action="mediaEngaged" data-event-content-id="wZUPFCCByfw" data-event-media-action="start">
+          <div class="thumb"><img src="https://img.youtube.com/vi/wZUPFCCByfw/hqdefault.jpg" alt="" loading="lazy" onerror="this.style.display='none'"><span class="play"><i>&#9654;</i></span><span class="dur">Data Exposed</span></div>
+          <div class="meta"><b>Build AI apps with VS Code Agents, GitHub Copilot, and the MSSQL extension</b><span>Data Exposed, May 2026</span></div>
+        </a>
+        <a class="v" href="https://www.youtube.com/watch?v=biJywQPbqn0" target="_blank" rel="noopener"
+           data-event="site/action" data-event-action="mediaEngaged" data-event-content-id="biJywQPbqn0" data-event-media-action="start">
+          <div class="thumb"><img src="https://img.youtube.com/vi/biJywQPbqn0/hqdefault.jpg" alt="" loading="lazy" onerror="this.style.display='none'"><span class="play"><i>&#9654;</i></span><span class="dur">Release</span></div>
+          <div class="meta"><b>AI-powered SQL development in VS Code with GitHub Copilot</b><span>MSSQL extension v1.32, May 2025</span></div>
+        </a>
+        <a class="v" href="https://aka.ms/azuresqlfoundationseries" target="_blank" rel="noopener"
+           data-event="site/action" data-event-action="mediaEngaged" data-event-content-id="foundations" data-event-media-action="start">
+          <div class="thumb"><img src="https://devblogs.microsoft.com/wp-content/uploads/2026/08/word-image-22210-2.webp" alt="" loading="lazy" onerror="this.style.display='none'"><span class="play"><i>&#9654;</i></span><span class="dur">Series</span></div>
+          <div class="meta"><b>Azure SQL Database Foundations</b><span>Four sessions: getting started, migration, performance, AI</span></div>
+        </a>
+        <a class="vmore" href="https://aka.ms/microsoftsqlyt" target="_blank" rel="noopener"
+           data-event="site/action" data-event-action="outboundClicked" data-event-destination-id="microsoft-sql-youtube"
+           data-event-destination-type="youtube">More on the Microsoft SQL channel</a>
+      </div>
+    </div>
+  </section>
+
+  <section id="existing" style="padding:36px 0">
+    <div class="w two">
+      <div class="aud">
+        <h3>Already have Azure SQL data?</h3><p>Point the prompts above at an existing development database. Review permissions and schema changes before you let an agent run them.</p>
+        <div class="links"><a href="#rag-app" data-event="site/action" data-event-action="pathSelected" data-event-path-id="rag-app">Start with the RAG example</a></div>
+      </div>
+      <div class="aud" id="continuity">
+        <h3>Prefer local development?<span class="badge">Preview</span></h3><p>The Azure SQL Database container runs the same engine offline. Sign up for the Preview.</p>
+        <div class="links"><a href="https://aka.ms/sqldbcontainerpreview-signup" data-event="site/action" data-event-action="outboundClicked"
+          data-event-destination-id="container-preview" data-event-destination-type="signup">Sign up</a><a href="https://microsoft.github.io/azure-sql-database-container/getting-started.html"
+          data-event="site/action" data-event-action="outboundClicked" data-event-destination-id="container-quickstart"
+          data-event-destination-type="docs">Container quickstart</a></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="faq" class="alt">
+    <div class="w">
+      <div class="sh"><h2>Before you build</h2></div>
+      <div class="faq"><details><summary>What do I need to get started?</summary><p>An Azure account and a development database. The free tier covers everything on this page, within its limits. If you want to work offline, sign up for the container Preview.</p></details><details><summary>Is it safe to let an agent write to my database?</summary><p>Use a development database with least-privilege access. The skills default to parameterised queries, Entra identity over passwords, and row-level security for multi-tenant work. Review schema changes before they run against anything real.</p></details><details><summary>Do I need the container?</summary><p>No. Every prompt here targets Azure SQL Database in the cloud. The container is the local option, in Preview today.</p></details><details><summary>What does this cost?</summary><p>The free tier covers the database for every example here, within its limits; see the tier details for what those are. The RAG example needs an embedding service, priced by whoever provides it; the prompt asks which one you have before using it.</p></details><details><summary>How is this different from SQL Server?</summary><p>Same engine family, managed for you, with features that ship to Azure SQL Database first. The container runs the Azure SQL Database engine, not the SQL Server image.</p></details></div>
+    </div>
+  </section>
+
+  <section class="close">
+    <div class="w">
+      <h2>Ready? Teach your agent, then ask</h2>
+      <div class="install"><div class="cmd"><code>npx skills add microsoft/microsoft-sql</code><button class="cp" type="button" data-hcopy="npx skills add microsoft/microsoft-sql"
+        data-event="site/action" data-event-action="contentCopied" data-event-action-location="footer"
+        data-event-content-id="microsoft-sql" data-event-content-type="collection-install">Copy</button></div></div>
+      <a class="btn btn-p" href="#get-running" data-event="site/action" data-event-action="pathSelected" data-event-path-id="get-running">Get started</a>
+    </div>
+  </section>
+  
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="footTop">
+      <div class="footBrand">Azure SQL Developer Hub<p>Build applications with Azure SQL.</p></div>
+      <div class="footLinks">
+        <a href="/azure-sql-dev-hub/pr/48/#get-running" data-event="site/action" data-event-action="pathSelected" data-event-path-id="get-running">Get started</a>
+        <a href="/azure-sql-dev-hub/pr/48/#build" data-event="site/action" data-event-action="pathSelected" data-event-path-id="build">Build examples</a>
+        <a href="/azure-sql-dev-hub/pr/48/#watch" data-event="site/action" data-event-action="pathSelected" data-event-path-id="watch">Videos</a>
+        <a href="https://learn.microsoft.com/azure/azure-sql/" data-event="site/action" data-event-action="outboundClicked" data-event-destination-id="azure-sql-docs" data-event-destination-type="docs">Documentation</a>
+      </div>
+    </div>
+    <div class="footBottom">
+      <span>Microsoft Azure SQL</span>
+      <span>
+        <a href="/azure-sql-dev-hub/pr/48/privacy.html">Privacy</a>
+        <a href="https://github.com/microsoft/azure-sql-dev-hub/issues/new" data-event="site/action" data-event-action="outboundClicked" data-event-destination-id="github-issues" data-event-destination-type="feedback">Feedback</a>
+        <a href="https://github.com/microsoft/azure-sql-dev-hub" data-event="site/action" data-event-action="outboundClicked" data-event-destination-id="dev-hub-repository" data-event-destination-type="github">GitHub</a>
+      </span>
+    </div>
+  </div>
+</footer>
+
+<script src="/azure-sql-dev-hub/pr/48/assets/js/main.js" defer></script>
+<script>
+(function(){
+  function copyText(t,cb){function legacy(){var ta=document.createElement('textarea');ta.value=t;ta.setAttribute('readonly','');ta.style.position='fixed';ta.style.top='-1000px';document.body.appendChild(ta);ta.select();var ok=false;try{ok=document.execCommand('copy')}catch(e){}document.body.removeChild(ta);cb(ok)}
+    if(navigator.clipboard&&window.isSecureContext){navigator.clipboard.writeText(t).then(function(){cb(true)},legacy)}else{legacy()}}
+  function flash(b,ok){if(b.classList.contains('chip')){b.classList.add(ok?'ok':'bad');setTimeout(function(){b.classList.remove('ok','bad')},1600);return}var t=b.textContent;b.textContent=ok?'Copied':'Select and copy';b.classList.add(ok?'ok':'bad');setTimeout(function(){b.textContent=t;b.classList.remove('ok','bad')},1600)}
+  function eventProps(b){var p={};Array.prototype.forEach.call(b.attributes,function(a){if(a.name.indexOf('data-event-')===0){var k=a.name.slice(11).replace(/-([a-z])/g,function(_,c){return c.toUpperCase()});p[k]=a.value}});return p}
+  function trackCopy(b,ok){if(!ok||typeof window.trackHubEvent!=='function')return;window.trackHubEvent(b.getAttribute('data-event'),eventProps(b),{clarityEvent:b.getAttribute('data-clarity-event')})}
+  document.querySelectorAll('[data-hcopy]').forEach(function(b){b.addEventListener('click',function(){copyText(b.getAttribute('data-hcopy'),function(ok){flash(b,ok);trackCopy(b,ok)})})});
+  document.querySelectorAll('[data-hprompt]').forEach(function(b){b.addEventListener('click',function(){fetch(b.getAttribute('data-hprompt')).then(function(r){if(!r.ok)throw 0;return r.text()}).then(function(t){copyText(t,function(ok){flash(b,ok);trackCopy(b,ok)})}).catch(function(){window.open(b.getAttribute('data-hprompt'),'_blank')})})});
+  document.querySelectorAll('[data-htab-go]').forEach(function(b){b.addEventListener('click',function(){var t=document.querySelector('[data-htab="'+b.getAttribute('data-htab-go')+'"]');if(t)t.click()})});
+  var tabs=document.querySelectorAll('[data-htab]'),panels=document.querySelectorAll('[data-hpanel]');
+  tabs.forEach(function(t){t.addEventListener('click',function(){tabs.forEach(function(x){x.setAttribute('aria-selected','false')});panels.forEach(function(p){p.classList.remove('on')});t.setAttribute('aria-selected','true');document.querySelector('[data-hpanel="'+t.getAttribute('data-htab')+'"]').classList.add('on')})});
+  var cmdEl=document.getElementById('hInstall'),noteEl=document.getElementById('hInstallNote'),copyEl=document.getElementById('hInstallCopy');
+  document.querySelectorAll('.agent').forEach(function(a){a.addEventListener('click',function(){var agent=a.getAttribute('data-agent');document.querySelectorAll('.agent').forEach(function(x){x.setAttribute('aria-pressed','false')});a.setAttribute('aria-pressed','true');cmdEl.textContent=a.getAttribute('data-cmd');noteEl.innerHTML=a.getAttribute('data-note');copyEl.setAttribute('data-hcopy',a.getAttribute('data-cmd'));copyEl.setAttribute('data-event-harness-id',agent);copyEl.setAttribute('data-clarity-event','copy_skill_install_'+agent)})});
+  var demo=document.getElementById('hDemo'),demoPlay=document.getElementById('hDemoPlay'),
+      demoLabel=document.getElementById('hDemoPlayLabel'),demoError=document.getElementById('hDemoError');
+  if(demo&&demoPlay){
+    // The poster is the cover. Controls belong to the running demo only, so the
+    // cover stays one target to click rather than two that overlap.
+    var AUTO_DELAY=2000,started=false,timer=null,io=null,title=demoPlay.getAttribute('data-title')||'';
+    demo.controls=false;demo.tabIndex=-1;demoPlay.hidden=false;
+    function demoCover(text){
+      var hadFocus=document.activeElement===demo;
+      demo.pause();demo.controls=false;demo.tabIndex=-1;demo.load();
+      demoLabel.textContent=text;demoPlay.setAttribute('aria-label',text+': '+title);
+      demoPlay.hidden=false;if(hadFocus)demoPlay.focus({preventScroll:true});
+    }
+    function demoStart(byUser){
+      demoError.hidden=true;demoPlay.hidden=true;demo.controls=true;demo.tabIndex=0;
+      return demo.play().then(function(){if(byUser)demo.focus({preventScroll:true})}).catch(function(){
+        // A browser is entitled to refuse playback it did not see asked for. That
+        // is an ordinary outcome, so the cover comes back without an error: the
+        // visitor starts the demo when they want it. A refusal of their own click
+        // is worth saying out loud, because they asked and nothing happened.
+        demoCover('Play demo');
+        if(byUser){demoError.hidden=false;demoPlay.focus({preventScroll:true})}
+      });
+    }
+    function demoCancel(){if(timer){clearTimeout(timer);timer=null}}
+    function demoSettle(){demoCancel();if(io){io.disconnect();io=null}}
+    demoPlay.addEventListener('click',function(){started=true;demoSettle();demoStart(true)});
+    demo.addEventListener('ended',function(){demoCover('Replay')});
+    // Reduced motion keeps the thumbnail and waits to be asked.
+    var demoReduce=window.matchMedia&&window.matchMedia('(prefers-reduced-motion:reduce)').matches;
+    if(!demoReduce&&window.IntersectionObserver){
+      io=new IntersectionObserver(function(entries){
+        for(var i=0;i<entries.length;i++){
+          if(entries[i].isIntersecting){
+            if(!started&&!timer)timer=setTimeout(function(){
+              timer=null;if(started)return;started=true;demoSettle();demoStart(false);
+            },AUTO_DELAY);
+          }else{
+            // Scrolled out of view before the hold elapsed, so the count starts over.
+            demoCancel();
+          }
+        }
+      },{threshold:.5});
+      io.observe(demo);
+    }
+  }
+  var frame=document.getElementById('hFrame'),vid=frame&&frame.getAttribute('data-video'),player=null,mounted=false;
+  function mount(){if(mounted||!vid)return;frame.innerHTML='<iframe id="hVideo" src="https://www.youtube-nocookie.com/embed/'+vid+'?rel=0&enablejsapi=1&autoplay=1" title="Hub demo" allow="accelerometer; autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>';mounted=true}
+  var poster=document.getElementById('hPoster');if(poster)poster.addEventListener('click',mount);
+  function ensure(cb){mount();if(player){cb();return}function mk(){player=new YT.Player('hVideo',{events:{onReady:cb}})}if(!window.YT||!window.YT.Player){var s=document.createElement('script');s.src='https://www.youtube.com/iframe_api';document.body.appendChild(s);window.onYouTubeIframeAPIReady=mk}else{mk()}}
+  document.querySelectorAll('.chapter').forEach(function(c){c.addEventListener('click',function(){var t=parseInt(c.getAttribute('data-seek'),10);ensure(function(){player.seekTo(t,true);player.playVideo()})})});
+})();
+</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"Azure SQL Developer Hub","description":"The front door for building with Azure SQL Database in the age of AI-assisted development. Start locally or in Azure, build with the coding agent you already use, and move from first prompt to production on Azure SQL.","publisher":{"@type":"Organization","name":"Microsoft"}}</script>
+</body>
+</html>
