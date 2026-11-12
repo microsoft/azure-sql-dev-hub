@@ -1,0 +1,299 @@
+name: PR checks and preview
+
+# Every pull request gets the site's checks, an agent-readiness score, and one
+# comment that updates on each push. Pull requests from branches in this
+# repository also get a live preview at <site>/pr/<number>/, removed on close.
+# Nothing here needs a secret: previews ride on the existing Pages site, and the
+# only token is the workflow's own. See docs/PR-PREVIEWS.md.
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, closed]
+
+permissions:
+  contents: read
+
+# A new push replaces the run for the previous one.
+concurrency:
+  group: pr-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  PR: ${{ github.event.pull_request.number }}
+  HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+  REPORT: ${{ github.workspace }}/../report
+
+jobs:
+  checks:
+    name: Checks
+    if: github.event.action != 'closed'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+      - uses: ruby/setup-ruby@14594264cd68ce8a2345dd349bc3d138a4ef85c8 # v1.327.0
+        with:
+          ruby-version: "3.3"
+          bundler-cache: true
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
+        with:
+          node-version: "22"
+      - run: npm ci && mkdir -p "$REPORT"
+
+      # Each check records its outcome and keeps going, so the report shows
+      # every result. The last step fails the job if a blocking check failed.
+      - name: House rules and telemetry
+        id: tests
+        continue-on-error: true
+        run: npm test 2>&1 | tee "$REPORT/tests.log"
+
+      - name: Build site
+        id: build
+        continue-on-error: true
+        run: |
+          { bundle exec jekyll build && node scripts/build-agent-files.mjs; } 2>&1 | tee "$REPORT/build.log"
+
+      - name: Internal links
+        id: links
+        if: steps.build.outcome == 'success'
+        continue-on-error: true
+        run: node scripts/check-links.mjs 2>&1 | tee "$REPORT/links.log"
+
+      # The base branch's score, so a PR that lowers it fails. Built with this
+      # PR's checker and gems; if the base will not build, the score just has
+      # nothing to compare against.
+      - name: Score the base branch
+        if: steps.build.outcome == 'success'
+        continue-on-error: true
+        run: |
+          base="$RUNNER_TEMP/base"
+          git fetch --no-tags --depth=1 origin "${{ github.base_ref }}"
+          git worktree add "$base" FETCH_HEAD
+          ln -s "$GITHUB_WORKSPACE/node_modules" "$base/node_modules"
+          (cd "$base" && BUNDLE_GEMFILE="$GITHUB_WORKSPACE/Gemfile" bundle exec jekyll build -q && node scripts/build-agent-files.mjs)
+          node scripts/check-pages.mjs --site "$base/_site" --json "$REPORT/pages-base.json" || true
+
+      - name: Page checks and score
+        id: pages
+        if: steps.build.outcome == 'success'
+        continue-on-error: true
+        run: |
+          node scripts/check-pages.mjs --json "$REPORT/pages.json" --baseline "$REPORT/pages-base.json" 2>&1 | tee "$REPORT/pages.log"
+
+      # Lumar's agentic-readiness CLI (MIT) over the built site, served here at
+      # the root, the way a host-level scanner expects. Fails on a published
+      # file that is broken; files the site does not publish are not counted.
+      - name: Agent files (Lumar agentic-readiness)
+        id: agentfiles
+        if: steps.build.outcome == 'success'
+        continue-on-error: true
+        run: |
+          python3 -m http.server 8080 --directory _site >/dev/null 2>&1 &
+          for i in $(seq 1 20); do curl -fs http://localhost:8080/ >/dev/null && break; sleep 0.5; done
+          npx -y agentic-readiness@0.3.7 localhost:8080 --allow-private --json > "$REPORT/lumar.json" 2> "$REPORT/lumar.log"
+
+      - name: External links (report only)
+        if: steps.build.outcome == 'success'
+        continue-on-error: true
+        run: node scripts/check-external-links.mjs --json "$REPORT/external.json"
+
+      - name: Write the report
+        if: always()
+        run: |
+          cat > "$REPORT/outcomes.json" <<EOF
+          {"tests":"${{ steps.tests.outcome }}","build":"${{ steps.build.outcome }}","links":"${{ steps.links.outcome }}","pages":"${{ steps.pages.outcome }}","agentfiles":"${{ steps.agentfiles.outcome }}"}
+          EOF
+          PREVIEW_STATE=skipped RUN_URL="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" \
+            node scripts/pr-report.mjs "$REPORT" >> "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: always()
+        with:
+          name: pr-report
+          path: ${{ env.REPORT }}
+          retention-days: 7
+
+      - name: Fail on blocking checks
+        if: always()
+        run: |
+          failed=""
+          for k in tests:${{ steps.tests.outcome }} build:${{ steps.build.outcome }} links:${{ steps.links.outcome }} pages:${{ steps.pages.outcome }} agentfiles:${{ steps.agentfiles.outcome }}; do
+            [ "${k#*:}" = failure ] && failed="$failed ${k%%:*}"
+          done
+          if [ -n "$failed" ]; then echo "Blocking checks failed:$failed"; exit 1; fi
+          echo "All blocking checks passed"
+
+  preview:
+    name: Preview
+    # Same-repository branches only: a fork's workflow token cannot write, and
+    # Dependabot's runs get a read-only one.
+    if: >-
+      github.event.action != 'closed' &&
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      github.actor != 'dependabot[bot]'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # push the build to the pr-previews branch
+      actions: write  # start the Pages deploy
+      pages: read     # read where the site is published
+    outputs:
+      url: ${{ steps.where.outputs.url }}
+      state: ${{ steps.wait.outputs.state || 'failed' }}
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+      - uses: ruby/setup-ruby@14594264cd68ce8a2345dd349bc3d138a4ef85c8 # v1.327.0
+        with:
+          ruby-version: "3.3"
+          bundler-cache: true
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
+        with:
+          node-version: "22"
+      - run: npm ci
+
+      - name: Resolve the preview URL
+        id: where
+        run: |
+          site=$(gh api "repos/$GITHUB_REPOSITORY/pages" --jq .html_url); site=${site%/}
+          origin=$(printf '%s' "$site" | sed -E 's#^(https?://[^/]+).*#\1#')
+          echo "origin=$origin" >> "$GITHUB_OUTPUT"
+          echo "base=${site#"$origin"}/pr/$PR" >> "$GITHUB_OUTPUT"
+          echo "live=$site/" >> "$GITHUB_OUTPUT"
+          echo "url=$site/pr/$PR/" >> "$GITHUB_OUTPUT"
+
+      # A preview is the site built for its subfolder, with analytics off,
+      # marked noindex, and without a sitemap or robots.txt of its own.
+      - name: Build the preview
+        run: |
+          cat > _config_preview.yml <<EOF
+          url: "${{ steps.where.outputs.origin }}"
+          baseurl: "${{ steps.where.outputs.base }}"
+          analytics:
+            enabled: false
+          preview:
+            number: $PR
+            sha: "$HEAD_SHA"
+            live_url: "${{ steps.where.outputs.live }}"
+            pr_url: "${{ github.event.pull_request.html_url }}"
+          EOF
+          bundle exec jekyll build --config _config.yml,_config_preview.yml
+          node scripts/build-agent-files.mjs --config _config.yml,_config_preview.yml
+          rm -f _site/sitemap.xml _site/robots.txt
+
+      - name: Publish to the pr-previews branch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git worktree add --detach "$RUNNER_TEMP/previews" && cd "$RUNNER_TEMP/previews"
+          # Other PRs write other folders, so when a push is rejected, start
+          # again from the branch as it is now and copy this folder in again.
+          for i in 1 2 3 4; do
+            if git ls-remote --exit-code --heads origin pr-previews >/dev/null; then
+              git fetch -q --no-tags --depth=1 origin pr-previews && git checkout -qf -B pr-previews FETCH_HEAD
+            else
+              git checkout -q --orphan pr-previews && git rm -rfq .
+              printf '%s\n' "# PR previews" "" "Built by .github/workflows/pr.yml, one folder per open pull request," \
+                "and published by pages.yml at <site>/pr/<number>/. Do not edit by hand." > README.md
+            fi
+            rm -rf "pr/$PR" && mkdir -p "pr/$PR" && cp -R "$GITHUB_WORKSPACE/_site/." "pr/$PR/"
+            git add -A
+            git diff --cached --quiet && { echo "Preview unchanged"; exit 0; }
+            git commit -qm "Preview #$PR at ${HEAD_SHA:0:7}"
+            git push -q origin pr-previews && exit 0
+            sleep $((i * 3))
+          done
+          exit 1
+
+      - name: Start the Pages deploy
+        run: gh workflow run pages.yml --ref "${{ github.event.repository.default_branch }}"
+
+      # Live once the served page carries this commit's marker.
+      - name: Wait for the preview to go live
+        id: wait
+        run: |
+          for i in $(seq 1 40); do
+            if curl -fsSL "${{ steps.where.outputs.url }}?v=$i" | grep -q "hub-preview-sha\" content=\"$HEAD_SHA"; then
+              echo "state=live" >> "$GITHUB_OUTPUT"; exit 0
+            fi
+            sleep 15
+          done
+          echo "state=pending" >> "$GITHUB_OUTPUT"
+
+  report:
+    name: Report
+    needs: [checks, preview]
+    if: >-
+      always() && github.event.action != 'closed' &&
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      github.actor != 'dependabot[bot]'
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        continue-on-error: true
+        with:
+          name: pr-report
+          path: report
+      - name: Post or update the PR comment
+        env:
+          PREVIEW_URL: ${{ needs.preview.outputs.url }}
+          PREVIEW_STATE: ${{ needs.preview.result == 'success' && needs.preview.outputs.state || 'failed' }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          node scripts/pr-report.mjs report > comment.md
+          id=$(gh api "repos/$GITHUB_REPOSITORY/issues/$PR/comments" --paginate \
+            --jq '.[] | select(.user.login == "github-actions[bot]" and (.body | startswith("<!-- hub-pr-report -->"))) | .id' | head -1)
+          if [ -n "$id" ]; then
+            gh api -X PATCH "repos/$GITHUB_REPOSITORY/issues/comments/$id" -F body=@comment.md >/dev/null
+          else
+            gh api "repos/$GITHUB_REPOSITORY/issues/$PR/comments" -F body=@comment.md >/dev/null
+          fi
+
+  cleanup:
+    name: Remove preview
+    if: >-
+      github.event.action == 'closed' &&
+      github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      actions: write
+      pull-requests: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+      - name: Delete the preview folder and redeploy
+        run: |
+          git ls-remote --exit-code --heads origin pr-previews >/dev/null || { echo "No previews branch"; exit 0; }
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git worktree add --detach "$RUNNER_TEMP/previews" && cd "$RUNNER_TEMP/previews"
+          for i in 1 2 3 4; do
+            git fetch -q --no-tags --depth=1 origin pr-previews && git checkout -qf -B pr-previews FETCH_HEAD
+            [ -d "pr/$PR" ] || { echo "No preview for #$PR"; break; }
+            git rm -rq "pr/$PR" && git commit -qm "Remove preview #$PR"
+            git push -q origin pr-previews && break
+            sleep $((i * 3))
+          done
+          # The deploy publishes open PRs only, so it drops this one even if
+          # the push above never landed.
+          gh workflow run pages.yml --ref "${{ github.event.repository.default_branch }}"
+      - name: Mark the preview removed in the PR comment
+        run: |
+          id=$(gh api "repos/$GITHUB_REPOSITORY/issues/$PR/comments" --paginate \
+            --jq '.[] | select(.user.login == "github-actions[bot]" and (.body | startswith("<!-- hub-pr-report -->"))) | .id' | head -1)
+          [ -n "$id" ] || exit 0
+          gh api "repos/$GITHUB_REPOSITORY/issues/comments/$id" --jq .body \
+            | sed -E 's#^\*\*Preview:\*\*.*#**Preview:** removed when the pull request closed#' > comment.md
+          gh api -X PATCH "repos/$GITHUB_REPOSITORY/issues/comments/$id" -F body=@comment.md >/dev/null

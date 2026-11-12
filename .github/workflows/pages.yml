@@ -11,6 +11,7 @@ permissions:
   contents: read
   pages: write
   id-token: write
+  pull-requests: read # list open PRs, whose previews are published alongside
 
 # One deploy at a time. In-progress runs finish rather than being cancelled, so
 # a half-uploaded site never becomes the live one.
@@ -55,7 +56,24 @@ jobs:
       # Writes the .md twin of every page and llms-full.txt into _site. Runs
       # after Jekyll so it can add to the built output.
       - name: Build agent-facing files
-        run: node scripts/build-agent-files.mjs
+        run: node scripts/build-agent-files.mjs --config _config.yml,_config_pages.yml
+      # PR previews (.github/workflows/pr.yml) are built for <site>/pr/<number>/
+      # and kept on the pr-previews branch. Only open PRs are published, so a
+      # closed PR's preview goes away with the next deploy even if its cleanup
+      # never ran. They are added after the agent files, so the live sitemap,
+      # llms.txt and llms-full.txt never list them.
+      - name: Add open pull request previews
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git ls-remote --exit-code --heads origin pr-previews >/dev/null || { echo "No pr-previews branch yet"; exit 0; }
+          git fetch -q --no-tags --depth=1 origin pr-previews
+          for n in $(gh pr list --state open --limit 200 --json number --jq '.[].number'); do
+            if git cat-file -e "FETCH_HEAD:pr/$n" 2>/dev/null; then
+              git archive FETCH_HEAD "pr/$n" | tar -x -C _site
+              echo "Added preview for #$n"
+            fi
+          done
       - uses: actions/upload-pages-artifact@v3
 
   deploy:

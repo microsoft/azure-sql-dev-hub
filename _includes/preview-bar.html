@@ -1,0 +1,11 @@
+{%- comment -%}
+  PR preview bar. Only a preview build sets site.preview (the PR workflow writes
+  it into _config_preview.yml), so the live site never renders this. It says
+  plainly that the page is a pull request's draft and links to the live site.
+{%- endcomment -%}
+{%- if site.preview -%}
+<div role="note" style="position:relative;z-index:60;padding:8px 16px;background:#fff4ce;color:#3b2e00;border-bottom:1px solid #e3c766;font:500 14px/1.4 system-ui,sans-serif;text-align:center">
+  Preview of <a href="{{ site.preview.pr_url }}" style="color:inherit;text-decoration:underline">pull request #{{ site.preview.number }}</a> at <code>{{ site.preview.sha | slice: 0, 7 }}</code>. This is not the live site:
+  <a href="{{ site.preview.live_url }}" style="color:inherit;text-decoration:underline">go to the live site</a>.
+</div>
+{%- endif -%}
