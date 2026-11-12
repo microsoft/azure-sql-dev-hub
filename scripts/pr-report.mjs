@@ -51,28 +51,32 @@ const tail = (s, n = 15) => s.trim().split('\n').slice(-n).join('\n');
 const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 const delta = (now, base) => (typeof base === 'number' ? ` (main ${base}, ${now - base >= 0 ? '+' : ''}${Math.round((now - base) * 10) / 10})` : '');
 
-// open-agent-readiness grades through the Cloudflare quick tunnel, and
-// Cloudflare's edge on trycloudflare.com rewrites robots.txt with its own
-// AI-crawler rules and content signals, and answers AI crawlers with 403.
-// These checks grade that edge, not this site, so the site score leaves them
-// out. Its rubric (web/2026.11) weights each check: pass 1, warn 0.4, fail 0,
-// skip not counted. That reproduces its total_score from its own checks.
+// open-agent-readiness: its own total_score is the number reported. It grades
+// through the Cloudflare quick tunnel, whose edge on trycloudflare.com rewrites
+// robots.txt with Cloudflare's AI-crawler rules and answers AI crawlers with
+// 403. The checks below grade that edge, not this site; they are listed apart
+// so nobody tries to fix them here. Both PR and base go through the same edge,
+// so the difference between them is still fair.
 const TUNNEL_CHECKS = new Set(['ai_bot_rules', 'content_signals', 'browse_bot_access', 'multi_bot_fetch']);
-const WARN_CREDIT = 0.4;
 function agentScore(o) {
   if (!o || typeof o.total_score !== 'number') return null;
-  let earned = 0, total = 0;
-  for (const c of o.checks || []) {
-    if (c.status === 'skip' || TUNNEL_CHECKS.has(c.id)) continue;
-    earned += c.weight * (c.status === 'pass' ? 1 : c.status === 'warn' ? WARN_CREDIT : 0);
-    total += c.weight;
-  }
+  const open = (o.checks || []).filter((c) => c.status === 'fail' || c.status === 'warn');
   return {
-    site: total ? Math.round((100 * earned) / total) : o.total_score,
-    scanned: o.total_score,
+    score: o.total_score,
     grade: o.grade,
-    open: (o.checks || []).filter((c) => (c.status === 'fail' || c.status === 'warn') && !TUNNEL_CHECKS.has(c.id)),
+    site: open.filter((c) => !TUNNEL_CHECKS.has(c.id)),
+    tunnel: open.filter((c) => TUNNEL_CHECKS.has(c.id)),
   };
+}
+
+// Vercel's Agent Readability audit: score, rating, and checks by category.
+function vercelAudit(o) {
+  if (!o || typeof o.score !== 'number') return null;
+  const failed = [];
+  for (const [, cat] of Object.entries(o.categories || {})) {
+    for (const c of cat.checks || []) if (!c.passed && !c.skipped) failed.push(c);
+  }
+  return { score: o.score, rating: o.rating, failed };
 }
 
 const rows = [];
@@ -87,8 +91,13 @@ rows.push(['Page checks', icon(out.pages), pages ? `score **${pages.score}/100**
 const oarPr = agentScore(json('oar-pr.json'));
 const oarBase = agentScore(json('oar-base.json'));
 rows.push(['Agent readiness (open-agent-readiness)', oarPr ? '📊' : '⚠️',
-  oarPr ? `score **${oarPr.site}/100**${delta(oarPr.site, oarBase?.site)} · report only`
+  oarPr ? `score **${oarPr.score}/100**, grade ${oarPr.grade}${delta(oarPr.score, oarBase?.score)} · report only`
     : 'unavailable this run (the tunnel or scan did not finish); not blocking']);
+
+const vcPr = vercelAudit(json('vercel-pr.json'));
+const vcBase = vercelAudit(json('vercel-base.json'));
+rows.push(['Agent readability (Vercel)', vcPr ? '📊' : '⏭️',
+  vcPr ? `score **${vcPr.score}/100**, ${vcPr.rating}${delta(vcPr.score, vcBase?.score)} · report only` : 'did not run']);
 
 const lumar = json('lumar.json');
 rows.push(['Agent files (Lumar)', icon(out.agentfiles),
@@ -105,8 +114,10 @@ const blocked = lkLinks.filter((l) => l.state !== 'BROKEN' && [401, 403, 429].in
 rows.push(['Links (linkinator)', lk ? (broken.length ? '⚠️' : '✅') : '⏭️',
   lk ? `${lkLinks.length} checked, ${brokenInt.length} internal and ${brokenExt.length} external broken${blocked.length ? `, ${blocked.length} blocked bots` : ''} · report only` : '']);
 
-rows.push(['Visual diff (BackstopJS)', visual ? (changed.length ? '🖼️' : '✅') : '⏭️',
-  visual ? `${changed.length} of ${pairs.length} screenshots changed from main` : 'no base build to compare']);
+const visualPages = json('visual-pages.json');
+rows.push(['Visual diff (BackstopJS)', visual ? (changed.length ? '🖼️' : '✅') : visualPages ? '✅' : '⏭️',
+  visual ? `${changed.length} of ${pairs.length} screenshots changed, on ${visualPages?.length ?? '?'} page(s) whose output changed`
+    : visualPages ? 'no page changed from main, so nothing to capture' : 'no base build to compare']);
 
 const sha = (env.HEAD_SHA || '').slice(0, 7);
 const lines = [
@@ -147,10 +158,18 @@ if (pages) {
 }
 if (oarPr) {
   const mark = { fail: '❌', warn: '⚠️' };
-  lines.push(`<details><summary>Agent readiness: what the other ${100 - oarPr.site} points need</summary>`, '',
-    ...oarPr.open.map((c) => `- ${mark[c.status]} ${esc(c.title || c.id)} (${c.category}, weight ${c.weight}): ${esc(c.detail || '')}`),
-    '', `The scanner reported ${oarPr.scanned}/100 (grade ${oarPr.grade}). The site score leaves out ${TUNNEL_CHECKS.size} checks that graded Cloudflare's tunnel instead of this site: its robots.txt and its blocking of AI crawlers. Some checks, such as Markdown content negotiation, need a server GitHub Pages does not provide.`,
-    '', '</details>', '');
+  const item = (c) => `- ${mark[c.status]} ${esc(c.title || c.id)} (${c.category}, weight ${c.weight}): ${esc(c.detail || '')}`;
+  lines.push(`<details><summary>Agent readiness (open-agent-readiness): ${oarPr.site.length + oarPr.tunnel.length} checks failed or warned</summary>`, '',
+    ...oarPr.site.map(item));
+  if (oarPr.tunnel.length) {
+    lines.push('', '**Graded the tunnel, not this site.** Cloudflare\'s edge in front of the scan rewrites robots.txt and refuses AI crawlers; GitHub Pages does neither. These count in the score above, for the PR and main alike:', '', ...oarPr.tunnel.map(item));
+  }
+  lines.push('', '</details>', '');
+}
+if (vcPr && vcPr.failed.length) {
+  lines.push(`<details><summary>Agent readability (Vercel): ${vcPr.failed.length} checks failed</summary>`, '',
+    ...vcPr.failed.map((c) => `- ❌ ${esc(c.name)} (${c.tier})${c.detail ? `: ${esc(c.detail)}` : ''}. ${esc(c.hint || '')}`),
+    '', 'Spec: [Agent Readability Spec](https://vercel.com/kb/guide/agent-readability-spec).', '', '</details>', '');
 }
 if (broken.length) {
   lines.push('<details><summary>Broken links</summary>', '',

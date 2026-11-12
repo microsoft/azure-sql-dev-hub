@@ -12,6 +12,7 @@ Every pull request runs [`.github/workflows/pr.yml`](../.github/workflows/pr.yml
 | Page checks and score out of 100 | `scripts/check-pages.mjs` | On errors, or a lower score than the base branch |
 | Agent files: robots.txt, sitemap, llms.txt and others | [Lumar `agentic-readiness`](https://agentic-readiness.lumar.io/cli) (MIT) | On a published file that is broken |
 | Agent-readiness score out of 100, PR and base | [`open-agent-readiness`](https://gitlab.com/startuphub-ai/open-agent-readiness) (MIT), over a public tunnel | No, report only |
+| Agent Readability Spec score out of 100, PR and base | [`@vercel/agent-readability`](https://www.npmjs.com/package/@vercel/agent-readability) audit (MIT), run in the job | No, report only |
 | Links, internal and external | [linkinator](https://github.com/JustinBeckwith/linkinator) (MIT) | No, report only |
 | Visual diff against the base branch | [BackstopJS](https://github.com/garris/BackstopJS) (MIT) | No, report only |
 
@@ -21,9 +22,11 @@ Pull requests from forks, and Dependabot's, run every check and get the results 
 
 1. The job builds the PR and the base branch, and serves each with `scripts/serve-site.mjs`, which answers the way GitHub Pages does: `/page` finds `page.html`, a missing path gets `404.html` with a 404 status, and there is no content negotiation.
 2. `open-agent-readiness` grades a whole public host and refuses local addresses. This site lives on a subpath of `microsoft.github.io`, so it cannot grade the live site either. Each build gets a [Cloudflare quick tunnel](https://developers.cloudflare.com/cloudflare-one/networks/connectors/cloudflare-tunnel/do-more-with-tunnels/trycloudflare/) for the length of the scan: a temporary `https://<random>.trycloudflare.com` with the site at its root. Quick tunnels are free, need no account, and are meant for testing. They have no uptime guarantee, so a failed tunnel shows "unavailable" and does not fail the PR. `cloudflared` is pinned and its checksum verified.
-3. BackstopJS captures four pages at desktop and phone widths from each build, with reduced motion so animations rest. Changed screenshots go to the `pr-assets` branch under `pr/<number>/` so the comment can show them, and closing the PR removes them. The full report is in the run's `pr-report` artifact.
+3. BackstopJS captures only the pages whose built output changed (`scripts/visual/changed-pages.mjs`), plus the key pages when shared CSS, JS or images changed, at desktop and phone widths from each build, with reduced motion so animations rest. A PR that changes no page gets no screenshots. Changed screenshots go to the `pr-assets` branch under `pr/<number>/` so the comment can show them, and closing the PR removes them. The full report is in the run's `pr-report` artifact.
 
-Add a page to the visual diff in `scripts/visual/backstop.config.cjs`.
+The key pages are listed in `scripts/visual/changed-pages.mjs`.
+
+The open-agent-readiness score is the scanner's own. A few of its checks grade Cloudflare's edge in front of the tunnel (its robots.txt and its blocking of AI crawlers) rather than this site; the comment lists those apart. The PR and base go through the same edge, so the difference between them is fair.
 
 ## Run it locally
 

@@ -3,16 +3,12 @@
 // each page from the base, `backstop test` captures it from the PR and compares.
 // Nothing is committed: both sides are built fresh in the same job.
 //
-// Environment: BASE_URL, PR_URL (no trailing slash), OUT_DIR, CHROME_PATH.
-// Pages are the ones that exist on every branch so far; add a path here to
-// cover a new page.
+// Environment: BASE_URL, PR_URL (no trailing slash), OUT_DIR, CHROME_PATH, and
+// PAGES, a JSON list of paths from changed-pages.mjs: only pages this PR
+// changed, plus the key pages when shared CSS or JS changed.
 
-const PAGES = [
-  ['Home', '/'],
-  ['Prompt page', '/build/javascript-app.html'],
-  ['All prompts', '/prompts.html'],
-  ['Privacy', '/privacy.html'],
-];
+const NAMES = { '/': 'Home', '/build/javascript-app.html': 'Prompt page', '/prompts.html': 'All prompts', '/privacy.html': 'Privacy' };
+const PAGES = JSON.parse(process.env.PAGES || '["/"]').map((path) => [NAMES[path] || path, path]);
 const base = process.env.BASE_URL || 'http://localhost:8081';
 const pr = process.env.PR_URL || 'http://localhost:8080';
 const out = process.env.OUT_DIR || 'backstop_data';

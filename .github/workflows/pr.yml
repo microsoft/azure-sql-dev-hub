@@ -32,6 +32,7 @@ env:
   AGENTIC_READINESS: agentic-readiness@0.3.7
   LINKINATOR: linkinator@8.1.0
   BACKSTOPJS: backstopjs@6.3.25
+  VERCEL_AUDIT: "@vercel/agent-readability@0.7.0"
   # BackstopJS drives the runner's own Chrome, so skip its browser downloads.
   PUPPETEER_SKIP_DOWNLOAD: "1"
   PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: "1"
@@ -65,11 +66,16 @@ jobs:
         continue-on-error: true
         run: npm test 2>&1 | tee "$REPORT/tests.log"
 
+      # Built for the address it is served at below (the PR on 8080, the base
+      # on 8081), so its sitemap and absolute URLs point at pages a scanner
+      # can fetch.
       - name: Build site
         id: build
         continue-on-error: true
         run: |
-          { bundle exec jekyll build && node scripts/build-agent-files.mjs; } 2>&1 | tee "$REPORT/build.log"
+          printf 'url: "http://localhost:8080"\n' > "$RUNNER_TEMP/ci-pr.yml"
+          printf 'url: "http://localhost:8081"\n' > "$RUNNER_TEMP/ci-base.yml"
+          { bundle exec jekyll build --config "_config.yml,$RUNNER_TEMP/ci-pr.yml" && node scripts/build-agent-files.mjs; } 2>&1 | tee "$REPORT/build.log"
 
       - name: Internal links
         id: links
@@ -87,7 +93,7 @@ jobs:
           git fetch --no-tags --depth=1 origin "${{ github.base_ref }}"
           git worktree add "$base" FETCH_HEAD
           ln -s "$GITHUB_WORKSPACE/node_modules" "$base/node_modules"
-          (cd "$base" && BUNDLE_GEMFILE="$GITHUB_WORKSPACE/Gemfile" bundle exec jekyll build -q && node scripts/build-agent-files.mjs)
+          (cd "$base" && BUNDLE_GEMFILE="$GITHUB_WORKSPACE/Gemfile" bundle exec jekyll build -q --config "_config.yml,$RUNNER_TEMP/ci-base.yml" && node scripts/build-agent-files.mjs)
           node scripts/check-pages.mjs --site "$BASE_SITE" --json "$REPORT/pages-base.json" || true
 
       - name: Page checks and score
@@ -114,6 +120,16 @@ jobs:
         if: steps.build.outcome == 'success'
         continue-on-error: true
         run: npx -y "$AGENTIC_READINESS" localhost:8080 --allow-private --json > "$REPORT/lumar.json" 2> "$REPORT/lumar.log"
+
+      # Vercel's Agent Readability Spec audit (@vercel/agent-readability, MIT):
+      # 25 weighted checks, run from this job against both builds, no tunnel
+      # needed. Report only.
+      - name: Agent readability (Vercel)
+        if: steps.build.outcome == 'success'
+        continue-on-error: true
+        run: |
+          npx -y "$VERCEL_AUDIT" audit http://localhost:8080/ --json > "$REPORT/vercel-pr.json" 2> "$REPORT/vercel-pr.log" || true
+          if [ -d "$BASE_SITE" ]; then npx -y "$VERCEL_AUDIT" audit http://localhost:8081/ --json > "$REPORT/vercel-base.json" 2>/dev/null || true; fi
 
       # open-agent-readiness (MIT) grades a whole public host and refuses
       # private addresses, so each build gets a Cloudflare quick tunnel: a
@@ -161,15 +177,20 @@ jobs:
             --skip '^http://localhost:4000' --skip 'linkedin\.com' --skip '^https://fonts\.(googleapis|gstatic)\.com/?$' \
             --format json > "$REPORT/linkinator.json" || true
 
-      # BackstopJS (MIT): each page from the base build, then from the PR,
-      # compared at desktop and phone widths. Report only: a PR that changes
+      # BackstopJS (MIT): the pages this PR changed, from the base build and
+      # then the PR, compared at desktop and phone widths. Pages whose built
+      # output is unchanged are not captured. Report only: a PR that changes
       # the design is meant to change the pictures.
       - name: Visual diff against the base branch (BackstopJS)
         if: steps.build.outcome == 'success'
         continue-on-error: true
         run: |
           if [ ! -d "$BASE_SITE" ]; then echo "No base build to compare against"; exit 0; fi
-          export OUT_DIR="$REPORT/visual" CHROME_PATH="$(command -v google-chrome || command -v chromium)"
+          PAGES=$(node scripts/visual/changed-pages.mjs "$BASE_SITE" _site)
+          echo "$PAGES" > "$REPORT/visual-pages.json"
+          if [ "$PAGES" = "[]" ]; then echo "No page changed; nothing to capture"; exit 0; fi
+          echo "Capturing $PAGES"
+          export PAGES OUT_DIR="$REPORT/visual" CHROME_PATH="$(command -v google-chrome || command -v chromium)"
           npx -y "$BACKSTOPJS" reference --config=scripts/visual/backstop.config.cjs
           npx -y "$BACKSTOPJS" test --config=scripts/visual/backstop.config.cjs || true
 
