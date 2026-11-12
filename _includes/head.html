@@ -110,5 +110,8 @@
     document.documentElement.classList.add("js");
   </script>
   <link rel="stylesheet" href="{{ '/assets/css/main.css' | relative_url }}">
+  {%- if include.css %}
+  <link rel="stylesheet" href="{{ include.css | relative_url }}">
+  {%- endif %}
   {% include analytics.html %}
 </head>
