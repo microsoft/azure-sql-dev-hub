@@ -458,6 +458,26 @@ skills:
   # appear in the markdown twin only, which has no links, so agents still get
   # the other install commands and the catalog's address.
   catalog: Full catalog, every skill's source, and the feedback form at aka.ms/azuresql-skills.
+tools_heading: Build with the tools you know.
+tools:
+- key: github-copilot
+  title: GitHub Copilot
+  agent_logo: vscode-copilot
+  text: Write and explain SQL queries.
+  label: Explore SQL capabilities
+  href: https://learn.microsoft.com/sql/tools/visual-studio-code-extensions/github-copilot/overview
+- key: vscode-mssql
+  title: VS Code + MSSQL
+  image: /assets/img/vscode.png
+  text: Design schemas and query your data.
+  label: Explore the extension
+  href: https://learn.microsoft.com/sql/tools/visual-studio-code-extensions/mssql/mssql-extension-visual-studio-code
+- key: ssms
+  title: SQL Server Management Studio
+  image: /assets/img/ssms.svg
+  text: Inspect query plans and troubleshoot.
+  label: Explore SSMS
+  href: https://learn.microsoft.com/ssms/sql-server-management-studio-ssms
 videos_heading: See it in action
 videos_text: Longer walkthroughs from the Microsoft SQL team. Scroll for more.
 videos:

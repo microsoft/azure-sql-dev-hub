@@ -290,6 +290,31 @@
     </div>
   </section>
 
+  <section id="tools" class="tools" aria-labelledby="tools-title">
+    <div class="w">
+      <h2 id="tools-title">{{ page.tools_heading }}</h2>
+      <div class="tools-grid">
+        {%- for tool in page.tools %}
+        <a class="su-card" href="{{ tool.href }}"
+           data-event="site/action" data-event-action="outboundClicked"
+           data-event-destination-id="tool-{{ tool.key }}" data-event-destination-type="docs">
+          <span class="su-icon tools-icon" aria-hidden="true">
+            {%- if tool.agent_logo %}
+            {%- assign tool_agent = page.skills.agents | where: 'key', tool.agent_logo | first %}
+            {{ tool_agent.logo }}
+            {%- else %}
+            <img src="{{ tool.image | relative_url }}" alt="" width="32" height="32" loading="lazy">
+            {%- endif %}
+          </span>
+          <h3>{{ tool.title }}</h3>
+          <p>{{ tool.text }}</p>
+          <span class="su-go">{{ tool.label }} <span aria-hidden="true">&#8599;</span></span>
+        </a>
+        {%- endfor %}
+      </div>
+    </div>
+  </section>
+
   <section id="watch" class="videos">
     <div class="w">
       <div class="vid-head">

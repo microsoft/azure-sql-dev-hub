@@ -207,6 +207,13 @@ function homeToMarkdown(d) {
   const skNote = [sk.catalog, sk.note].filter(Boolean).map(plain).join(' ');
   if (skNote) out.push(skNote, '');
 
+  if (d.tools && d.tools.length) {
+    out.push(`## ${d.tools_heading} {#tools}`, '');
+    for (const tool of d.tools) {
+      out.push(`### ${tool.title}`, '', plain(tool.text), '', `[${tool.label}](${tool.href})`, '');
+    }
+  }
+
   out.push('## Videos {#watch}', '', d.videos_text || '', '');
   for (const vv of d.videos || []) out.push(`- [${vv.title}](${vv.href}): ${vv.text}`);
   out.push('');
