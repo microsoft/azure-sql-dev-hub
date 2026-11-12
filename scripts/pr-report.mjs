@@ -48,7 +48,7 @@ if (ext) {
 
 const preview = {
   live: `**Preview:** ${env.PREVIEW_URL}`,
-  pending: `**Preview:** ${env.PREVIEW_URL} (built, not live yet: it goes live with the next Pages deploy)`,
+  pending: `**Preview:** ${env.PREVIEW_URL} (saved but not live yet: it appears once the Pages deploy on the default branch publishes previews; see the workflow run)`,
   failed: '**Preview:** ❌ the preview did not build or publish; see the workflow run',
   skipped: '**Preview:** none for pull requests from forks',
   removed: '**Preview:** removed when the pull request closed',

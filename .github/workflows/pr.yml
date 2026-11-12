@@ -222,16 +222,29 @@ jobs:
       - name: Start the Pages deploy
         run: gh workflow run pages.yml --ref "${{ github.event.repository.default_branch }}"
 
-      # Live once the served page carries this commit's marker.
+      # Live once the served page carries this commit's marker. The deploy runs
+      # the default branch's pages.yml, so until that version publishes
+      # previews there is nothing to wait for.
       - name: Wait for the preview to go live
         id: wait
+        env:
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+          URL: ${{ steps.where.outputs.url }}
         run: |
+          if ! gh api "repos/$GITHUB_REPOSITORY/contents/.github/workflows/pages.yml?ref=$DEFAULT_BRANCH" --jq .content \
+               | base64 -d | grep -q 'refs/heads/pr-previews'; then
+            echo "::notice::pages.yml on $DEFAULT_BRANCH does not publish previews yet. The preview is saved and goes live once that change is on $DEFAULT_BRANCH."
+            echo "state=pending" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          echo "Waiting up to 10 minutes for $URL to serve ${HEAD_SHA:0:7}"
           for i in $(seq 1 40); do
-            if curl -fsSL "${{ steps.where.outputs.url }}?v=$i" | grep -q "hub-preview-sha\" content=\"$HEAD_SHA"; then
+            if curl -sfL "$URL?v=$i" | grep -q "hub-preview-sha\" content=\"$HEAD_SHA"; then
+              echo "Live after about $((i * 15 - 15)) seconds"
               echo "state=live" >> "$GITHUB_OUTPUT"; exit 0
             fi
             sleep 15
           done
+          echo "::notice::Not live after 10 minutes; the Pages deploy may still be queued."
           echo "state=pending" >> "$GITHUB_OUTPUT"
 
   report:
