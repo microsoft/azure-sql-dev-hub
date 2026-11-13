@@ -26,8 +26,6 @@ module.exports = {
     url: pr + path,
     referenceUrl: base + path,
     selectors: ['document'],
-    // Video thumbnails come from YouTube and can differ run to run.
-    hideSelectors: ['.vid-thumb img'],
     delay: 400,
     misMatchThreshold: 0.1,
     requireSameDimensions: false,

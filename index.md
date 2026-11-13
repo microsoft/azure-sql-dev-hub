@@ -765,43 +765,28 @@ tools:
   text: Inspect query plans and troubleshoot.
   label: Explore SSMS
   href: https://learn.microsoft.com/ssms/sql-server-management-studio-ssms
-videos_heading: See it in action
-videos_text: Longer walkthroughs from the Microsoft SQL team.
-# The video marked `featured` (else the first) leads, large; the next three sit
-# beside it as Up next. Any more go in a grid below, behind a Show more button
-# once the page script runs. Add a video anywhere in the list; to change the
-# lead, move `featured`.
-videos_up_next: Up next
-videos_all: All videos on YouTube
-videos_all_href: https://aka.ms/microsoftsqlyt
-videos_more: Show N more videos
-videos_less: Show fewer videos
-videos:
-- id: pq2drN2Qw5w
-  title: 'Boost your SQL development in VS Code: Copilot, containers, and more'
-  text: Carlos Robles, VS Code Live, Aug 2025
-  tag: VS Code Live
-  href: https://www.youtube.com/watch?v=pq2drN2Qw5w
-  image: https://img.youtube.com/vi/pq2drN2Qw5w/hqdefault.jpg
-- id: wZUPFCCByfw
-  featured: true
+# Learn more: a short row of links where the video section was. Each entry is
+# one link: `kind` labels it, `type` is its telemetry destination type.
+learn_heading: Learn more
+learn:
+- key: build-with-agent
+  kind: Blog
+  title: How to build an app on Azure SQL with an AI coding agent
+  text: Azure SQL blog, September 2026
+  href: https://devblogs.microsoft.com/azure-sql/build-app-azure-sql-ai-coding-agent/
+  type: other
+- key: data-exposed-agents
+  kind: Video
   title: Build AI apps with VS Code Agents, GitHub Copilot, and the MSSQL extension
   text: Data Exposed, May 2026
-  tag: Data Exposed
   href: https://www.youtube.com/watch?v=wZUPFCCByfw
-  image: https://img.youtube.com/vi/wZUPFCCByfw/hqdefault.jpg
-- id: biJywQPbqn0
-  title: AI-powered SQL development in VS Code with GitHub Copilot
-  text: MSSQL extension v1.32, May 2025
-  tag: Release
-  href: https://www.youtube.com/watch?v=biJywQPbqn0
-  image: https://img.youtube.com/vi/biJywQPbqn0/hqdefault.jpg
-- id: foundations
-  title: Azure SQL Database Foundations
-  text: 'Four sessions: getting started, migration, performance, AI'
-  tag: Series
-  href: https://aka.ms/azuresqlfoundationseries
-  image: https://devblogs.microsoft.com/wp-content/uploads/2026/08/word-image-22210-2.webp
+  type: youtube
+- key: youtube-channel
+  kind: Channel
+  title: All videos on YouTube
+  text: The Microsoft SQL channel
+  href: https://aka.ms/microsoftsqlyt
+  type: youtube
 faqs:
 - question: What do I need to get started?
   answer: An Azure account and a development database. The free tier covers everything on this page, within its limits. If you want to work offline, run the container instead. It is in public preview and needs no sign-up.
