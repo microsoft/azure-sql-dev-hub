@@ -436,6 +436,15 @@ html:has(.qs-dialog[open]){overflow:hidden}
    tokens only. The play button and tag sit on the thumbnail, so they keep the
    same colors in both themes. The arrows show only once the page script has
    run; without it the row still scrolls. */
+/* SQL tools use the setup cards and the adjacent sections' theme tokens. */
+.h .tools{padding:56px 0;border-top:1px solid var(--border);background:var(--bg);color:var(--text)}
+.h .tools h2{font-size:24px;line-height:1.25;font-weight:600;letter-spacing:-.01em}
+.h .tools-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-top:24px}
+.h .tools-icon{color:var(--text)}
+.h .tools-icon svg,.h .tools-icon img{display:block;width:32px;height:32px;object-fit:contain}
+@media (max-width:820px){.h .tools{padding:44px 0}.h .tools-grid{grid-template-columns:1fr}}
+
+
 .h .videos{padding:56px 0;border-top:1px solid var(--border);background:var(--bg);color:var(--text)}
 .h .vid-head{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px 32px;margin-bottom:24px}
 .h .videos h2{font-size:24px;line-height:1.25;font-weight:600;letter-spacing:-.01em}

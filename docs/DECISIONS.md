@@ -77,3 +77,5 @@ Consequence for `hub-new-prompt` (contributor skill, drafted, not yet implemente
 ## 2026-09-16: Homepage design and prompt files
 
 Human layer added on top of the agent layer: hero video with chapter stamps, three setup paths as tabs, six scenario cards with illustrations, workload tiles, agent selector that switches the install command, video reel. Prompts moved from short front matter strings to full instruction sets in `build/*.md` (role, purpose, scope, numbered steps, validation rules, do-nots), matching the container site's prompt structure. The homepage Copy button fetches the page's markdown twin, so the card and the file cannot drift. `dotnet-app` replaced by `multi-tenant`; the .NET framework is covered by the serverless and event-driven scenarios. All install commands and skills links point at `microsoft/azure-sql-skills` (aka.ms/azuresql-skills), which launches at SQLCon alongside the Hub.
+
+2026-11-12: Add a compact SQL tools section after Agent Skills and before Videos, reusing setup-card styles and existing theme tokens. Keep its copy in homepage front matter and include it in the Markdown twin. The section has no subtitle.
