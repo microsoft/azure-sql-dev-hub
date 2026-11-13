@@ -123,7 +123,8 @@ function twinHref(href) {
 // route, with every command and the agent prompt, so an agent reading the twin
 // can follow either.
 function setupOption(o, labels, skills) {
-  const out = [`### ${o.title}${o.pill ? ` (${o.pill})` : ''}`, '', o.card, '', o.summary, ''];
+  const out = [`### ${o.title}${o.pill ? ` (${o.pill})` : ''}`, '', o.card, ''];
+  if (o.summary) out.push(o.summary, '');
   if (o.vscode) {
     out.push(`${labels.vscode || 'Set it up in VS Code'}. ${plain(o.vscode.text)} ${labels.vscode_need || ''}`.trim(), '');
     out.push(`- ${labels.vscode_open || 'Open in VS Code'}: vscode://ms-mssql.mssql/deploy?type=${o.vscode.type}&source=azure-sql-dev-hub`);

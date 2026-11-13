@@ -83,37 +83,31 @@ setup:
 - key: free
   id: free-setup
   title: Azure SQL Database, free tier
+  # The setup dialog's heading. The card and the markdown twin keep the title.
+  heading: Get a free Azure SQL database
   icon: <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 18a4.5 4.5 0 0 1-.6-8.96A6 6 0 0 1 18 8.5a4 4 0 0 1-.5 9.5H7z"/></svg>
   card: A serverless database in Azure with a monthly free allowance. Up to 10 free databases per subscription.
-  summary: A serverless database with a monthly free allowance, created in the Azure portal in a few minutes.
   # Shown under Set it up yourself, before the steps.
-  need: You need an Azure subscription that can create resources. Azure for Students Starter doesn't work.
+  need: You need an Azure subscription that can create resources.
   steps:
   # A step's link is set inside its text where the text names it.
   - key: create
-    title: Start a free database
-    text: Open the Azure SQL hub and select <b>Start free</b>.
+    title: Create the database
+    text: Open the Azure portal and select <b>Start free</b>. Create when <b>Estimated cost/month</b> shows 0.
     link:
-      label: Open the Azure SQL hub
+      label: Open the Azure portal
       href: https://aka.ms/azuresqlhub
-  - key: basics
-    title: Fill in the basics
-    text: Pick the subscription, resource group, database name and server. For a new server, choose Microsoft Entra authentication.
-  - key: review
-    title: Create it
-    text: Check that <b>Estimated cost/month</b> shows 0, then select <b>Review + create</b> and <b>Create</b>.
   - key: access
-    title: Open access
-    text: On the server, add your IP under <b>Networking</b> and sign in under <b>Microsoft Entra ID</b>.
+    title: Allow your IP
+    text: On the server's <b>Networking</b> page, add your client IP and save.
   - key: verify
-    title: Verify
-    text: Run this in the portal's query editor or the MSSQL extension for VS Code.
-    code: SELECT 1 AS connected;
+    title: Test the connection
+    text: Run SELECT 1 in the query editor.
   vscode:
     type: azureSqlDatabase
     text: The MSSQL extension creates the free database from your editor and connects to it. Sign in to Azure when it asks.
   free:
-    title: What's free, every month
+    title: Free every month
     # Each tile: label, value, and an optional unit shown small under the value.
     tiles:
     - [Compute, '100,000', vCore seconds]
@@ -121,7 +115,7 @@ setup:
     - [Backup storage, 32 GB, per database]
     - [Free databases, '10', per subscription]
   agent:
-    prompt: Create a free Azure SQL Database in my Azure subscription using the free offer, and pause it when the monthly free limit is reached. Use Microsoft Entra authentication only, add my current IP address to the server firewall, then connect and run SELECT 1. Ask me which subscription and region to use, and show me each command before you run it.
+    prompt: Create a free Azure SQL Database with --use-free-limit true and --free-limit-exhaustion-behavior AutoPause. Use Microsoft Entra authentication only, add my IP to the server firewall, then run SELECT 1 and confirm useFreeLimit is true. Ask me for the subscription and region, and show me each command before you run it.
   links:
   - label: Full guide on Microsoft Learn
     id: free-setup-docs
