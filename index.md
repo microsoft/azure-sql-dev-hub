@@ -803,14 +803,12 @@ videos:
   href: https://aka.ms/azuresqlfoundationseries
   image: https://devblogs.microsoft.com/wp-content/uploads/2026/08/word-image-22210-2.webp
 faqs:
-- question: What do I need to get started?
-  answer: An Azure account and a development database. The free tier covers everything on this page, within its limits. If you want to work offline, run the container instead. It is in public preview and needs no sign-up.
-- question: Is it safe to let an agent write to my database?
-  answer: Use a development database with least-privilege access. The skills default to parameterised queries, Entra identity over passwords, and row-level security for multi-tenant work. Review schema changes before they run against anything real.
-- question: Do I need the container?
-  answer: No. Every prompt here targets Azure SQL Database in the cloud. The container is the local option, in public preview.
-- question: What does this cost?
-  answer: The free tier covers the database for every example here, within its limits; see the tier details for what those are. The RAG example needs an embedding service, priced by whoever provides it; the prompt asks which one you have before using it.
-- question: How is this different from SQL Server?
-  answer: Same engine family, managed for you, with features that ship to Azure SQL Database first. The container runs the Azure SQL Database engine, not the SQL Server image.
+- question: Is it safe to let an AI coding agent write to my Azure SQL database?
+  answer: Yes, on a development database with least-privilege access. The Microsoft SQL Agent Skills default to parameterised queries, Microsoft Entra sign-in, and row-level security for multi-tenant apps.
+- question: Is Azure SQL Database free to start?
+  answer: Yes. The Azure SQL Database free offer includes 100,000 vCore seconds of compute and 32 GB of data storage every month.
+- question: What do I need to build an app on Azure SQL with a coding agent?
+  answer: You need an Azure account, a free Azure SQL database, and a coding agent.
+- question: Which AI coding agents work with Azure SQL?
+  answer: The Microsoft SQL Agent Skills work with Claude Code, GitHub Copilot, Codex, and Cursor. The Azure SQL Developer Hub app templates use your stack, or TypeScript and Node.
 ---
