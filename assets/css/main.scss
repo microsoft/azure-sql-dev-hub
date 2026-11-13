@@ -141,7 +141,7 @@
    have not chosen. Add a section here once it is rebuilt; when every section
    is, this collapses to the theme on :root. */
 @mixin dark-regions{
-  .site-banner,.topbar,.h .hero,.h .quick,.h .tpl,.h .wl,.h .skills,.h .videos,.h .faqs,.doc,.site-footer{@include theme-dark}
+  .site-banner,.topbar,.h .hero,.h .quick,.h .tpl,.h .wl,.h .skills,.h .tools,.h .videos,.h .faqs,.doc,.site-footer{@include theme-dark}
   /* A doc page is themed top to bottom, so the page behind a short one (the
      404) does not show light below its footer. */
   body:has(.doc){@include theme-dark}

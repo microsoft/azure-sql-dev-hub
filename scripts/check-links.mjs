@@ -62,7 +62,7 @@ for (const file of htmlFiles(SITE)) {
   let m;
   while ((m = re.exec(html))) {
     const url = m[1];
-    if (/^(?:https?:|mailto:|data:|javascript:)/.test(url)) continue;
+    if (/^(?:https?:|mailto:|data:|javascript:|vscode:)/.test(url)) continue;
     checked++;
 
     const [pathPart, hash] = url.split('#');

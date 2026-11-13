@@ -54,6 +54,7 @@
 
 {% endcapture %}
       {%- for o in page.setup %}
+      {%- assign e0 = nil %}
       {%- assign all_code = o.steps | map: 'code' | compact | join: blank_line %}
       <dialog class="qs-dialog tpl-dialog su-dialog" id="setup-{{ o.key }}" aria-labelledby="setup-{{ o.key }}-title" tabindex="-1">
         <div class="tpl-xbar"><button class="qs-x" type="button" aria-label="Close"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
@@ -63,8 +64,19 @@
             <p class="tpl-sum">{{ o.summary }}</p>
           </div>
           <aside class="tpl-side" aria-labelledby="setup-{{ o.key }}-agent">
-            <h3 id="setup-{{ o.key }}-agent">{{ sl.agent }}</h3>
-            <p class="tpl-how">{{ o.agent.text }}</p>
+            {%- if o.vscode %}
+            <a class="su-vcard" href="vscode://ms-mssql.mssql/deploy?type={{ o.vscode.type }}&amp;source=azure-sql-dev-hub"
+               data-event="site/action" data-event-action="outboundClicked" data-event-destination-id="{{ o.id }}-vscode" data-event-destination-type="other">
+              <span class="su-vlogo" aria-hidden="true"><img src="{{ '/assets/img/vscode.png' | relative_url }}" alt="" width="26" height="26"></span>
+              <span class="su-vtext"><b>{{ sl.vscode_title }}</b><span>{{ sl.vscode_sub }}</span></span>
+              <svg class="su-vgo" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>
+            </a>
+            {%- endif %}
+            <div class="ag-head">
+              <h3 id="setup-{{ o.key }}-agent">{{ sl.agent }}</h3>
+              {% include agent-logos.html label=sl.agents_label %}
+            </div>
+            {%- if o.agent.text %}<p class="tpl-how">{{ o.agent.text }}</p>{% endif %}
             <div class="tpl-dact">
               <button class="tpl-primary" type="button" data-hcopy="{{ o.agent.prompt | escape }}"
                       data-event="site/action" data-event-action="contentCopied" data-event-action-location="install-panel"
@@ -97,15 +109,30 @@
             </nav>
           </aside>
           <div class="tpl-dmain">
-            <div class="tpl-dshot su-shot" aria-hidden="true">{% include setup-shot.html key=o.key %}</div>
             {%- if o.free %}
             <div class="qs-free">
               <h3>{{ o.free.title }}</h3>
-              <dl class="qs-tiles">{% for t in o.free.tiles %}<div><dt>{{ t[0] }}</dt><dd>{{ t[1] }}</dd></div>{% endfor %}</dl>
-              <ul>{% for n in o.free.notes %}<li>{{ n }}</li>{% endfor %}</ul>
+              <dl class="qs-tiles">{% for t in o.free.tiles %}<div><dt>{{ t[0] }}</dt><dd><span class="qs-v">{{ t[1] }}</span>{% if t[2] %}<span class="qs-u">{{ t[2] }}</span>{% endif %}</dd></div>{% endfor %}</dl>
+              {%- if o.free.notes %}<ul>{% for n in o.free.notes %}<li>{{ n }}</li>{% endfor %}</ul>{% endif %}
             </div>
             {%- endif %}
             <h3>{{ sl.manual }}</h3>
+            {%- if o.engines %}
+            {%- assign e0 = o.engines[0] %}
+            <div class="su-engine">
+              <div class="sk-seg" role="group" aria-label="{{ sl.engine }}">
+                {%- for e in o.engines %}
+                <button type="button" aria-pressed="{% if forloop.first %}true{% else %}false{% endif %}" data-engine="{{ e.key }}"
+                        data-event="site/action" data-event-action="runtimeSelected" data-event-action-location="install-panel"
+                        data-event-runtime-id="{{ e.runtime | default: e.key }}">{{ e.name }}</button>
+                {%- endfor %}
+              </div>
+              {%- for e in o.engines %}
+              <p class="su-enote" data-engine-note="{{ e.key }}"{% unless forloop.first %} hidden{% endunless %}>{{ e.note }}</p>
+              {%- endfor %}
+              <p class="su-enojs">The commands use {{ e0.use }}.{% for e in o.engines offset: 1 %} With {{ e.name }}, use {{ e.use }}.{% endfor %}</p>
+            </div>
+            {%- endif %}
             <ol class="qs-steps qs-dsteps">
               {%- for st in o.steps %}
               <li><span class="qs-n">{{ forloop.index }}</span><div class="qs-dstep"><div><b>{{ st.title }}</b><p>{{ st.text }}</p></div>
@@ -114,15 +141,16 @@
                    data-event-destination-id="{{ o.id }}-{{ st.key }}" data-event-destination-type="other">{{ st.link.label }}<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17L17 7M9 7h8v8"/></svg></a>
                 {%- endif %}
                 {%- if st.code %}
-                <div class="code-box sm"><pre><code>{{ st.code | escape }}</code></pre><button class="code-copy" type="button" data-hcopy="{{ st.code | escape }}"
+                <div class="code-box sm"{% for e in o.engines %}{% assign ec = st.code %}{% for r in e.swap %}{% assign ec = ec | replace: r[0], r[1] %}{% endfor %} data-ecode-{{ e.key }}="{{ ec | escape }}" data-erun-{{ e.key }}="{{ e.runtime | default: e.key }}"{% endfor %}><pre><code>{{ st.code | escape }}</code></pre><button class="code-copy" type="button" data-hcopy="{{ st.code | escape }}"
                   data-event="site/action" data-event-action="contentCopied" data-event-action-location="install-panel"
-                  data-event-content-id="{{ o.id }}-{{ st.key }}" data-event-content-type="command">Copy</button></div>
+                  data-event-content-id="{{ o.id }}-{{ st.key }}" data-event-content-type="command"{% if e0 %} data-event-runtime-id="{{ e0.runtime | default: e0.key }}"{% endif %}>Copy</button></div>
                 {%- endif %}</div></li>
               {%- endfor %}
             </ol>
             {%- if o.copy_all %}
-            <button class="qs-all" type="button" data-hcopy="{{ all_code | escape }}" data-event="site/action" data-event-action="contentCopied" data-event-action-location="install-panel"
-                    data-event-content-id="{{ o.id }}-all" data-event-content-type="command">{{ o.copy_all }}</button>
+            <button class="qs-all" type="button" data-hcopy="{{ all_code | escape }}"{% for e in o.engines %}{% assign ec = all_code %}{% for r in e.swap %}{% assign ec = ec | replace: r[0], r[1] %}{% endfor %} data-ecode-{{ e.key }}="{{ ec | escape }}" data-erun-{{ e.key }}="{{ e.runtime | default: e.key }}"{% endfor %}
+                    data-event="site/action" data-event-action="contentCopied" data-event-action-location="install-panel"
+                    data-event-content-id="{{ o.id }}-all" data-event-content-type="command"{% if e0 %} data-event-runtime-id="{{ e0.runtime | default: e0.key }}"{% endif %}>{{ o.copy_all }}</button>
             {%- endif %}
           </div>
         </div>
@@ -197,7 +225,10 @@
             <p class="tpl-sum">{{ t.summary }}</p>
           </div>
           <aside class="tpl-side" aria-labelledby="tpl-{{ t.slug }}-build">
-            <h3 id="tpl-{{ t.slug }}-build">{{ ti.build_ai }}</h3>
+            <div class="ag-head">
+              <h3 id="tpl-{{ t.slug }}-build">{{ ti.build_ai }}</h3>
+              {% include agent-logos.html label=sl.agents_label %}
+            </div>
             <p class="tpl-how">{{ ti.copy_text }}</p>
             <div class="tpl-dact">
               <button class="tpl-primary" type="button" data-hprompt="{{ '/build/' | append: t.slug | append: '.md' | relative_url }}"
@@ -292,24 +323,24 @@
 
   <section id="tools" class="tools" aria-labelledby="tools-title">
     <div class="w">
-      <h2 id="tools-title">{{ page.tools_heading }}</h2>
-      <div class="tools-grid">
+      <div class="wl-head"><h2 id="tools-title">{{ page.tools_heading }}</h2>{% if page.tools_text %}<p>{{ page.tools_text }}</p>{% endif %}</div>
+      <div class="wl-tiles">
         {%- for tool in page.tools %}
-        <a class="su-card" href="{{ tool.href }}"
-           data-event="site/action" data-event-action="outboundClicked"
-           data-event-destination-id="tool-{{ tool.key }}" data-event-destination-type="docs">
-          <span class="su-icon tools-icon" aria-hidden="true">
+        <div class="wl-tile">
+          <div class="wl-icon tools-icon" aria-hidden="true">
             {%- if tool.agent_logo %}
             {%- assign tool_agent = page.skills.agents | where: 'key', tool.agent_logo | first %}
             {{ tool_agent.logo }}
             {%- else %}
-            <img src="{{ tool.image | relative_url }}" alt="" width="32" height="32" loading="lazy">
+            <img src="{{ tool.image | relative_url }}" alt="" width="22" height="22" loading="lazy">
             {%- endif %}
-          </span>
+          </div>
           <h3>{{ tool.title }}</h3>
           <p>{{ tool.text }}</p>
-          <span class="su-go">{{ tool.label }} <span aria-hidden="true">&#8599;</span></span>
-        </a>
+          <a class="wl-link ext" href="{{ tool.href }}" target="_blank" rel="noopener"
+             data-event="site/action" data-event-action="outboundClicked"
+             data-event-destination-id="tool-{{ tool.key }}" data-event-destination-type="docs">{{ tool.label }}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17L17 7M9 7h8v8"/></svg></a>
+        </div>
         {%- endfor %}
       </div>
     </div>
@@ -317,25 +348,50 @@
 
   <section id="watch" class="videos">
     <div class="w">
+      {%- assign vid_lead = page.videos | where: "featured", true | first | default: page.videos.first %}
+      {%- assign vid_rest = page.videos | where_exp: "v", "v.id != vid_lead.id" %}
+      {%- assign vid_extra = vid_rest.size | minus: 3 %}
       <div class="vid-head">
         <div><h2>{{ page.videos_heading }}</h2><p>{{ page.videos_text }}</p></div>
-        <div class="vid-nav">
-          <button type="button" data-vscroll="-1" aria-controls="vidRow" aria-label="Scroll videos left"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg></button>
-          <button type="button" data-vscroll="1" aria-controls="vidRow" aria-label="Scroll videos right"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
-        </div>
+        <a class="vid-all" href="{{ page.videos_all_href }}" target="_blank" rel="noopener"
+           data-event="site/action" data-event-action="outboundClicked" data-event-destination-id="microsoft-sql-youtube"
+           data-event-destination-type="youtube">{{ page.videos_all }}<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17L17 7M9 7h8v8"/></svg></a>
       </div>
-      <div class="vid-row" id="vidRow" role="region" aria-label="Video walkthroughs" tabindex="0">
-        {%- for v in page.videos %}
-        <a class="vid" href="{{ v.href }}" target="_blank" rel="noopener"
+      <div class="vid-top">
+        {%- assign v = vid_lead %}
+        <a class="vid vid-lead" href="{{ v.href }}" target="_blank" rel="noopener"
            data-event="site/action" data-event-action="mediaEngaged" data-event-content-id="{{ v.id }}" data-event-media-action="start">
-          <span class="vid-thumb">{% if v.image %}<img src="{{ v.image }}" alt="" loading="lazy" onerror="this.style.display='none'">{% endif %}<span class="vid-play" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span><span class="vid-tag">{{ v.tag }}</span></span>
+          <span class="vid-thumb">{% if v.image %}<img src="{{ v.image }}" alt="" loading="lazy" onerror="this.style.display='none'">{% endif %}<span class="vid-play" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span><span class="vid-tag">{{ v.tag }}</span></span>
           <span class="vid-text"><span class="vid-title">{{ v.title }}</span><span class="vid-meta">{{ v.text }}</span></span>
         </a>
-        {%- endfor %}
-        <a class="vid-more" href="https://aka.ms/microsoftsqlyt" target="_blank" rel="noopener"
-           data-event="site/action" data-event-action="outboundClicked" data-event-destination-id="microsoft-sql-youtube"
-           data-event-destination-type="youtube">More on the Microsoft SQL channel</a>
+        {%- if vid_rest.size > 0 %}
+        <div class="vid-next">
+          <h3>{{ page.videos_up_next }}</h3>
+          <ul class="vid-list">
+            {%- for v in vid_rest limit: 3 %}
+            <li><a class="vid-li" href="{{ v.href }}" target="_blank" rel="noopener"
+               data-event="site/action" data-event-action="mediaEngaged" data-event-content-id="{{ v.id }}" data-event-media-action="start">
+              <span class="vid-thumb">{% if v.image %}<img src="{{ v.image }}" alt="" loading="lazy" onerror="this.style.display='none'">{% endif %}<span class="vid-play" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span></span>
+              <span class="vid-text"><span class="vid-title">{{ v.title }}</span><span class="vid-meta">{{ v.text }}</span></span>
+            </a></li>
+            {%- endfor %}
+          </ul>
+        </div>
+        {%- endif %}
       </div>
+      {%- if vid_extra > 0 %}
+      <ul class="vid-grid" id="vidMore" aria-label="More videos">
+        {%- for v in vid_rest offset: 3 %}
+        <li><a class="vid" href="{{ v.href }}" target="_blank" rel="noopener"
+           data-event="site/action" data-event-action="mediaEngaged" data-event-content-id="{{ v.id }}" data-event-media-action="start">
+          <span class="vid-thumb">{% if v.image %}<img src="{{ v.image }}" alt="" loading="lazy" onerror="this.style.display='none'">{% endif %}<span class="vid-play" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span><span class="vid-tag">{{ v.tag }}</span></span>
+          <span class="vid-text"><span class="vid-title">{{ v.title }}</span><span class="vid-meta">{{ v.text }}</span></span>
+        </a></li>
+        {%- endfor %}
+      </ul>
+      <button class="vid-toggle" type="button" aria-expanded="false" aria-controls="vidMore"
+              data-more="{{ page.videos_more | replace: 'N', vid_extra }}" data-less="{{ page.videos_less }}">{{ page.videos_more | replace: 'N', vid_extra }}</button>
+      {%- endif %}
     </div>
   </section>
 
@@ -392,10 +448,39 @@
   })});
   var cmdEl=document.getElementById('hInstall'),copyEl=document.getElementById('hInstallCopy');
   document.querySelectorAll('[data-agent]').forEach(function(a){a.addEventListener('click',function(){var agent=a.getAttribute('data-agent');document.querySelectorAll('[data-agent]').forEach(function(x){x.setAttribute('aria-pressed','false')});a.setAttribute('aria-pressed','true');cmdEl.textContent=a.getAttribute('data-cmd');copyEl.setAttribute('data-hcopy',a.getAttribute('data-cmd'));copyEl.setAttribute('data-event-harness-id',agent);copyEl.setAttribute('data-clarity-event','copy_skill_install_'+agent)})});
-  // Videos. Each arrow scrolls the row by one card and the gap after it,
-  // without the smooth glide when reduced motion is asked for.
-  var vidRow=document.getElementById('vidRow');
-  if(vidRow)document.querySelectorAll('[data-vscroll]').forEach(function(b){b.addEventListener('click',function(){var card=vidRow.querySelector('.vid'),step=card?card.offsetWidth+16:336;vidRow.scrollBy({left:step*Number(b.getAttribute('data-vscroll')),behavior:document.documentElement.classList.contains('motion')?'smooth':'auto'})})});
+  // Container engine picker in the setup dialog. Each command is rendered for
+  // every engine (data-ecode-<key>, with its runtime id in data-erun-<key>);
+  // picking one swaps the shown text, what Copy copies, and the runtime id
+  // its copy event carries. The choice is
+  // remembered per browser.
+  document.querySelectorAll('.su-engine').forEach(function(box){
+    var dlg=box.closest('dialog')||document,btns=box.querySelectorAll('[data-engine]');
+    function pick(key){
+      btns.forEach(function(b){b.setAttribute('aria-pressed',String(b.getAttribute('data-engine')===key))});
+      box.querySelectorAll('[data-engine-note]').forEach(function(n){n.hidden=n.getAttribute('data-engine-note')!==key});
+      dlg.querySelectorAll('[data-ecode-'+key+']').forEach(function(el){
+        var code=el.getAttribute('data-ecode-'+key),btn=el.matches('button')?el:el.querySelector('.code-copy'),shown=el.querySelector('pre code');
+        if(shown)shown.textContent=code;
+        if(btn){btn.setAttribute('data-hcopy',code);btn.setAttribute('data-event-runtime-id',el.getAttribute('data-erun-'+key))}
+      });
+    }
+    var saved=null;try{saved=localStorage.getItem('hub.engine')}catch(e){}
+    if(saved&&box.querySelector('[data-engine="'+saved+'"]'))pick(saved);
+    btns.forEach(function(b){b.addEventListener('click',function(){var key=b.getAttribute('data-engine');pick(key);try{localStorage.setItem('hub.engine',key)}catch(e){}})});
+  });
+  // Videos past the first four sit in a grid that starts folded once the
+  // script runs; the button opens and closes it. Without the script it shows.
+  var vidMore=document.getElementById('vidMore'),vidToggle=document.querySelector('.vid-toggle');
+  if(vidMore&&vidToggle){
+    vidMore.hidden=true;
+    vidToggle.addEventListener('click',function(){
+      var open=vidMore.hidden;
+      vidMore.hidden=!open;
+      vidToggle.setAttribute('aria-expanded',String(open));
+      vidToggle.textContent=vidToggle.getAttribute(open?'data-less':'data-more');
+      if(!open)vidToggle.scrollIntoView({block:'nearest'});
+    });
+  }
   // Hero demo. The animation is CSS. The first run's clock ends after the
   // first app has shown for a few seconds; from then on the demo is .cycling,
   // the terminal rests, and each app's tick moves to the next app, showing its

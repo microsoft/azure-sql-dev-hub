@@ -119,22 +119,41 @@ function twinHref(href) {
   return /^\//.test(href) ? href.replace(/\.html(?=#|$)/, '.md') : href;
 }
 
-// One way to get a database (Get a database running): its setup dialog, both
-// routes, with every command and the agent prompt, so an agent reading the twin
+// One way to get a database (Get a database running): its setup dialog, every
+// route, with every command and the agent prompt, so an agent reading the twin
 // can follow either.
 function setupOption(o, labels, skills) {
   const out = [`### ${o.title}${o.pill ? ` (${o.pill})` : ''}`, '', o.card, '', o.summary, ''];
+  if (o.vscode) {
+    out.push(`${labels.vscode || 'Set it up in VS Code'}. ${plain(o.vscode.text)} ${labels.vscode_need || ''}`.trim(), '');
+    out.push(`- ${labels.vscode_open || 'Open in VS Code'}: vscode://ms-mssql.mssql/deploy?type=${o.vscode.type}&source=azure-sql-dev-hub`);
+    if (labels.vscode_get_href) out.push(`- ${labels.vscode_get || 'Get the extension'}: ${labels.vscode_get_href}`);
+    out.push('');
+  }
   out.push(`${labels.manual || 'Set it up yourself'}:`, '');
+  if (o.engines && o.engines.length) {
+    const [first, ...rest] = o.engines;
+    out.push(`The commands use ${plain(first.use)}. Other engines' full commands follow the steps.`, '');
+    for (const e of o.engines) out.push(`- ${e.name}: ${plain(e.note)}`);
+    out.push('');
+  }
   for (const [i, st] of (o.steps || []).entries()) {
     out.push(`${i + 1}. ${st.title}. ${plain(st.text)}`, '');
     if (st.link) out.push(`${st.link.label}: ${st.link.href}`, '');
     if (st.code) out.push(fence(st.code, /^SELECT/.test(st.code) ? 'sql' : 'bash'), '');
   }
+  if (o.engines) {
+    const all = (o.steps || []).map((st) => st.code).filter(Boolean).join('\n\n');
+    for (const e of o.engines.slice(1)) {
+      const code = (e.swap || []).reduce((c, [from, to]) => c.split(from).join(to), all);
+      out.push(`With ${e.name}:`, '', fence(code, 'bash'), '');
+    }
+  }
   if (o.free) {
-    out.push(`${o.free.title}:`, '', ...o.free.tiles.map(([k, v]) => `- ${k}: ${v}`), ...o.free.notes.map((n) => `- ${n}`), '');
+    out.push(`${o.free.title}:`, '', ...o.free.tiles.map(([k, v, u]) => `- ${k}: ${v}${u ? ` ${u}` : ''}`), ...(o.free.notes || []).map((n) => `- ${n}`), '');
   }
   if (o.agent) {
-    out.push(`${labels.agent || 'Set it up with your coding agent'}. ${plain(o.agent.text)}`, '');
+    out.push(`${labels.agent || 'Set it up with your coding agent'}.${o.agent.text ? ` ${plain(o.agent.text)}` : ''}`, '');
     if (skills && skills.skills_code) out.push(`${skills.skills_title}: ${skills.skills_text}`, '', fence(skills.skills_code, 'bash'), '');
     out.push(`> ${o.agent.prompt}`, '');
     if (o.agent.check) out.push(plain(o.agent.check), '');

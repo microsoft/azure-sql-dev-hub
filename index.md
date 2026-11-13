@@ -49,20 +49,37 @@ demo:
     name: a multi-tenant helpdesk
     alt: 'From idea to app: a prompt builds a multi-tenant helpdesk on Azure SQL where each organization sees only its own tickets.'
 # Get a database running: two ways to get Azure SQL Database, as cards. Each
-# card opens its setup dialog, laid out like the template details: the
-# illustration and the manual steps on the left, the coding-agent route on the
-# right. Without scripts the dialogs show in place below the cards. `id`
-# prefixes each Copy button's telemetry id. In `links`, a path on this site is
-# a page here; a full URL is outbound, of `type` docs or other.
+# card opens its setup dialog, laid out like the template details: the manual
+# steps on the left; on the right a Prefer VS Code? card, then the coding-agent
+# route. Without scripts the dialogs show in place below the cards. `id`
+# prefixes each Copy button's telemetry id. `vscode.type` is the MSSQL
+# extension's deep link type (vscode://ms-mssql.mssql/deploy?type=), a public
+# contract kept stable in vscode-mssql; `vscode.text` and the version note
+# appear in the markdown twin only. `engines` adds a picker above the steps:
+# commands are written for Docker, each other engine lists `swap` pairs,
+# applied in order, that turn them into its own (Apple container's match the
+# MSSQL extension's wizard), `use` says which command to use when the picker
+# can't run, and `key` is the telemetry runtime id (`runtime` overrides it).
+# In `links`, a path on this site is a page here; a full URL is outbound, of
+# `type` docs or other.
 setup_heading: Get a database running
 setup_text: Start free in Azure, or run the same engine on your machine. Set it up yourself or hand it to your coding agent.
 setup_labels:
   open: Set it up
   manual: Set it up yourself
   agent: Set it up with your coding agent
+  agents_label: Works with
   copy: Copy prompt
   show_prompt: See the prompt
   resources: Resources
+  vscode: Set it up in VS Code
+  vscode_title: Prefer VS Code?
+  vscode_sub: Set it up with the MSSQL extension
+  vscode_open: Open in VS Code
+  vscode_need: Needs the MSSQL extension 1.49 or later.
+  vscode_get: Get the extension
+  vscode_get_href: https://marketplace.visualstudio.com/items?itemName=ms-mssql.mssql
+  engine: Choose your container engine
 setup:
 - key: free
   id: free-setup
@@ -87,19 +104,18 @@ setup:
     title: Verify
     text: Run SELECT 1 in the portal's query editor or the MSSQL extension for VS Code. The database's Overview page shows <b>Free monthly vCore amount</b>.
     code: SELECT 1 AS connected;
+  vscode:
+    type: azureSqlDatabase
+    text: The MSSQL extension creates the free database from your editor and connects to it. Sign in to Azure when it asks.
   free:
     title: What's free, every month
+    # Each tile: label, value, and an optional unit shown small under the value.
     tiles:
-    - [Compute, '100,000 vCore s']
+    - [Compute, '100,000', vCore seconds]
     - [Data storage, 32 GB]
     - [Backup storage, 32 GB]
-    - [Free databases, Up to 10]
-    notes:
-    - It pauses after 15 minutes idle. Close query editors and VS Code connections when you're done, or the database keeps using free time.
-    - 'When the monthly allowance runs out, you choose: pause until next month (the default) or keep running at standard rates. Once you choose to keep running, you can''t switch back.'
-    - For new databases only, with no SLA. Use it for development and proofs of concept.
+    - [Free databases, '10', per subscription]
   agent:
-    text: Your agent runs the Azure CLI as you, so sign in with <code>az login</code> first. You review each command before it runs.
     prompt: Create a free Azure SQL Database in my Azure subscription using the free offer, and pause it when the monthly free limit is reached. Use Microsoft Entra authentication only, add my current IP address to the server firewall, then connect and run SELECT 1. Ask me which subscription and region to use, and show me each command before you run it.
     check: Your agent should report that the database uses the free limit (useFreeLimit is true) and that SELECT 1 returned 1.
   links:
@@ -121,7 +137,7 @@ setup:
   pill: Public preview
   icon: <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l8 4.5v9L12 21l-8-4.5v-9z"/><path d="M4 7.5l8 4.5 8-4.5M12 12v9"/></svg>
   card: The Azure SQL Database engine in a container, for development, testing and CI. It runs offline after the first pull.
-  summary: Three commands from pull to your first query. You need Docker, Podman or WSL, and a bash or zsh shell.
+  summary: The Azure SQL Database engine on your machine. Free, no Azure subscription.
   steps:
   - key: pull
     title: Get the image
@@ -129,7 +145,7 @@ setup:
     code: docker pull mcr.microsoft.com/mssql/azure-sql-db-server:latest
   - key: run
     title: Start the container
-    text: Generate a strong SA password, then start the engine on port 1433, bound to localhost.
+    text: In a bash or zsh shell, generate a strong SA password, then start the engine on port 1433, bound to localhost.
     code: |-
       MSSQL_SA_PASSWORD="Aa1$(openssl rand -hex 16)"
       docker run --name sqldb -e "ACCEPT_EULA=Y" \
@@ -143,6 +159,35 @@ setup:
       docker exec sqldb /opt/mssql-tools18/bin/sqlcmd \
         -S localhost -U sa -P "$MSSQL_SA_PASSWORD" -C -Q "SELECT @@VERSION;"
   copy_all: Copy all three commands
+  engines:
+  - key: docker
+    name: Docker
+    use: <code>docker</code>
+    note: Docker 24 or later, with the engine running. <code>docker info</code> checks it.
+  - key: podman
+    name: Podman
+    use: <code>podman</code>
+    swap:
+    - ['docker ', 'podman ']
+    note: Podman 5.0 or later. On macOS and Windows, Podman runs in a VM, so start it first with <code>podman machine start</code>.
+  - key: apple
+    runtime: unknown
+    name: Apple container
+    use: <code>container</code>, with <code>container image pull</code> to pull and <code>--detach</code> in place of <code>-d</code>
+    swap:
+    - ['docker pull ', 'container image pull ']
+    - [' -d ', ' --detach ']
+    - ['docker ', 'container ']
+    note: Apple's container tool, on a Mac with Apple silicon and macOS 26 or later. Start it with <code>container system start</code>; <code>container system status</code> checks it.
+  - key: wsl
+    name: WSL
+    use: <code>wslc</code>
+    swap:
+    - ['docker ', 'wslc ']
+    note: WSL containers on Windows 11. The <code>wslc</code> command comes with WSL, and <code>wslc version</code> checks it.
+  vscode:
+    type: azureSqlContainer
+    text: The MSSQL extension creates the container in a few clicks and connects to it. No Azure subscription needed.
   agent:
     text: The container skills are part of the microsoft-sql plugin. They cover pulling the image, waiting for the engine to be ready and creating the database, with you reviewing each step.
     prompt: Add a local Azure SQL Database to this project, then scaffold the schema, migrations and data-access layer for my stack.
@@ -479,7 +524,16 @@ tools:
   label: Explore SSMS
   href: https://learn.microsoft.com/ssms/sql-server-management-studio-ssms
 videos_heading: See it in action
-videos_text: Longer walkthroughs from the Microsoft SQL team. Scroll for more.
+videos_text: Longer walkthroughs from the Microsoft SQL team.
+# The video marked `featured` (else the first) leads, large; the next three sit
+# beside it as Up next. Any more go in a grid below, behind a Show more button
+# once the page script runs. Add a video anywhere in the list; to change the
+# lead, move `featured`.
+videos_up_next: Up next
+videos_all: All videos on YouTube
+videos_all_href: https://aka.ms/microsoftsqlyt
+videos_more: Show N more videos
+videos_less: Show fewer videos
 videos:
 - id: pq2drN2Qw5w
   title: 'Boost your SQL development in VS Code: Copilot, containers, and more'
@@ -488,6 +542,7 @@ videos:
   href: https://www.youtube.com/watch?v=pq2drN2Qw5w
   image: https://img.youtube.com/vi/pq2drN2Qw5w/hqdefault.jpg
 - id: wZUPFCCByfw
+  featured: true
   title: Build AI apps with VS Code Agents, GitHub Copilot, and the MSSQL extension
   text: Data Exposed, May 2026
   tag: Data Exposed
