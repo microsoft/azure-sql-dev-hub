@@ -324,52 +324,20 @@
     </div>
   </section>
 
-  <section id="watch" class="videos">
+  <section id="watch" class="learn" aria-labelledby="learn-title">
     <div class="w">
-      {%- assign vid_lead = page.videos | where: "featured", true | first | default: page.videos.first %}
-      {%- assign vid_rest = page.videos | where_exp: "v", "v.id != vid_lead.id" %}
-      {%- assign vid_extra = vid_rest.size | minus: 3 %}
-      <div class="vid-head">
-        <div><h2>{{ page.videos_heading }}</h2><p>{{ page.videos_text }}</p></div>
-        <a class="vid-all" href="{{ page.videos_all_href }}" target="_blank" rel="noopener"
-           data-event="site/action" data-event-action="outboundClicked" data-event-destination-id="microsoft-sql-youtube"
-           data-event-destination-type="youtube">{{ page.videos_all }}<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17L17 7M9 7h8v8"/></svg></a>
-      </div>
-      <div class="vid-top">
-        {%- assign v = vid_lead %}
-        <a class="vid vid-lead" href="{{ v.href }}" target="_blank" rel="noopener"
-           data-event="site/action" data-event-action="mediaEngaged" data-event-content-id="{{ v.id }}" data-event-media-action="start">
-          <span class="vid-thumb">{% if v.image %}<img src="{{ v.image }}" alt="" loading="lazy" onerror="this.style.display='none'">{% endif %}<span class="vid-play" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span><span class="vid-tag">{{ v.tag }}</span></span>
-          <span class="vid-text"><span class="vid-title">{{ v.title }}</span><span class="vid-meta">{{ v.text }}</span></span>
-        </a>
-        {%- if vid_rest.size > 0 %}
-        <div class="vid-next">
-          <h3>{{ page.videos_up_next }}</h3>
-          <ul class="vid-list">
-            {%- for v in vid_rest limit: 3 %}
-            <li><a class="vid-li" href="{{ v.href }}" target="_blank" rel="noopener"
-               data-event="site/action" data-event-action="mediaEngaged" data-event-content-id="{{ v.id }}" data-event-media-action="start">
-              <span class="vid-thumb">{% if v.image %}<img src="{{ v.image }}" alt="" loading="lazy" onerror="this.style.display='none'">{% endif %}<span class="vid-play" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span></span>
-              <span class="vid-text"><span class="vid-title">{{ v.title }}</span><span class="vid-meta">{{ v.text }}</span></span>
-            </a></li>
-            {%- endfor %}
-          </ul>
-        </div>
-        {%- endif %}
-      </div>
-      {%- if vid_extra > 0 %}
-      <ul class="vid-grid" id="vidMore" aria-label="More videos">
-        {%- for v in vid_rest offset: 3 %}
-        <li><a class="vid" href="{{ v.href }}" target="_blank" rel="noopener"
-           data-event="site/action" data-event-action="mediaEngaged" data-event-content-id="{{ v.id }}" data-event-media-action="start">
-          <span class="vid-thumb">{% if v.image %}<img src="{{ v.image }}" alt="" loading="lazy" onerror="this.style.display='none'">{% endif %}<span class="vid-play" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span><span class="vid-tag">{{ v.tag }}</span></span>
-          <span class="vid-text"><span class="vid-title">{{ v.title }}</span><span class="vid-meta">{{ v.text }}</span></span>
+      <h2 id="learn-title">{{ page.learn_heading }}</h2>
+      <ul class="learn-list">
+        {%- for l in page.learn %}
+        <li><a class="learn-li" href="{{ l.href }}" target="_blank" rel="noopener"
+           data-event="site/action" data-event-action="outboundClicked"
+           data-event-destination-id="learn-{{ l.key }}" data-event-destination-type="{{ l.type }}">
+          <span class="learn-kind">{{ l.kind }}</span>
+          <span class="learn-title">{{ l.title }}</span>
+          <span class="learn-meta">{{ l.text }}</span>
         </a></li>
         {%- endfor %}
       </ul>
-      <button class="vid-toggle" type="button" aria-expanded="false" aria-controls="vidMore"
-              data-more="{{ page.videos_more | replace: 'N', vid_extra }}" data-less="{{ page.videos_less }}">{{ page.videos_more | replace: 'N', vid_extra }}</button>
-      {%- endif %}
     </div>
   </section>
 
@@ -454,19 +422,6 @@
     if(saved&&box.querySelector('[data-engine="'+saved+'"]'))pick(saved);
     btns.forEach(function(b){b.addEventListener('click',function(){var key=b.getAttribute('data-engine');pick(key);try{localStorage.setItem('hub.engine',key)}catch(e){}})});
   });
-  // Videos past the first four sit in a grid that starts folded once the
-  // script runs; the button opens and closes it. Without the script it shows.
-  var vidMore=document.getElementById('vidMore'),vidToggle=document.querySelector('.vid-toggle');
-  if(vidMore&&vidToggle){
-    vidMore.hidden=true;
-    vidToggle.addEventListener('click',function(){
-      var open=vidMore.hidden;
-      vidMore.hidden=!open;
-      vidToggle.setAttribute('aria-expanded',String(open));
-      vidToggle.textContent=vidToggle.getAttribute(open?'data-less':'data-more');
-      if(!open)vidToggle.scrollIntoView({block:'nearest'});
-    });
-  }
   // Hero demo. The animation is CSS. The first run's clock ends after the
   // first app has shown for a few seconds; from then on the demo is .cycling,
   // the terminal rests, and each app's tick moves to the next app, showing its

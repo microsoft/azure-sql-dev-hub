@@ -234,8 +234,8 @@ function homeToMarkdown(d) {
     }
   }
 
-  out.push('## Videos {#watch}', '', d.videos_text || '', '');
-  for (const vv of d.videos || []) out.push(`- [${vv.title}](${vv.href}): ${vv.text}`);
+  out.push(`## ${d.learn_heading || 'Learn more'} {#watch}`, '');
+  for (const l of d.learn || []) out.push(`- [${l.title}](${l.href}): ${l.kind}. ${l.text}`);
   out.push('');
 
   out.push('## Before you build', '');
