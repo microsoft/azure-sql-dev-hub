@@ -1,20 +1,26 @@
 ---
 layout: page
-title: Make it multi-tenant
-description: Make a JavaScript app multi-tenant on Azure SQL Database with row-level security
+title: Isolate each tenant's rows
+description: Row-level security on Azure SQL Database keyed on SESSION_CONTEXT, with tests that show one tenant cannot read or move another tenant's rows.
 tag: JavaScript
+kind: block
+after: javascript-app
+after_title: Start a Next.js app
+needs: The project from Start a Next.js app, on an Azure SQL Database.
 last_verified: 2026-09-16
 validated: false
 ---
 
-# AI Prompt: Make a JavaScript app multi-tenant on Azure SQL Database with row-level security
+# AI Prompt: Isolate each tenant's rows on Azure SQL Database with row-level security
 
 **Role:** You are an expert engineer adding tenant isolation to the current project's Azure SQL Database, enforced in the database with row-level security rather than in application code, with a test that proves it.
 
 **Purpose:** Add a `tenant_id` column to `dbo.tasks`, create a filter predicate and security policy keyed on `SESSION_CONTEXT`, set the tenant from the app on every connection, and write a test that shows tenant A cannot read tenant B's rows even when it asks for them.
 
 **Scope:**
-- Assumes the scaffold scenario's project exists (Next.js, `mssql` driver, `src/lib/db.ts` with one pool). If not, create it first.
+- Builds on the project from the Start a Next.js app prompt: Next.js, the `mssql` driver, `src/lib/db.ts` with one pool, and the `dbo.tasks` table. If that project does not exist, stop and tell the person to run that prompt first: {{ '/build/javascript-app.md' | absolute_url }}
+- This changes `dbo.tasks` for everything that uses it. Once the policy is on, a connection that has not set a tenant reads zero rows and cannot insert, so the other building blocks stop working against this table. Use a database they are not sharing, or expect to update them.
+- Run T-SQL with `sqlcmd` and Microsoft Entra sign-in (`sqlcmd -S <server>.database.windows.net -d <database> -G -i <file>.sql`). If `sqlcmd` is not installed, ask the person to run the statements in the Azure portal's query editor and tell you when they are done. `GO` separates batches for `sqlcmd`; it is not T-SQL. If you run the statements through the `mssql` driver instead, split on `GO` and send each batch on its own.
 - Isolation is enforced by the engine. Application code sets the tenant; it does not filter rows.
 - The security policy filters reads and blocks writes for the wrong tenant.
 
@@ -32,13 +38,30 @@ Identify the project's package manager (`npm`, `yarn`, `pnpm`, `bun`) and use it
 
 ### 1. Add the tenant column and backfill
 
+First check whether this has been done before:
+
+```sql
+SELECT name FROM sys.security_policies WHERE name = N'TenantPolicy';
+```
+
+If that returns a row, the database is already set up. Skip steps 1 and 2 and go to step 3.
+
+Otherwise run these. Each statement is its own batch, because a batch cannot add a column and use it:
+
 ```sql
 ALTER TABLE dbo.tasks ADD tenant_id INT NULL;
+GO
 UPDATE dbo.tasks SET tenant_id = 1 WHERE tenant_id IS NULL;
+GO
 ALTER TABLE dbo.tasks ALTER COLUMN tenant_id INT NOT NULL;
+GO
 CREATE INDEX IX_tasks_tenant ON dbo.tasks (tenant_id);
+GO
 INSERT INTO dbo.tasks (title, tenant_id) VALUES (N'Tenant two task', 2);
+GO
 ```
+
+Every row that was already in the table now belongs to tenant 1, and tenant 2 has one row.
 
 ### 2. Create the predicate and the policy
 
@@ -126,12 +149,12 @@ describe("row-level security", () => {
     expect(n).toBe(0);
   });
 
-  it("tenant 2 sees its own row", async () => {
+  it("tenant 2 sees its own rows", async () => {
     const n = await withTenant(2, async (req) => {
       const r = await req().query("SELECT COUNT(*) AS n FROM dbo.tasks WHERE tenant_id = 2");
       return r.recordset[0].n;
     });
-    expect(n).toBe(1);
+    expect(n).toBeGreaterThan(0);
   });
 
   it("tenant 1 cannot move a row to tenant 2", async () => {
@@ -142,12 +165,18 @@ describe("row-level security", () => {
   });
 
   it("interleaved tenants do not leak across pooled connections", async () => {
-    const [a, b] = await Promise.all([
-      withTenant(1, async (req) => (await req().query("SELECT COUNT(*) AS n FROM dbo.tasks")).recordset[0].n),
-      withTenant(2, async (req) => (await req().query("SELECT COUNT(*) AS n FROM dbo.tasks")).recordset[0].n),
-    ]);
-    expect(a).toBe(3);
-    expect(b).toBe(1);
+    // Twenty units of work on a pool of ten, alternating tenants. Each counts the
+    // rows it can see that belong to someone else. A leak makes a count non-zero.
+    const foreignRows = (own: number) =>
+      withTenant(own, async (req) => {
+        const r = await req().input("own", sql.Int, own)
+          .query("SELECT COUNT(*) AS n FROM dbo.tasks WHERE tenant_id <> @own");
+        return r.recordset[0].n as number;
+      });
+    const counts = await Promise.all(
+      Array.from({ length: 20 }, (_, i) => foreignRows(i % 2 === 0 ? 1 : 2))
+    );
+    expect(counts.every((n) => n === 0)).toBe(true);
   });
 });
 ```
@@ -168,7 +197,8 @@ All four pass.
 - The cross-tenant read test returns zero and the cross-tenant update test throws. That is the isolation proof.
 - The tenant is resolved server-side from the signed-in identity. Nothing in the request chooses it.
 - Session context is set and cleared on one pinned connection per unit of work; the interleaved test passes.
-- No password in config; the connection is unchanged from the scaffold scenario.
+- No password in config; the connection is unchanged from the Next.js app.
+- The tests do not depend on how many rows the table holds, so they pass on a database that already had tasks.
 
 ## Do not
 

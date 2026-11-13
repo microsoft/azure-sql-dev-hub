@@ -12,11 +12,13 @@
       Azure SQL Developer Hub
     </a>
     <nav class="topnav" aria-label="Primary">
-      <a href="{{ '/' | relative_url }}#get-running">Quickstarts</a>
-      <a href="{{ '/' | relative_url }}#containers">Container</a>
-      <a href="{{ '/' | relative_url }}#build">Build</a>
+      {%- comment %} In page order. Local container opens that tab of Get a database. {% endcomment %}
+      <a href="{{ '/' | relative_url }}#get-running" data-htab-go="cloud">Get a database</a>
+      <a href="{{ '/' | relative_url }}#containers" data-htab-go="local">Local container</a>
       <a href="{{ '/' | relative_url }}#skills">Skills</a>
+      <a href="{{ '/' | relative_url }}#build">Build</a>
       <a href="{{ '/' | relative_url }}#watch">Videos</a>
+      <a href="{{ '/' | relative_url }}#faq">FAQ</a>
     </nav>
     <div class="topbar-actions">
       <a class="topbar-link" href="https://microsoft.qualtrics.com/jfe/form/SV_9ytUzrnNnbcxPlI" target="_blank" rel="noopener"

@@ -243,6 +243,25 @@
     });
   });
 
+  // A build prompt's page: Copy prompt fetches the page's markdown twin, so what
+  // lands on the clipboard is the whole prompt and nothing else. If the fetch
+  // fails, the twin opens instead, where the text can be selected by hand.
+  document.querySelectorAll("[data-copy-url]").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      var url = btn.getAttribute("data-copy-url");
+      fetch(url)
+        .then(function (response) { if (!response.ok) throw new Error("twin"); return response.text(); })
+        .then(function (text) { return copyText(text, btn); })
+        .then(function (copied) {
+          if (!copied) return;
+          var props = eventProperties(btn);
+          props.action = props.action || "copyPrompt";
+          track("site/action", props, { clarityEvent: btn.getAttribute("data-clarity-event") });
+        })
+        .catch(function () { window.open(url, "_blank"); });
+    });
+  });
+
   // Every bare code block in prose gets a copy button.
   document.querySelectorAll(".prose pre, .scenarioProse pre").forEach(function (pre, index) {
     if (pre.querySelector(".copyBtn")) return;

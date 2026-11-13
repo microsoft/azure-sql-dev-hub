@@ -16,6 +16,7 @@ The container is a development target, not a production database. For what it in
 
 - [Prerequisites](#prerequisites)
 - [Set up the container](#set-up)
+- [Build something on it](#build)
 - [Set up with your coding agent](#agent)
 - [Microsoft Entra authentication](#entra)
 - [Troubleshooting](#troubleshooting)
@@ -50,13 +51,13 @@ Pick the runtime that already works on your machine. The container image and the
 
 ### System resources
 
-Minimum allocation for the container runtime:
+Give the container runtime at least:
 
 - CPU: 2 cores
-- Memory: 4 GB available to the runtime VM
+- Memory: 4 GB available to the runtime VM. The engine does not start with less than 2 GB.
 - Disk: 10 GB free for the image and a small database, more for larger datasets
 
-If your container runtime's VM is set lower than this, the container may fail to start or may run with reduced performance.
+With less than this, the container may fail to start or may run slowly.
 
 ### Network
 
@@ -71,7 +72,7 @@ The container does not need an Azure subscription. To deploy to Azure SQL Databa
 
 ## Set up the container {#set-up}
 
-The commands use `docker`. With Podman, replace `docker` with `podman`. On Windows with WSL containers, replace `docker` with `wslc`. The password step needs a bash or zsh shell.
+The commands use `docker`. With Podman, replace `docker` with `podman`. On Windows with WSL containers, replace `docker` with `wslc`. Steps 2 to 4 are shown for bash and zsh, with the PowerShell form after each.
 
 ### 1. Pull the image {#pull}
 
@@ -91,7 +92,16 @@ docker run --name sqldb -e "ACCEPT_EULA=Y" \
   mcr.microsoft.com/mssql/azure-sql-db-server:latest
 ```
 
+In PowerShell:
+
+```powershell
+$env:MSSQL_SA_PASSWORD = "Aa1" + [guid]::NewGuid().ToString("N")
+docker run --name sqldb -e "ACCEPT_EULA=Y" -e "MSSQL_SA_PASSWORD=$env:MSSQL_SA_PASSWORD" -p 127.0.0.1:1433:1433 -d mcr.microsoft.com/mssql/azure-sql-db-server:latest
+```
+
 Confirm it is up with `docker ps --filter "name=sqldb"`. You should see `sqldb` with an Up status. If it exited, run `docker logs sqldb`; the most common cause is a password that does not meet the complexity policy. Keep `MSSQL_SA_PASSWORD` in your environment, not in source control.
+
+Your databases live inside the container, so `docker rm` deletes them. To keep them, add `-v sqldb-data:/var/opt/mssql` to the `docker run` command, or use the compose file below, which does.
 
 Prefer docker compose? Export the password with `export MSSQL_SA_PASSWORD`, save this as `docker-compose.yml`, and run `docker compose up -d`:
 
@@ -121,6 +131,12 @@ docker exec sqldb /opt/mssql-tools18/bin/sqlcmd \
   -S localhost -U sa -P "$MSSQL_SA_PASSWORD" -C -Q "SELECT @@VERSION;"
 ```
 
+In PowerShell, the same command on one line with `$env:MSSQL_SA_PASSWORD`:
+
+```powershell
+docker exec sqldb /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P "$env:MSSQL_SA_PASSWORD" -C -Q "SELECT @@VERSION;"
+```
+
 A result that names Microsoft SQL Azure confirms the Azure SQL Database engine.
 
 ### 4. Create your database {#create-database}
@@ -133,7 +149,13 @@ docker exec sqldb /opt/mssql-tools18/bin/sqlcmd \
   -Q "IF DB_ID('appdb') IS NULL CREATE DATABASE appdb;"
 ```
 
+In PowerShell, use the same command on one line with `$env:MSSQL_SA_PASSWORD` in place of `$MSSQL_SA_PASSWORD`.
+
 Then connect to it by name. Select the database in the connection string, `Database=appdb` or `-d appdb` for sqlcmd, rather than switching with `USE`.
+
+### Build something on it {#build}
+
+The app prompts in [Build with a prompt]({{ '/' | relative_url }}#build) run against this container. Paste one into your coding agent and tell it the server is `localhost,1433`, the database is `appdb`, and the SQL login is in `MSSQL_SA_PASSWORD`. When you are ready for Azure, [Move from the container to the cloud]({{ '/build/local-to-cloud.html' | relative_url }}) switches the same app to a free Azure SQL database.
 
 ### Other ways to connect {#other-clients}
 
@@ -151,13 +173,7 @@ docker compose down
 
 ## Set up with your coding agent {#agent}
 
-The container skills are part of the microsoft-sql plugin. They cover pulling the image, waiting for the engine to be ready, and creating the database, with you reviewing each step. Install them once for Claude Code, GitHub Copilot, Codex, and Cursor; per-tool commands are in [Skills]({{ '/' | relative_url }}#skills).
-
-```bash
-npx skills add microsoft/microsoft-sql
-```
-
-Then paste this into your agent:
+The container skills are part of the microsoft-sql plugin. They cover pulling the image, waiting for the engine to be ready, and creating the database, with you reviewing each step. Install the plugin with the command for your agent in [Skills]({{ '/' | relative_url }}#skills), then paste this into your agent:
 
 ```text
 Add a local Azure SQL Database to this project, then scaffold the schema, migrations and data-access layer for my stack.
@@ -255,4 +271,5 @@ If `SELECT SERVERPROPERTY('EngineEdition');` does not return 5, you are running 
 ## Related {#related}
 
 - [Container FAQ]({{ '/container/faq.html' | relative_url }}): what the container is for, and which features it includes and leaves out.
+- [Build with a prompt]({{ '/' | relative_url }}#build): app prompts that run on the container.
 - [Azure SQL Database free tier]({{ site.azure_free_tier }}): validate in Azure before you deploy.

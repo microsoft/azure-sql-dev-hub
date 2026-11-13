@@ -1,37 +1,32 @@
 {%- comment -%}
   Site footer, laid out like the Ignite redesign's. It follows the visitor's
-  theme; see the themed regions in main.scss. As in the redesign, it carries
-  the skills install command and Get started on every page. The links and
-  wording are the site's own: the redesign's extra link columns are not
-  adopted. The Copy button uses main.js's data-copy handler and shows only once
-  that script has run.
+  theme; see the themed regions in main.scss. On every page it offers the two
+  next steps: create a free database, and browse the build prompts. The skills
+  install commands live in one place, the home page's Skills section.
 {%- endcomment -%}
 <footer class="site-footer">
   <div class="wrap foot-top">
     <div class="foot-brand">
       <p class="foot-name"><img src="{{ '/assets/img/azure-sql-database.svg' | relative_url }}" alt="" width="24" height="24">Azure SQL Developer Hub</p>
-      <p class="foot-tag">Build applications with Azure SQL.</p>
+      <p class="foot-tag">Build applications on Azure SQL Database with your coding agent.</p>
       <div class="foot-cta">
-        <div class="foot-cmd">
-          <code id="footInstall">npx skills add microsoft/microsoft-sql</code>
-          <button class="foot-copy" type="button" data-copy="#footInstall"
-                  data-event="site/action" data-event-action="contentCopied" data-event-action-location="footer"
-                  data-event-content-id="microsoft-sql" data-event-content-type="collection-install">Copy</button>
-        </div>
-        <a class="foot-start" href="{{ '/' | relative_url }}#get-running" data-event="site/action" data-event-action="pathSelected" data-event-path-id="get-running">Get started</a>
+        <a class="foot-start" href="{{ site.azure_portal_hub }}" target="_blank" rel="noopener" data-event="site/action" data-event-action="outboundClicked" data-event-action-location="footer"
+           data-event-destination-id="azure-sql-free-database" data-event-destination-type="signup">Create a free database</a>
+        <a class="foot-second" href="{{ '/' | relative_url }}#build" data-event="site/action" data-event-action="pathSelected" data-event-action-location="footer" data-event-path-id="build">Browse build prompts</a>
       </div>
     </div>
     <div class="foot-links">
-      <a href="{{ '/' | relative_url }}#build" data-event="site/action" data-event-action="pathSelected" data-event-path-id="build">Build examples</a>
-      <a href="{{ '/' | relative_url }}#watch" data-event="site/action" data-event-action="pathSelected" data-event-path-id="watch">Videos</a>
-      <a href="{{ site.azure_sql_docs }}" data-event="site/action" data-event-action="outboundClicked" data-event-destination-id="azure-sql-docs" data-event-destination-type="docs">Documentation</a>
+      <a href="{{ '/' | relative_url }}#get-running" data-event="site/action" data-event-action="pathSelected" data-event-path-id="get-running">Get a database</a>
+      <a href="{{ '/container/get-started.html' | relative_url }}" data-event="site/action" data-event-action="pathSelected" data-event-path-id="container-get-started">Local container guide</a>
+      <a href="{{ '/' | relative_url }}#skills" data-event="site/action" data-event-action="pathSelected" data-event-path-id="skills">Agent skills</a>
+      <a href="{{ site.azure_sql_docs }}" data-event="site/action" data-event-action="outboundClicked" data-event-destination-id="azure-sql-docs" data-event-destination-type="docs">Azure SQL documentation</a>
     </div>
   </div>
   <div class="wrap foot-bottom">
     <span>Microsoft Azure SQL</span>
     <span class="foot-legal">
       <a href="{{ '/privacy.html' | relative_url }}">Privacy</a>
-      <a href="{{ site.repo }}/issues/new" data-event="site/action" data-event-action="outboundClicked" data-event-destination-id="github-issues" data-event-destination-type="feedback">Feedback</a>
+      <a href="{{ site.repo }}/issues/new" data-event="site/action" data-event-action="outboundClicked" data-event-destination-id="github-issues" data-event-destination-type="feedback">Report an issue</a>
       <a href="{{ site.repo }}" data-event="site/action" data-event-action="outboundClicked" data-event-destination-id="dev-hub-repository" data-event-destination-type="github">GitHub</a>
     </span>
   </div>

@@ -1,20 +1,25 @@
 ---
 layout: page
-title: React to row changes
-description: React to row changes in Azure SQL Database with a SQL trigger function
+title: React to data changes
+description: An Azure Function that runs when rows change in Azure SQL Database, using the SQL trigger and Change Tracking.
 tag: .NET
+kind: block
+after: serverless-api
+after_title: Add a serverless API
+needs: The project from Add a serverless API, on an Azure SQL Database in the cloud. The local container does not include Change Tracking.
 last_verified: 2026-09-16
 validated: false
 ---
 
-# AI Prompt: React to row changes in Azure SQL Database with a SQL trigger function
+# AI Prompt: React to data changes in Azure SQL Database with a SQL trigger function
 
 **Role:** You are an expert .NET engineer adding an event-driven function to the current project that runs whenever rows change in an Azure SQL Database table.
 
 **Purpose:** Enable Change Tracking on the database and on `dbo.tasks`, then add an Azure Functions SQL trigger that fires on inserts, updates, and deletes and logs each change. Prove it with one insert.
 
 **Scope:**
-- Assumes the serverless scenario's project exists (`TasksApi`, .NET isolated worker, `SqlConnectionString` configured with `Active Directory Default`). If not, create that project first using the serverless scenario.
+- Builds on the project from the Add a serverless API prompt: `TasksApi`, .NET isolated worker, `SqlConnectionString` set to use `Active Directory Default`, and the `dbo.tasks` table. If that project does not exist, stop and tell the person to run that prompt first: {{ '/build/serverless-api.md' | absolute_url }}
+- Run T-SQL with `sqlcmd` and Microsoft Entra sign-in (`sqlcmd -S <server>.database.windows.net -d <database> -G -i <file>.sql`). If `sqlcmd` is not installed, ask the person to run the statements in the Azure portal's query editor and tell you when they are done.
 - Change Tracking is required by the SQL trigger. Without it the function never fires and reports no error.
 - The free tier runs on serverless compute with auto-pause. The trigger polls; the first poll against a paused database can fail with error 40613 and then succeed once the database resumes. Expect one retry, not a bug.
 
@@ -71,7 +76,9 @@ public class TasksChanged
 }
 ```
 
-The trigger needs a leases table for state. The binding creates `az_func.Leases_Tables_...` on first run. Grant the connecting identity only the documented database and table permissions it needs:
+The trigger needs a leases table for state. The binding creates `az_func.Leases_Tables_...` on first run.
+
+If the identity that runs the function owns the database or is the server's Microsoft Entra admin, which is the usual case for a database the person created, skip the grants below: it already has these permissions, and a `GRANT` to yourself fails. Otherwise ask the person, then grant the connecting identity only what it needs:
 
 ```sql
 GRANT CREATE SCHEMA TO [<your-entra-user>];
@@ -108,7 +115,7 @@ Within a few seconds the `func start` output logs `Insert task <id>`.
 - `sys.change_tracking_tables` lists `tasks`.
 - One insert produces exactly one `Insert` log line from `TasksChanged`, carrying the id and not the row content.
 - The function uses `[SqlTrigger]`; it does not poll the table with its own timer.
-- `SqlConnectionString` is unchanged from the serverless scenario: no password.
+- `SqlConnectionString` is unchanged from the serverless API: no password.
 
 ## Do not
 

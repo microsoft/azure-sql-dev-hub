@@ -1,5 +1,5 @@
 {%- comment -%}
-  Hero demo. It plays like an animated GIF. A terminal in GitHub Copilot types
+  Hero demo. It plays like an animated GIF. A terminal in GitHub Copilot CLI types
   the prompt from `demo.prompt` (index.md) with the first app's name, shows the
   skills and the build once, and the first app opens below the terminal's last
   line, overlapping only its empty bottom edge so no line is covered. After
@@ -25,7 +25,7 @@
 {%- assign n = first_prompt | size %}
 <div class="ht play" id="hDemo" role="img" aria-label="{{ demo.apps[0].alt | escape }}">
   <div class="ht-term">
-    <div class="ht-bar"><span class="ht-dots"><i></i><i></i><i></i></span>GitHub Copilot</div>
+    <div class="ht-bar"><span class="ht-dots"><i></i><i></i><i></i></span>GitHub Copilot CLI</div>
     <div class="ht-body">
       <p><span class="t-pr">❯</span> <span class="ht-type" style="--n:{{ n }};--d:.3s;--dur:{{ n | times: 30 }}ms">{{ prompt_parts[0] }}<span class="ht-name">{% for a in demo.apps %}<b data-ht="{{ a.key }}"{% unless forloop.first %} hidden{% endunless %}>{{ a.name }}</b>{% endfor %}</span>{{ prompt_parts[1] }}</span><span class="ht-caret" style="--d:.3s;--dur:{{ n | times: 30 }}ms"></span></p>
       <p class="gap ht-in" style="--d:2.1s"><span class="t-ok">●</span> skill({{ demo.skills[0] }})</p>

@@ -1,23 +1,25 @@
 ---
 layout: page
-title: Scaffold a JavaScript app
-description: Scaffold a JavaScript app on Azure SQL Database
+title: Start a Next.js app
+description: A read-only Next.js task page that reads from Azure SQL Database with Microsoft Entra and no passwords.
 tag: JavaScript
+kind: block
+needs: Node.js 20.12 or later, the Azure CLI signed in with az login, and an Azure SQL Database.
 last_verified: 2026-09-16
 validated: false
 ---
 
-# AI Prompt: Scaffold a JavaScript app on Azure SQL Database
+# AI Prompt: Start a Next.js app on Azure SQL Database
 
-**Role:** You are an expert full-stack engineer scaffolding a small web application in the current project, using Azure SQL Database in the cloud as the only data store.
+**Role:** You are an expert full-stack engineer scaffolding a small web application, using Azure SQL Database in the cloud as the only data store.
 
 **Purpose:** Stand up a Next.js task list that connects to an existing Azure SQL Database with Microsoft Entra, creates the schema, seeds a few rows when the table is empty, and renders them as a read-only page. One heading, one card per task, one status label. No passwords in code or config.
 
 **Scope:**
-- Assumes Node.js 20+ and an Azure SQL Database that already exists (free tier is fine). The person running this has signed in with `az login` and their identity can connect to the database.
-- Uses the `mssql` package, which wraps `tedious`. That is the only place the name `tedious` should appear.
+- Assumes Node.js 20.12 or later and an Azure SQL Database that already exists (free tier is fine). The person running this has signed in with `az login` and their identity can connect to the database.
+- Uses the `mssql` package for the connection.
 - The page is read-only. It displays what the database holds and offers no way to change it.
-- If the project already has code, add to it. Do not replace an existing framework.
+- Creates a new Next.js project in a `sql-tasks` folder. If the current folder already holds a Next.js app, skip `create-next-app` and add the files below to it instead; do not replace an existing framework.
 
 Read the entire instruction set before executing.
 
@@ -33,9 +35,11 @@ Identify the project's package manager (`npm`, `yarn`, `pnpm`, `bun`) and use it
 
 ### 1. Confirm the target database
 
-Ask for the server name and database name if they are not in `.env`. Do not create a database; it must already exist. Expect the form `<server>.database.windows.net` and a database on it.
+Ask for the server name and database name unless the person gave them or an existing `.env.local` holds them. Do not create a database; it must already exist. Expect the form `<server>.database.windows.net` and a database on it.
 
 ### 2. Create the project
+
+In an existing Next.js app, run only the two `npm install` lines.
 
 ```bash
 npx create-next-app@16.3.4 sql-tasks --typescript --app --no-tailwind --eslint --src-dir --import-alias "@/*"

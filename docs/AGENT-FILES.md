@@ -17,29 +17,21 @@ files at build time, so they cannot drift from what a person sees.
 
 Every page here is authored as a `.md` file and published twice: once rendered,
 once as source. So `/index.html` has its source at `/index.md`, and
-`/build/rag.html` at `/build/rag.md`. If you are an agent deciding what to
+`/build/team-board.html` at `/build/team-board.md`. If you are an agent deciding what to
 fetch: take the `.md`. It is smaller, it is the same content, and the code
 blocks are fenced.
 
 ## Skills {#skills}
 
-The [Azure SQL Database container repository]({{ site.container_repo }}) ships
-17 agent skills that carry current product knowledge into Claude Code, GitHub
-Copilot, Codex, and Cursor:
+The [microsoft/microsoft-sql repository]({{ site.skills_catalog }}) ships the
+Microsoft SQL agent skills as plugins for Claude Code, GitHub Copilot CLI,
+Codex, and Cursor. The install command for each agent is on the home page and
+in that repository's README. For Claude Code:
 
 ```bash
-npx skills add microsoft/azure-sql-database-container
+claude plugin marketplace add microsoft/microsoft-sql
+claude plugin install microsoft-sql@microsoft-sql
 ```
-
-Claude Code and Codex can install them as a native plugin instead:
-
-```text
-/plugin marketplace add microsoft/azure-sql-database-container
-```
-
-Per-tool detail and the full catalog live in the repository's
-[skills folder]({{ site.skills_catalog }}).
-
 ## MCP {#mcp}
 
 An Azure SQL MCP endpoint is not published yet. When it is, this page will

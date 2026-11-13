@@ -10,7 +10,6 @@ const analyticsRouter = readFileSync("_includes/analytics.html", "utf8");
 const oneDsInclude = readFileSync("_includes/analytics/one-ds.html", "utf8");
 const homeLayout = readFileSync("_layouts/home.html", "utf8");
 const pageLayout = readFileSync("_layouts/page.html", "utf8");
-const scenarioLayout = readFileSync("_layouts/scenario.html", "utf8");
 const navInclude = readFileSync("_includes/nav.html", "utf8");
 const footerInclude = readFileSync("_includes/footer.html", "utf8");
 const homeContent = readFileSync("index.md", "utf8");
@@ -142,7 +141,7 @@ assert.deepEqual(
 
 const templateSources = [
   ["home layout", homeLayout],
-  ["scenario layout", scenarioLayout],
+  ["page layout", pageLayout],
   ["navigation", navInclude],
   ["footer", footerInclude],
 ];
@@ -181,18 +180,19 @@ const requiredWiring = [
   [homeLayout, 'data-event-action="contentCopied"', "home copy actions"],
   [homeLayout, 'data-event-harness-id="{{ a.key }}"', "harness identifiers"],
   [homeLayout, 'data-event-scenario="{{ s.slug }}"', "scenario identifiers"],
-  [scenarioLayout, 'data-event-scenario="{{ scenario_id }}"', "scenario prompt"],
-  [scenarioLayout, 'data-event-content-type="skill-install"', "scenario skill install"],
+  [pageLayout, 'data-event-scenario="{{ scenario_id }}"', "prompt page copy and view"],
+  [pageLayout, 'data-event-destination-type="signup"', "prompt page create-database link"],
+  [homeLayout, 'data-event-destination-type="signup"', "home create-database links"],
+  [footerInclude, 'data-event-destination-type="signup"', "footer create-database link"],
   [navInclude, 'data-event-destination-type="feedback"', "feedback destination"],
   [footerInclude, 'data-event-destination-type="github"', "repository destination"],
   [homeContent, "key: connect_node_passwordless", "stable suggested ask keys"],
-  [homeContent, "key: vscode-copilot", "normalized Copilot harness ID"],
+  [homeContent, "key: copilot-cli", "normalized Copilot harness ID"],
   [homeContent, "event:", "obsolete front-matter event names", true],
   [pageLayout, 'data-view="scenarioPage"', "scenario page view"],
   [pageLayout, 'data-scenario="{{ page.name', "scenario page identity"],
   [pageLayout, 'data-view="{{ page.name', "content page views"],
   [homeLayout, 'data-view="mainPage"', "main page view"],
-  [scenarioLayout, 'data-view="scenarioPage"', "scenario page view"],
 ];
 
 for (const [source, marker, interaction, mustBeAbsent] of requiredWiring) {

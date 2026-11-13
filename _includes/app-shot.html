@@ -1,11 +1,10 @@
 {%- comment -%}
-  One app screen, by key. The apps (board, inventory, revenue, shipments,
+  One app screen, by key. The apps (board, inventory, kb, revenue, shipments,
   helpdesk) show one at a time in the hero demo, and on the Build section's
   app cards and in their details. The building blocks (tasks, api, search,
-  functions, changes, tenants) show on their Build cards, each drawn from what
-  its prompt builds, with its sample rows where it has them. The apps are
-  drawn after the matching idea-to-app reference apps; other names, rows, and
-  numbers are made up for the picture.
+  functions, changes, tenants, dab, cloud) show on their Build cards, each
+  drawn from what its prompt builds, with its sample rows where it has them.
+  Names, rows, and numbers are made up for the picture.
 
   Wrap it in an element with the ha-app class, which sets the screen's light
   Azure look and makes it a container, so its own width decides what fits.
@@ -27,6 +26,9 @@
   {%- when 'functions' %}{% assign ha_title = "Functions · localhost:7071" %}
   {%- when 'changes' %}{% assign ha_title = "Change log · Change Tracking on" %}
   {%- when 'tenants' %}{% assign ha_title = "Tasks · row-level security" %}
+  {%- when 'kb' %}{% assign ha_title = "Knowledge base · vector search" %}
+  {%- when 'dab' %}{% assign ha_title = "Data API builder · localhost:5000" %}
+  {%- when 'cloud' %}{% assign ha_title = "Local container to Azure SQL Database" %}
   {%- endcase %}
   <div class="ha-bar"><i></i><i></i><i></i><span>{{ ha_title }}</span></div>
 {%- endif %}
@@ -159,6 +161,39 @@
     <ul class="ha-rows">
       <li><span class="ha-grow">Cross-tenant read returns 0 rows</span><span class="ha-pill ok">Pass</span></li>
       <li><span class="ha-grow">Cross-tenant update is blocked</span><span class="ha-pill ok">Pass</span></li>
+    </ul>
+  </div>
+  {%- when 'kb' %}
+  <div class="ha-head"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 2.5h8.5A1.5 1.5 0 0 1 13 4v9.5H4.5A1.5 1.5 0 0 1 3 12Zm0 9.5a1.5 1.5 0 0 1 1.5-1.5H13M6 5.5h4" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>Knowledge base<span class="ha-org">Vector search</span></div>
+  <div class="ha-main">
+    <div class="ha-search ht-in" style="--d:5.2s"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="4.5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="m10.4 10.4 3.6 3.6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg><span class="ha-grow">Customer can't sign in after changing phones</span></div>
+    <div class="ha-filters"><span>Product: Identity</span><span>Ranked by cosine distance</span></div>
+    <ul class="ha-rows ha-hits">
+      <li class="ht-in" style="--d:5.4s"><span class="ha-grow">Move an authenticator app to a new device</span><code>0.142</code></li>
+      <li class="ht-in" style="--d:5.55s"><span class="ha-grow">Reset multifactor sign-in for a user</span><code>0.187</code></li>
+      <li class="ht-in" style="--d:5.7s"><span class="ha-grow">Recover an account without a recovery code</span><code>0.231</code></li>
+    </ul>
+  </div>
+  {%- when 'dab' %}
+  <div class="ha-head"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M5.5 2.5c-1.6 0-2 .8-2 2v1.6c0 .9-.5 1.4-1.5 1.9 1 .5 1.5 1 1.5 1.9v1.6c0 1.2.4 2 2 2M10.5 2.5c1.6 0 2 .8 2 2v1.6c0 .9.5 1.4 1.5 1.9-1 .5-1.5 1-1.5 1.9v1.6c0 1.2-.4 2-2 2" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>Data API<span class="ha-org">localhost:5000</span></div>
+  <div class="ha-main">
+    <ul class="ha-rows ha-ep">
+      <li><b class="ha-verb">GET</b><code class="ha-grow">/api/Task</code><span class="ha-pill ok">200</span></li>
+      <li><b class="ha-verb post">POST</b><code class="ha-grow">/graphql</code><span class="ha-pill ok">200</span></li>
+      <li><b class="ha-verb post">POST</b><code class="ha-grow">/api/Task</code><span class="ha-pill bad">403 read-only</span></li>
+    </ul>
+    <div class="ha-card ha-json"><code>{ <b>"value"</b>: [{ <b>"id"</b>: 1, <b>"title"</b>: <i>"Plan a weekend trip"</i>, <b>"done"</b>: false }] }</code></div>
+  </div>
+  {%- when 'cloud' %}
+  <div class="ha-head"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4.5 12.5a3 3 0 0 1-.4-5.97 4 4 0 0 1 7.7-.6 3.3 3.3 0 0 1-.3 6.57Z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>Move to the cloud<span class="ha-org">Microsoft Entra</span></div>
+  <div class="ha-main">
+    <div class="ha-split">
+      <div class="ha-card"><p class="ha-card-h">Local container</p><p>localhost,1433</p><p>SQL login</p></div>
+      <div class="ha-card"><p class="ha-card-h">Azure SQL Database</p><p>contoso.database.windows.net</p><p>Microsoft Entra, no password</p></div>
+    </div>
+    <ul class="ha-rows">
+      <li><span class="ha-grow">Migrations applied to the cloud database</span><span class="ha-pill ok">Done</span></li>
+      <li><span class="ha-grow">Test suite on Azure SQL Database</span><span class="ha-pill ok">Pass</span></li>
     </ul>
   </div>
   {%- endcase %}

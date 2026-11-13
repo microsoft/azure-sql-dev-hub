@@ -427,13 +427,10 @@ main.h + .site-footer{margin-top:0}
 .foot-name img{display:block;width:24px;height:24px}
 .foot-tag{margin:2px 0 0;font-size:13px;color:var(--text-3)}
 .foot-cta{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-top:20px}
-.foot-cmd{display:flex;align-items:center;gap:12px;max-width:100%;min-height:44px;padding:0 6px 0 14px;border:1px solid var(--border-3);border-radius:8px;background:var(--bg)}
-.foot-cmd code{min-width:0;overflow-wrap:anywhere;font-family:var(--font-mono);font-size:13px;color:var(--text-code)}
-.foot-copy{display:none;flex:none;min-height:32px;padding:0 10px;border:0;border-radius:6px;background:var(--bg);color:var(--accent);font:inherit;font-size:13px;font-weight:600;cursor:pointer}
-.js .foot-copy{display:block}
-.foot-copy:hover{background:var(--bg-hover)}
 .foot-start{display:inline-flex;align-items:center;min-height:44px;padding:0 18px;border-radius:8px;background:var(--accent);color:var(--on-accent);font-size:14px;font-weight:600}
 .foot-start:hover{background:var(--accent-hover);color:var(--on-accent);text-decoration:none}
+.foot-second{display:inline-flex;align-items:center;min-height:44px;padding:0 18px;border:1px solid var(--border-3);border-radius:8px;background:var(--bg);color:var(--text);font-size:14px;font-weight:600}
+.foot-second:hover{background:var(--bg-hover)}
 .foot-links{flex:1 1 140px;display:flex;flex-direction:column;align-items:flex-start;gap:8px;font-size:14px}
 .foot-links a,.foot-legal a{color:var(--text-3)}
 .foot-links a:hover,.foot-legal a:hover{color:var(--text)}
@@ -516,6 +513,20 @@ main.h + .site-footer{margin-top:0}
 .doc .prose a.doc-back:hover{color:var(--accent)}
 .doc .sectionLabel{color:var(--text-3);font-size:13px;font-weight:600;letter-spacing:0;text-transform:none}
 .doc-pill{padding:2px 8px;border-radius:4px;background:var(--badge-bg);color:var(--badge-text);font-size:12px;font-weight:600}
+.doc-pill.plain{border:1px solid var(--border-2);background:none;color:var(--text-3);font-family:var(--font-mono);font-size:11.5px;font-weight:400}
+/* A build prompt's header: what it is, what it needs, and the actions. The
+   prompt itself follows below the rule, exactly as it is copied. */
+.prompt-head{margin:0 0 32px;padding-bottom:28px;border-bottom:1px solid var(--border)}
+.doc .prose .prompt-head .doc-lead{margin-bottom:20px;color:var(--text);font-size:20px;line-height:1.45;font-weight:500}
+.prompt-meta{display:grid;grid-template-columns:max-content 1fr;gap:8px 20px;margin:0 0 22px;font-size:14px;line-height:1.5}
+.prompt-meta dt{color:var(--text-3)}
+.prompt-meta dd{margin:0;color:var(--text-2)}
+.prompt-actions{display:flex;flex-wrap:wrap;align-items:center;gap:10px 22px;font-size:14px}
+.doc .prose .prompt-actions a{font-weight:600}
+.prompt-copy{min-height:44px;padding:0 20px;border:0;border-radius:8px;background:var(--accent);color:var(--on-accent);font:inherit;font-size:15px;font-weight:600;cursor:pointer}
+.prompt-copy:hover{background:var(--accent-hover)}
+.prompt-copy.is-copied{background:var(--accent-hover)}
+@media(max-width:640px){.prompt-meta{grid-template-columns:1fr;gap:2px}.prompt-meta dd{margin-bottom:8px}}
 .doc .prose h1{margin:0 0 12px;color:var(--text);font-size:40px;line-height:1.15;font-weight:600;letter-spacing:-.02em}
 .doc .prose h2{margin:48px 0 12px;padding-top:28px;border-top:1px solid var(--border);color:var(--text);font-size:24px;line-height:1.25;font-weight:600;letter-spacing:-.015em}
 .doc .prose h3{margin:28px 0 8px;color:var(--text);font-size:17px;line-height:1.35;font-weight:600}

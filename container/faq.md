@@ -28,30 +28,28 @@ The SQL Server container runs SQL Server. Azure SQL Database container is design
 
 ### Will an application that works with the container work unchanged in Azure SQL Database?
 
-The container is designed to reduce differences between local development and Azure SQL Database, but it is not a replacement for validation in Azure. Before production deployment, test your application against the Azure SQL Database. You can most definitely leverage the [Free Tier offering]({{ site.azure_free_tier }}).
+The container is designed to reduce differences between local development and Azure SQL Database, but it is not a replacement for validation in Azure. Before you deploy to production, test your application against Azure SQL Database. The [free tier]({{ site.azure_free_tier }}) is enough for that.
 
 ## Feature availability {#feature-availability}
 
 ### What features available in Azure SQL Database are not available in the container?
 
-The following capabilities are not included in the current container experience. If your application depends on one of these capabilities, validate that part of the application directly against Azure SQL Database.
+These are not in the container. If your application depends on one, validate that part against Azure SQL Database.
 
-| Capability not available | What this means for development |
-| --- | --- |
-| Auditing | Test auditing configuration and audit-output workflows in Azure SQL Database. |
-| Backup and restore | The Azure SQL Database backup/restore service and backup/restore engine are not included. Use supported development workflows rather than production backup and restore operations. |
-| Change Data Capture | Change Data Capture is not included. |
-| Change Event Streaming | Change Event Streaming is not included. |
-| Change Tracking | Change Tracking is not included. |
-| Global Query | Global Query is not included. |
-| Always Encrypted | Always Encrypted is not included. |
-| Cell-level encryption | Cell-level encryption is not included. |
-| SQL Ledger | SQL Ledger is not included. |
-| Transparent Data Encryption and Azure Key Vault integration | These service-managed encryption capabilities are not included in the local container. |
+- Auditing
+- Backup and restore. The managed backup service is not included; keep data between runs with a volume.
+- Change Data Capture
+- Change Event Streaming
+- Change Tracking. The Azure Functions SQL trigger depends on it.
+- Global Query
+- Always Encrypted
+- Cell-level encryption
+- SQL Ledger
+- Transparent Data Encryption and Azure Key Vault integration
 
 ### Are any features temporarily unavailable in the initial Public Preview? {#arm64}
 
-Yes, the below is only available on X64. ARM support on the below will follow soon.
+Yes. These are available on x64 only for now, and ARM64 support will follow.
 
 - Full-text search
 - PolyBase
@@ -80,6 +78,10 @@ Yes. A primary scenario is running integration tests locally or in a continuous 
 
 Yes. The intended workflow is to build and test locally, then deploy the database project or schema and connect the application to Azure SQL Database. [Features listed as unavailable](#feature-availability) must be tested separately in Azure.
 
+### Can I run this site's build prompts on the container?
+
+The app prompts, yes: each one tells your agent how to connect to the container or to a cloud database. The building blocks marked Cloud only need Azure SQL Database. See [Build with a prompt]({{ '/' | relative_url }}#build).
+
 ### Can I use Microsoft Entra authentication?
 
 Microsoft Entra authentication is included. During Public Preview, some setup may require [command-line configuration]({{ '/container/get-started.html#entra' | relative_url }}). Tooling experiences in SQL Server Management Studio and Visual Studio Code may evolve during the preview.
@@ -90,7 +92,7 @@ No. Azure SQL Database includes cloud services and operational capabilities that
 
 ### How should I report an issue? {#report-an-issue}
 
-When reporting an issue, include the container image version, host operating system and architecture, startup command, client tool and version, relevant logs, and a minimal reproduction. Do not include passwords, connection secrets, or customer data.
+[Report a bug](https://aka.ms/azuresqldb-container-bug). Include the container image version, host operating system and architecture, startup command, client tool and version, relevant logs, and a minimal reproduction. Do not include passwords, connection secrets, or customer data.
 
 ## Related {#related}
 

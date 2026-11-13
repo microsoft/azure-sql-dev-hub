@@ -29,6 +29,7 @@
 .h .hero h1{font-size:clamp(34px,7vw,44px);line-height:1.08;font-weight:600;letter-spacing:-.02em;text-wrap:balance}
 .h .hero .tagline{margin-top:20px;font-size:19px;line-height:1.4;font-weight:600}
 .h .hero .sub{margin-top:10px;max-width:460px;font-size:17px;line-height:1.55;color:var(--text-2)}
+.h .hero h1+.sub{margin-top:18px;font-size:19px}
 .h .hero .ctas{justify-content:flex-start;gap:10px;margin:28px 0 0}
 .h .hero .btn{min-height:44px;padding:0 18px;border-radius:8px}
 .h .hero .btn-p{background:var(--accent);color:var(--on-accent)}.h .hero .btn-p:hover{background:var(--accent-hover)}
@@ -111,6 +112,7 @@
 /* Sales. One series in the app's blue, so the card title names it and no
    legend is needed; bars stay under 24px with rounded tops on one baseline. */
 .h .ha-filters{display:flex;gap:6px;margin-bottom:8px}
+.h .ha-search+.ha-filters{margin:8px 0 0}
 .h .ha-filters span{padding:2px 8px;border:1px solid var(--ha-line-2);border-radius:4px;font-size:10.5px;color:var(--ha-text-2)}
 .h .ha-kpis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:8px}
 .h .ha-kpis div{padding:5px 9px;border:1px solid var(--ha-line);border-radius:6px}
@@ -216,10 +218,10 @@
 .h .code-copy:hover{border-color:var(--term-dim)}.h .code-copy.ok{color:var(--term-ok)}
 .h .code-box.sm{padding:12px 76px 12px 14px}.h .code-box.sm code{font-size:12.5px}
 .h .code-box.sm .code-copy{top:8px;right:8px;min-height:30px;padding:0 11px}
-/* Quickstart, rebuilt from the redesign. A themed region like the hero: shared
-   tokens only. With scripts, tabs show one panel at a time and the container
-   setup guide opens as a dialog. Without them, every panel shows, stacked, and
-   the guide shows in place below the card. */
+/* Get a database. A themed region like the hero: shared tokens only. With
+   scripts, tabs show one panel at a time. Without them, every panel shows,
+   stacked. Each panel carries its own steps and commands, so nothing opens in
+   a dialog. */
 .h .quick{padding:56px 0 64px;background:var(--bg);color:var(--text)}
 .h .qs-head{margin-bottom:28px}
 .h .quick h2{font-size:28px;line-height:1.2;font-weight:600;letter-spacing:-.015em}
@@ -227,16 +229,16 @@
 .h .qs-body{display:flex;flex-direction:column;gap:14px;max-width:760px;margin:0 auto}
 .h .qs-card{overflow:hidden;border:1px solid var(--border-2);border-radius:12px;background:var(--bg);box-shadow:0 1px 2px rgba(16,24,40,.04)}
 .h .qs-tabs{display:flex;flex-wrap:wrap;gap:0 24px;padding:0 20px;border-bottom:1px solid var(--border)}
-.h .qs-dtabs{display:flex;flex-wrap:wrap;gap:0 24px;margin-top:-6px;border-bottom:1px solid var(--border)}
-.h .qs-tab,.h .qs-dtab{display:flex;align-items:center;gap:8px;margin-bottom:-1px;padding:13px 0 11px;border:0;border-bottom:2px solid transparent;background:none;color:var(--text-3);font:inherit;font-size:14px;font-weight:500;cursor:pointer}
-.h .qs-dtab{padding:10px 0 9px}
-.h .qs-tab:focus-visible,.h .qs-dtab:focus-visible{outline-offset:-2px}
-.h .qs-tab[aria-selected="false"]:hover,.h .qs-dtab[aria-selected="false"]:hover{color:var(--text)}
-.h .qs-tab[aria-selected="true"],.h .qs-dtab[aria-selected="true"]{border-bottom-color:var(--accent);color:var(--accent);font-weight:600}
+.h .qs-tab{display:flex;align-items:center;gap:8px;margin-bottom:-1px;padding:13px 0 11px;border:0;border-bottom:2px solid transparent;background:none;color:var(--text-3);font:inherit;font-size:14px;font-weight:500;cursor:pointer}
+.h .qs-tab:focus-visible{outline-offset:-2px}
+.h .qs-tab[aria-selected="false"]:hover{color:var(--text)}
+.h .qs-tab[aria-selected="true"]{border-bottom-color:var(--accent);color:var(--accent);font-weight:600}
 .h .qs-badge{padding:1px 6px;border-radius:4px;background:var(--badge-bg);color:var(--badge-text);font-size:11px;font-weight:600}
 .h .qs-panel{display:flex;flex-direction:column;gap:18px;padding:20px}
 .js .h .qs-panel:not(.on){display:none}
 .h .quick h3{font-size:15px;line-height:1.35;font-weight:600;letter-spacing:0}
+.h .qs-lede{display:flex;flex-wrap:wrap;align-items:flex-start;justify-content:space-between;gap:14px 24px}
+.h .qs-lede>div{flex:1 1 380px;min-width:0}
 .h .qs-lede p{margin-top:2px;font-size:14px;color:var(--text-3)}
 .h .qs-sub{margin-bottom:-6px;font-size:14px;font-weight:600}
 .h .qs-steps{display:flex;flex-direction:column;gap:14px;margin:0;padding:0;list-style:none}
@@ -251,15 +253,9 @@
 .h .qs-steps .qs-prompt p{color:var(--text-code);line-height:1.6}
 .h .qs-pcopy{display:none;position:absolute;top:8px;right:8px;min-height:30px;padding:0 11px;border:1px solid var(--border-3);border-radius:6px;background:var(--bg);color:var(--text-2);font:inherit;font-size:12px;font-weight:500;cursor:pointer}
 .js .h .qs-pcopy{display:block}.h .qs-pcopy:hover{background:var(--bg-muted)}
-.h .qs-local{display:flex;flex-wrap:wrap;align-items:stretch;gap:16px 20px}
-.h .qs-intro{flex:1 1 200px;min-width:0;display:flex;flex-direction:column;gap:10px;padding:18px;border:1px solid var(--border-soft);border-radius:8px;background:var(--bg-subtle)}
-.h .qs-intro p{font-size:14px;color:var(--text-3)}
-.h .qs-start{align-self:flex-start;margin-top:auto;display:inline-flex;align-items:center;min-height:40px;padding:0 16px;border-radius:8px;background:var(--accent);color:var(--on-accent);font-size:14px;font-weight:600}
+.h .qs-start{flex:none;align-self:flex-start;display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:0 18px;border-radius:8px;background:var(--accent);color:var(--on-accent);font-size:14px;font-weight:600}
 .h .qs-start:hover{background:var(--accent-hover);color:var(--on-accent);text-decoration:none}
-.h .qs-local .qs-steps{flex:1.3 1 260px;min-width:0}
 .h .qs-foot{display:flex;flex-wrap:wrap;gap:6px 20px;padding-top:14px;border-top:1px solid var(--border-soft);font-size:14px}
-.h .qs-then{display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px;padding:0 4px;font-size:13px;color:var(--text-3)}
-.h .qs-node{padding:3px 10px;border:1px solid var(--border-3);border-radius:6px;background:var(--bg);color:var(--text);font-weight:500}
 .h .qs-dialog{width:calc(100% - 48px);max-width:720px;max-height:calc(100vh - 48px);padding:0;overflow-y:auto;border:1px solid var(--border-2);border-radius:12px;background:var(--bg);color:var(--text);box-shadow:0 20px 50px rgba(0,0,0,.35)}
 .h .qs-dialog:focus{outline:none}
 .h .qs-dialog::backdrop{background:rgba(8,10,14,.6)}
@@ -270,42 +266,12 @@ html:has(.qs-dialog[open]){overflow:hidden}
 .h .qs-x{flex:0 0 44px;display:flex;align-items:center;justify-content:center;width:44px;height:44px;padding:0;border:0;border-radius:8px;background:transparent;color:var(--text-3);cursor:pointer}
 .h .qs-x:hover{background:var(--bg-muted);color:var(--text)}
 .h .qs-dlg-body{display:flex;flex-direction:column;gap:18px;padding:20px 24px 24px}
-.h .qs-dpanel{display:flex;flex-direction:column;gap:18px}
-.js .h .qs-dpanel:not(.on){display:none}
-.h .qs-dhead{display:none}
-.h .qs-dintro{font-size:14px;color:var(--text-3)}
 .h .qs-dsteps{gap:18px}
 .h .qs-dstep{display:flex;flex-direction:column;gap:8px}
 .h .qs-dstep .qs-prompt{margin-top:0}
-.h .qs-dfoot{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 20px;padding-top:14px;border-top:1px solid var(--border-soft);font-size:14px}
-.h .qs-dlinks{display:flex;flex-wrap:wrap;gap:6px 20px}
-.h .qs-all{display:none;min-height:28px;padding:0;border:0;background:none;color:var(--accent);font:inherit;font-size:14px;font-weight:600;cursor:pointer}
-.js .h .qs-all{display:block}.h .qs-all:hover{color:var(--accent-hover);text-decoration:underline}
-:root:not(.js) .h .qs-tabs,:root:not(.js) .h .qs-dtabs,:root:not(.js) .h .qs-x{display:none}
+:root:not(.js) .h .qs-tabs{display:none}
 :root:not(.js) .h .qs-panel + .qs-panel{border-top:1px solid var(--border)}
-:root:not(.js) .h .qs-dialog{display:block;position:static;width:auto;max-width:760px;max-height:none;margin:24px auto 0;overflow:visible;box-shadow:none}
-:root:not(.js) .h .qs-dlg-head{position:static}
-:root:not(.js) .h .qs-dhead{display:block}
 @media (max-width:640px){.h .qs-dialog{width:calc(100% - 24px);max-height:calc(100vh - 24px)}.h .qs-dlg-head{padding-left:16px}.h .qs-dlg-body{padding:16px}}
-/* Azure SQL Database container, from the redesign. A themed region on the
-   subtle background: two cards that open the quickstart's setup guide on its
-   manual or agent tab, then the container's resources. Without scripts the
-   cards jump to the guide, shown in place in the quickstart. */
-.h .ctr{padding:56px 0;border-top:1px solid var(--border);background:var(--bg-subtle);color:var(--text)}
-.h .ctr-head{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px}
-.h .ctr h2{font-size:28px;line-height:1.2;font-weight:600;letter-spacing:-.015em}
-.h .ctr-head .qs-badge{padding:2px 8px;font-size:12px}
-.h .ctr-sub{max-width:640px;margin:8px 0 24px;font-size:16px;color:var(--text-3)}
-.h .ctr-cards{display:flex;flex-wrap:wrap;gap:16px}
-.h .ctr-card{flex:1 1 420px;min-width:0;display:flex;flex-direction:column;gap:8px;padding:28px;border:1px solid var(--border-2);border-radius:12px;background:var(--bg)}
-.h .ctr-card>svg{color:var(--accent)}
-.h .ctr-card h3{margin-top:10px;font-size:19px;line-height:1.3;font-weight:600;letter-spacing:0}
-.h .ctr-card p{font-size:15px;color:var(--text-3)}
-.h .ctr-go{align-self:flex-start;display:inline-flex;align-items:center;min-height:32px;margin-top:8px;font-size:15px;font-weight:600}
-.h .ctr-links{display:flex;flex-wrap:wrap;gap:8px 32px;margin-top:24px;font-size:15px}
-.h .ctr-links a{display:inline-flex;align-items:center;gap:4px;min-height:32px}
-@media (max-width:820px){.h .ctr{padding:44px 0}}
-@media (max-width:640px){.h .ctr-card{padding:22px}}
 /* Build, rebuilt from the redesign's templates. A themed region: shared tokens
    only. The filter shows one group, full apps first. The apps' pictures are
    the hero demo's app screens (_includes/app-shot.html), light in both themes,
@@ -317,9 +283,6 @@ html:has(.qs-dialog[open]){overflow:hidden}
 .h .tpl h2{font-size:28px;line-height:1.2;font-weight:600;letter-spacing:-.015em}
 .h .tpl-head p{margin-top:8px;font-size:16px;color:var(--text-3)}
 .h .tpl-note{max-width:640px;margin-top:10px;font-size:14px;color:var(--text-3)}
-.h .tpl-flow{display:flex;flex-wrap:wrap;gap:8px 24px;margin:16px 0 0;padding:0;list-style:none;font-size:14px;color:var(--text-2)}
-.h .tpl-flow li{display:flex;align-items:center;gap:8px}
-.h .tpl-flow span{display:grid;place-items:center;width:22px;height:22px;border:1px solid var(--border-3);border-radius:50%;font-size:12px;font-weight:600;color:var(--text-nav)}
 .h .tpl-filter{display:flex;flex-wrap:wrap;gap:8px;margin:24px 0 16px}
 .h .tpl-chip{display:inline-flex;align-items:center;gap:6px;min-height:36px;padding:0 14px;border:1px solid var(--border-3);border-radius:18px;background:var(--bg);color:var(--text-2);font:inherit;font-size:13px;font-weight:500;cursor:pointer}
 .h .tpl-chip span{font-weight:500;opacity:.7}
@@ -347,40 +310,33 @@ html:has(.qs-dialog[open]){overflow:hidden}
 .h .tpl-card h3{font-size:15px;line-height:1.35;font-weight:600;letter-spacing:0}
 .h .tpl-tag{flex:none;padding:1px 6px;border:1px solid var(--border-2);border-radius:4px;font-family:var(--font-mono);font-size:11.5px;font-weight:400;color:var(--text-3);white-space:nowrap}
 .h .tpl-body p{font-size:14px;color:var(--text-3)}
+.h .tpl-body .tpl-needs{display:flex;flex-wrap:wrap;gap:2px 12px;font-size:12.5px;line-height:1.5}
+.h .tpl-needs span+span::before{content:"\00b7";margin-right:12px;color:var(--border-3)}
 .h .tpl-act{display:flex;align-items:center;gap:20px;margin-top:auto;padding-top:8px}
 .h .tpl-link{display:inline-flex;align-items:center;height:28px;padding:0;border:0;background:none;color:var(--accent);font:inherit;font-size:13px;font-weight:600;cursor:pointer}
 .h .tpl-link:hover{text-decoration:underline}.h .tpl-link.bad{color:var(--text-3)}
 /* An app's details */
-.h .tpl-dialog{max-width:960px}
-.h .tpl-dbody{gap:28px}
+.h .tpl-dialog{max-width:860px}
+.h .tpl-dbody{gap:22px}
 .h .tpl-dtop{display:flex;flex-wrap:wrap;align-items:flex-start;gap:24px 28px}
 .h .tpl-dshot{flex:1.35 1 420px;min-width:0;aspect-ratio:8/5;padding:20px 24px;overflow:hidden;border:1px solid var(--border-2);border-radius:12px;background:var(--shot-bg)}
 .h .tpl-dinfo{display:flex;flex:1 1 300px;flex-direction:column;gap:16px;min-width:0}
 .h .tpl-sum{font-size:18px;line-height:1.45;font-weight:500}
-.h .tpl-meta{display:grid;grid-template-columns:auto 1fr;gap:6px 16px;margin:0;font-size:13.5px}
-.h .tpl-meta dt{color:var(--text-3)}.h .tpl-meta dd{margin:0;font-weight:600}
 .h .tpl-runs{display:flex;flex-wrap:wrap;gap:6px}
 .h .tpl-runs span{padding:2px 10px;border:1px solid var(--border-2);border-radius:999px;background:var(--bg-subtle);color:var(--text-nav);font-size:12.5px;font-weight:500}
 .h .tpl-dact{display:flex;flex-wrap:wrap;align-items:center;gap:10px 18px;margin-top:4px}
 .h .tpl-dact a{display:inline-flex;align-items:center;gap:4px;font-size:14px;font-weight:600}
 .h .tpl-primary{min-height:44px;padding:0 20px;border:0;border-radius:8px;background:var(--accent);color:var(--on-accent);font:inherit;font-size:15px;font-weight:600;cursor:pointer}
 .h .tpl-primary:hover{background:var(--accent-hover)}
-.h .tpl-dh{margin-bottom:14px;font-size:16px;line-height:1.3;font-weight:600;letter-spacing:0}
 .h .tpl-boxes{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,250px),1fr));gap:12px}
 .h .tpl-box{padding:16px;border:1px solid var(--border-2);border-radius:10px}
-.h .tpl-box h4{margin:0 0 12px;font-size:13px;font-weight:600;color:var(--text-3)}
-.h .tpl-sqlbox{background:var(--bg-subtle)}
+.h .tpl-box h3{margin:0 0 12px;font-size:13px;line-height:1.3;font-weight:600;letter-spacing:0;color:var(--text-3)}
+.h .tpl-tables{display:flex;flex-wrap:wrap;gap:6px}
+.h .tpl-tables code{padding:2px 8px;border:1px solid var(--border-2);border-radius:6px;background:var(--bg-subtle);color:var(--text-code);font-size:12.5px}
+.h .tpl-dneeds{font-size:13.5px;color:var(--text-3)}
 .h .tpl-box ul{display:flex;flex-direction:column;gap:9px;margin:0;padding:0;list-style:none;font-size:14px;line-height:1.45}
-.h .tpl-feat li{position:relative;padding-left:25px}
-.h .tpl-feat li::before{content:"";position:absolute;left:2px;top:6px;width:10px;height:5px;border:solid var(--accent);border-width:0 0 2.2px 2.2px;transform:rotate(-45deg)}
 .h .tpl-pairs li{display:flex;flex-direction:column;gap:1px}
-.h .tpl-pairs code{padding:0;border:0;background:none;color:var(--text-code);font-family:var(--font-mono);font-size:13px;font-weight:600}
 .h .tpl-pairs span{font-size:13.5px;line-height:1.4;color:var(--text-3)}
-.h .tpl-try{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,260px),1fr));gap:10px;margin:0;padding:0;list-style:none}
-.h .tpl-try li{display:flex;gap:10px;padding:12px 14px;border:1px solid var(--border-2);border-radius:8px;background:var(--bg-subtle)}
-.h .tpl-try svg{flex:0 0 16px;margin-top:2px;color:var(--accent)}
-.h .tpl-try b{display:block;font-size:14px;line-height:1.4;font-weight:600}
-.h .tpl-try span{display:block;margin-top:2px;font-size:13.5px;line-height:1.45;color:var(--text-3)}
 :root:not(.js) .h .tpl-dialog{display:none}
 @media (max-width:820px){.h .tpl{padding:44px 0}}
 /* Built for AI workloads. A themed region, so shared tokens only; the copy is
@@ -408,7 +364,7 @@ html:has(.qs-dialog[open]){overflow:hidden}
    shared tokens only. The agent picker is the redesign's segmented control,
    one row that wraps only when it runs out of room. Copy labels show only once
    the page script has run. */
-.h .skills{padding:56px 0;border-top:1px solid var(--border);background:var(--bg);color:var(--text)}
+.h .skills{padding:56px 0;border-top:1px solid var(--border);background:var(--bg-subtle);color:var(--text)}
 .h .sk-in{display:flex;flex-wrap:wrap;gap:40px 56px}
 .h .sk-main{flex:1 1 460px;min-width:0}
 .h .sk-side{flex:1 1 380px;min-width:0}
@@ -420,7 +376,11 @@ html:has(.qs-dialog[open]){overflow:hidden}
 .h .sk-seg button[aria-pressed="true"]{background:var(--bg);color:var(--text);font-weight:600;box-shadow:var(--seg-shadow)}
 .h .sk-seg svg{display:block;flex:none;width:16px;height:16px}
 .h .sk-seg span{white-space:nowrap}
-.h .sk-links{display:flex;flex-wrap:wrap;gap:6px 20px;margin-top:16px;font-size:14px}
+.h .sk-note{margin-top:10px;font-size:13px;line-height:1.5;color:var(--text-3)}
+.h .sk-note code{font-size:12px;color:var(--text-code)}
+.h .sk-note b{font-weight:600;color:var(--text-2)}
+.h .sk-all{margin-top:14px}.js .h .sk-all{display:none}
+.h .sk-links{margin-top:14px;font-size:14px;font-weight:600}
 .h .sk-label{margin-bottom:10px;padding-top:6px;font-size:13px;font-weight:600;color:var(--text-3)}
 .h .sk-asks{overflow:hidden;border:1px solid var(--border-2);border-radius:10px}
 .h .sk-ask{display:flex;justify-content:space-between;align-items:center;gap:16px;width:100%;min-height:52px;padding:12px 16px;border:0;border-bottom:1px solid var(--border);background:var(--bg);color:var(--text);font:inherit;font-size:14px;line-height:1.45;text-align:left;cursor:pointer}
@@ -481,8 +441,8 @@ html:has(.qs-dialog[open]){overflow:hidden}
         {%- if page.hero.tagline %}<p class="tagline">{{ page.hero.tagline }}</p>{% endif %}
         <p class="sub">{{ page.hero.subline }}</p>
         <div class="ctas">
-          <a class="btn btn-p" href="#get-running" data-event="site/action" data-event-action="pathSelected" data-event-path-id="get-running">Get started</a>
-          <a class="btn btn-s" href="#get-running" data-htab-go="agent">Install skills</a>
+          <a class="btn btn-p" href="{{ page.hero.primary.href }}" data-event="site/action" data-event-action="pathSelected" data-event-action-location="hero" data-event-path-id="{{ page.hero.primary.path }}">{{ page.hero.primary.label }}</a>
+          <a class="btn btn-s" href="{{ page.hero.secondary.href }}" data-event="site/action" data-event-action="pathSelected" data-event-action-location="hero" data-event-path-id="{{ page.hero.secondary.path }}">{{ page.hero.secondary.label }}</a>
         </div>
         <p class="agentline">Works with <span>{% for a in page.hero.agents %}{{ a }}{% unless forloop.last %}{% if forloop.rindex == 2 %}, and {% else %}, {% endif %}{% endunless %}{% endfor %}.</span></p>
       </div>
@@ -493,167 +453,112 @@ html:has(.qs-dialog[open]){overflow:hidden}
     </div>
   </header>
 
+  {%- comment %} Get a database. #containers is where the container pages' back
+  link lands, and the page script opens the Local container tab for it. The other
+  spans are anchors from earlier versions of the page, kept so old links land. {% endcomment %}
   <section id="get-running" class="quick">
-    <span id="start" aria-hidden="true"></span><span id="connect" aria-hidden="true"></span><span id="continuity" aria-hidden="true"></span>
+    <span id="start" aria-hidden="true"></span><span id="connect" aria-hidden="true"></span><span id="continuity" aria-hidden="true"></span><span id="containers" aria-hidden="true"></span>
     <div class="w">
       <div class="qs-head"><h2>{{ page.quickstart_heading }}</h2><p>{{ page.quickstart_text }}</p></div>
       <div class="qs-body">
         <div class="qs-card">
-          <div class="qs-tabs" role="tablist" aria-label="Ways to start">
+          <div class="qs-tabs" role="tablist" aria-label="Where the database runs">
             {%- for m in page.quickstart %}
             <button class="qs-tab" type="button" role="tab" id="qs-tab-{{ m.key }}" aria-controls="qs-panel-{{ m.key }}" aria-selected="{% if forloop.first %}true{% else %}false{% endif %}"
-                    data-htab="{{ m.key }}" data-event="site/action" data-event-action="pathSelected" data-event-path-id="{{ m.key }}">{{ m.name }}{% if m.pill %}<span class="qs-badge">{{ m.pill }}</span>{% endif %}</button>
+                    data-htab="{{ m.key }}" data-event="site/action" data-event-action="pathSelected" data-event-action-location="install-panel" data-event-path-id="{{ m.key }}">{{ m.name }}{% if m.pill %}<span class="qs-badge">{{ m.pill }}</span>{% endif %}</button>
             {%- endfor %}
           </div>
           {%- for m in page.quickstart %}
           <div class="qs-panel{% if forloop.first %} on{% endif %}" role="tabpanel" id="qs-panel-{{ m.key }}" aria-labelledby="qs-tab-{{ m.key }}">
-            {%- if m.key == 'local' %}
-            <div class="qs-local">
-              <div class="qs-intro">
-                <h3>{{ m.title }}</h3>
-                <p>{{ m.desc }}</p>
-                <a class="qs-start" href="#container-setup" data-setup-open="cs-tab-manual"
-                   data-event="site/action" data-event-action="contentOpened" data-event-action-location="install-panel"
-                   data-event-content-id="container-setup" data-event-content-type="setup-guide">{{ m.start }}</a>
-              </div>
-              <ol class="qs-steps qs-ruled">
-                {%- for c in m.checks %}
-                <li><span class="qs-n">{{ forloop.index }}</span><div><b>{{ c[0] }}</b><p>{{ c[1] }}</p></div></li>
-                {%- endfor %}
-              </ol>
+            <div class="qs-lede">
+              <div><h3>{{ m.title }}</h3><p>{{ m.desc }}</p></div>
+              {%- if m.button %}
+              <a class="qs-start" href="{{ m.button.href }}" target="_blank" rel="noopener"
+                 data-event="site/action" data-event-action="outboundClicked" data-event-action-location="install-panel"
+                 data-event-destination-id="{{ m.button.id }}" data-event-destination-type="signup">{{ m.button.label }}<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17L17 7M9 7h8v8"/></svg></a>
+              {%- endif %}
             </div>
-            <p class="qs-foot">
-              <a href="#container-setup" data-setup-open="cs-tab-manual" data-event="site/action" data-event-action="contentOpened" data-event-action-location="install-panel"
-                 data-event-content-id="container-setup" data-event-content-type="setup-guide">{{ m.setup_link }}</a>
-              <a href="#container-setup" data-setup-open="cs-tab-agent" data-event="site/action" data-event-action="contentOpened" data-event-action-location="install-panel"
-                 data-event-content-id="container-setup-agent" data-event-content-type="setup-guide">{{ m.agent_link }}</a>
-            </p>
-            {%- else %}
-            <div class="qs-lede"><h3>{{ m.title }}</h3><p>{{ m.desc }}</p></div>
-            {%- if m.code %}
-            <div class="code-box"><code>{{ m.code }}</code><button class="code-copy" type="button" data-hcopy="{{ m.code | escape }}"
-              data-event="site/action" data-event-action="contentCopied" data-event-action-location="install-panel"
-              data-event-content-id="quickstart-{{ m.key }}"
-              data-event-content-type="{% if m.key == 'agent' %}collection-install{% else %}command{% endif %}">Copy</button></div>
-            {%- endif %}
-            <p class="qs-sub">{{ m.detail_title }}</p>
-            <ol class="qs-steps">
-              {%- for c in m.checks %}
-              <li><span class="qs-n">{{ forloop.index }}</span><div><b>{{ c[0] }}</b>{% if c[2] == 'prompt' %}<div class="qs-prompt"><p>{{ c[1] }}</p><button class="qs-pcopy" type="button" data-hcopy="{{ c[1] | escape }}"
-                data-event="site/action" data-event-action="contentCopied" data-event-action-location="install-panel"
-                data-event-content-id="quickstart-{{ m.key }}-prompt" data-event-content-type="suggested-ask">Copy</button></div>{% else %}<p>{{ c[1] }}</p>{% endif %}</div></li>
-              {%- endfor %}
-            </ol>
-            {%- assign lead = m.link.href | slice: 0 %}
-            <p class="qs-foot">{% if lead == '#' %}<a href="{{ m.link.href }}" data-event="site/action" data-event-action="pathSelected" data-event-path-id="{{ m.link.href | remove_first: '#' }}">{{ m.link.label }}</a>{% else %}<a href="{{ m.link.href }}" data-event="site/action" data-event-action="outboundClicked"
-              data-event-destination-id="quickstart-{{ m.key }}-docs" data-event-destination-type="docs">{{ m.link.label }}</a>{% endif %}</p>
-            {%- endif %}
-          </div>
-          {%- endfor %}
-        </div>
-        <p class="qs-then">
-          <span>Then:</span><span class="qs-node">{{ page.then.from }}</span><span aria-hidden="true">&rarr;</span><span class="qs-node">{{ page.then.to }}</span><span>{{ page.then.note }}</span>
-        </p>
-      </div>
-      {%- assign cs = page.container_setup %}
-      {%- comment %} Liquid drops a block whose body is only whitespace, so the blank line between commands is captured once and joined in. {% endcomment %}
-      {%- capture blank_line %}
-
-{% endcapture %}
-      {%- assign cs_all = cs.manual.steps | map: 'code' | join: blank_line %}
-      <dialog class="qs-dialog" id="container-setup" aria-labelledby="cs-title" tabindex="-1">
-        <div class="qs-dlg-head">
-          <div class="qs-dlg-title"><h2 id="cs-title">{{ cs.title }}</h2><span class="qs-badge">{{ cs.pill }}</span></div>
-          <button class="qs-x" type="button" aria-label="Close"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
-        </div>
-        <div class="qs-dlg-body">
-          <div class="qs-dtabs" role="tablist" aria-label="How to set up">
-            <button class="qs-dtab" type="button" role="tab" id="cs-tab-manual" aria-controls="cs-panel-manual" aria-selected="true">{{ cs.manual.tab }}</button>
-            <button class="qs-dtab" type="button" role="tab" id="cs-tab-agent" aria-controls="cs-panel-agent" aria-selected="false">{{ cs.agent.tab }}</button>
-          </div>
-          <div class="qs-dpanel on" role="tabpanel" id="cs-panel-manual" aria-labelledby="cs-tab-manual">
-            <h3 class="qs-dhead">{{ cs.manual.tab }}</h3>
-            <p class="qs-dintro">{{ cs.manual.intro }} <a href="{{ cs.prerequisites.href | relative_url }}" data-event="site/action" data-event-action="pathSelected"
-              data-event-path-id="container-prerequisites">{{ cs.prerequisites.label }}</a></p>
             <ol class="qs-steps qs-dsteps">
-              {%- for st in cs.manual.steps %}
-              <li><span class="qs-n">{{ forloop.index }}</span><div class="qs-dstep"><div><b>{{ st.title }}</b><p>{{ st.text }}</p></div>
-                <div class="code-box sm"><pre><code>{{ st.code | escape }}</code></pre><button class="code-copy" type="button" data-hcopy="{{ st.code | escape }}"
-                  data-event="site/action" data-event-action="contentCopied" data-event-action-location="container-setup"
-                  data-event-content-id="container-{{ st.key }}" data-event-content-type="command">Copy</button></div></div></li>
-              {%- endfor %}
-            </ol>
-            <div class="qs-dfoot">
-              <span class="qs-dlinks"><a href="{{ cs.limitations.href | relative_url }}" data-event="site/action" data-event-action="pathSelected" data-event-path-id="container-limitations">{{ cs.limitations.label }}</a><a href="{{ cs.troubleshooting.href | relative_url }}" data-event="site/action" data-event-action="pathSelected" data-event-path-id="container-troubleshooting">{{ cs.troubleshooting.label }}</a></span>
-              <button class="qs-all" type="button" data-hcopy="{{ cs_all | escape }}" data-event="site/action" data-event-action="contentCopied" data-event-action-location="container-setup"
-                      data-event-content-id="container-all" data-event-content-type="command">{{ cs.manual.copy_all }}</button>
-            </div>
-          </div>
-          <div class="qs-dpanel" role="tabpanel" id="cs-panel-agent" aria-labelledby="cs-tab-agent">
-            <h3 class="qs-dhead">{{ cs.agent.tab }}</h3>
-            <p class="qs-dintro">{{ cs.agent.intro }}</p>
-            <ol class="qs-steps qs-dsteps">
-              {%- for st in cs.agent.steps %}
-              <li><span class="qs-n">{{ forloop.index }}</span><div class="qs-dstep"><div><b>{{ st.title }}</b><p>{{ st.text }}</p></div>
+              {%- for st in m.steps %}
+              <li><span class="qs-n">{{ forloop.index }}</span><div class="qs-dstep"><div><b>{{ st.title }}</b>{% if st.text %}<p>{{ st.text }}</p>{% endif %}</div>
                 {%- if st.code %}
                 <div class="code-box sm"><pre><code>{{ st.code | escape }}</code></pre><button class="code-copy" type="button" data-hcopy="{{ st.code | escape }}"
-                  data-event="site/action" data-event-action="contentCopied" data-event-action-location="container-setup"
-                  data-event-content-id="container-{{ st.key }}" data-event-content-type="collection-install">Copy</button></div>
-                {%- endif %}
-                {%- if st.prompt %}
-                <div class="qs-prompt"><p>{{ st.prompt }}</p><button class="qs-pcopy" type="button" data-hcopy="{{ st.prompt | escape }}"
-                  data-event="site/action" data-event-action="contentCopied" data-event-action-location="container-setup"
-                  data-event-content-id="container-{{ st.key }}" data-event-content-type="suggested-ask">Copy</button></div>
+                  data-event="site/action" data-event-action="contentCopied" data-event-action-location="install-panel"
+                  data-event-content-id="quickstart-{{ m.key }}-{{ st.key }}" data-event-content-type="command">Copy</button></div>
                 {%- endif %}</div></li>
               {%- endfor %}
             </ol>
-            <div class="qs-dfoot">
-              <span class="qs-dlinks"><a href="#skills" data-event="site/action" data-event-action="pathSelected" data-event-path-id="skills">{{ cs.skills_link }}</a><a href="{{ cs.troubleshooting.href | relative_url }}" data-event="site/action" data-event-action="pathSelected" data-event-path-id="container-troubleshooting">{{ cs.troubleshooting.label }}</a></span>
-            </div>
+            <p class="qs-foot">
+              {%- for l in m.links %}
+              {%- assign lead = l.href | slice: 0 %}
+              {%- if lead == '#' %}
+              <a href="{{ l.href }}" data-event="site/action" data-event-action="pathSelected" data-event-path-id="{{ l.id }}">{{ l.label }}</a>
+              {%- elsif lead == '/' %}
+              <a href="{{ l.href | relative_url }}" data-event="site/action" data-event-action="pathSelected" data-event-path-id="{{ l.id }}">{{ l.label }}</a>
+              {%- else %}
+              <a href="{{ l.href }}" target="_blank" rel="noopener" data-event="site/action" data-event-action="outboundClicked"
+                 data-event-destination-id="{{ l.id }}" data-event-destination-type="{% if l.href contains 'learn.microsoft.com' %}docs{% else %}other{% endif %}">{{ l.label }}</a>
+              {%- endif %}
+              {%- endfor %}
+            </p>
           </div>
+          {%- endfor %}
         </div>
-      </dialog>
+      </div>
     </div>
   </section>
 
-  {%- assign ct = page.containers %}
-  {%- if ct %}
-  <section id="containers" class="ctr" aria-labelledby="ctr-title">
+  {%- assign sk = page.skills %}
+  <section id="skills" class="skills">
     <div class="w">
-      <div class="ctr-head"><h2 id="ctr-title">{{ ct.heading }}</h2><span class="qs-badge">{{ ct.pill }}</span></div>
-      <p class="ctr-sub">{{ ct.text }}</p>
-      <div class="ctr-cards">
-        {%- for c in ct.cards %}
-        <div class="ctr-card"{% if c.tab == 'agent' %} id="containers-agent"{% endif %}>
-          {{ c.icon }}
-          <h3>{{ c.title }}</h3>
-          <p>{{ c.text }}</p>
-          <a class="ctr-go" href="#container-setup" data-setup-open="cs-tab-{{ c.tab }}" aria-haspopup="dialog"
-             data-event="site/action" data-event-action="contentOpened" data-event-action-location="containers"
-             data-event-content-id="container-setup{% if c.tab == 'agent' %}-agent{% endif %}" data-event-content-type="setup-guide">{{ c.link }}&nbsp;<span aria-hidden="true">&rarr;</span></a>
+      <div class="sk-in">
+        <div class="sk-main">
+          <h2>{{ sk.heading }}</h2>
+          <p class="sk-lead">{{ sk.text }}</p>
+          <div class="sk-seg" role="group" aria-label="Choose your coding agent">
+            {%- for a in sk.agents %}
+            <button type="button" aria-pressed="{% if forloop.first %}true{% else %}false{% endif %}" data-agent="{{ a.key }}" data-cmd="{{ a.code | escape }}" data-note="{{ a.note | escape }}"
+                    data-event="site/action" data-event-action="harnessSelected" data-event-action-location="install-panel"
+                    data-event-harness-id="{{ a.key }}">{{ a.logo }}<span>{{ a.name }}</span></button>
+            {%- endfor %}
+          </div>
+          {%- assign a0 = sk.agents[0] %}
+          <div class="code-box"><pre><code id="hInstall">{{ a0.code | escape }}</code></pre><button class="code-copy" type="button" id="hInstallCopy" data-hcopy="{{ a0.code | escape }}"
+            data-event="site/action" data-event-action="contentCopied" data-event-action-location="install-panel"
+            data-event-content-id="microsoft-sql" data-event-content-type="harness-install"
+            data-event-harness-id="{{ a0.key }}" data-clarity-event="copy_skill_install_{{ a0.key }}">Copy</button></div>
+          <p class="sk-note" id="hInstallNote">{{ a0.note }}</p>
+          <p class="sk-links"><a href="{{ skills_site }}" target="_blank" rel="noopener" data-event="site/action" data-event-action="outboundClicked"
+             data-event-destination-id="skills-catalog" data-event-destination-type="github"
+             data-clarity-event="browse_skills">{{ sk.catalog.label }}</a></p>
+          {%- comment %} Without scripts the picker cannot switch, so every other agent's command shows below. {% endcomment %}
+          <div class="sk-all">
+            {%- for a in sk.agents offset: 1 %}
+            <p class="sk-note"><b>{{ a.name }}</b></p>
+            <div class="code-box"><pre><code>{{ a.code | escape }}</code></pre></div>
+            <p class="sk-note">{{ a.note }}</p>
+            {%- endfor %}
+          </div>
         </div>
-        {%- endfor %}
+        <div class="sk-side">
+          <p class="sk-label" id="skAskLabel">{{ sk.asks_label }}</p>
+          <div class="sk-asks" role="group" aria-labelledby="skAskLabel">
+            {%- for c in sk.chips %}
+            <button class="sk-ask" type="button" data-hcopy="{{ c.text | escape }}"
+                    data-event="site/action" data-event-action="contentCopied" data-event-action-location="install-panel"
+                    data-event-content-id="{{ c.key }}" data-event-content-type="suggested-ask"
+                    data-clarity-event="copy_ask_{{ c.key }}"><span>{{ c.text }}</span><span class="sk-act" aria-hidden="true">Copy</span></button>
+            {%- endfor %}
+          </div>
+        </div>
       </div>
-      {%- assign cs = page.container_setup %}
-      <nav class="ctr-links" aria-label="{{ ct.links_label }}">
-        <a href="{{ ct.image.href }}" target="_blank" rel="noopener" data-event="site/action" data-event-action="outboundClicked"
-           data-event-destination-id="container-image" data-event-destination-type="other">{{ ct.image.label }}<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17L17 7M9 7h8v8"/></svg></a>
-        <a href="{{ cs.prerequisites.href | relative_url }}" data-event="site/action" data-event-action="pathSelected" data-event-path-id="container-prerequisites">{{ ct.prerequisites }}</a>
-        <a href="{{ cs.limitations.href | relative_url }}" data-event="site/action" data-event-action="pathSelected" data-event-path-id="container-limitations">{{ cs.limitations.label }}</a>
-        <a href="{{ cs.troubleshooting.href | relative_url }}" data-event="site/action" data-event-action="pathSelected" data-event-path-id="container-troubleshooting">{{ cs.troubleshooting.label }}</a>
-        <a href="{{ cs.faq.href | relative_url }}" data-event="site/action" data-event-action="pathSelected" data-event-path-id="container-faq">{{ cs.faq.label }}</a>
-      </nav>
     </div>
   </section>
-  {%- endif %}
 
   <section id="build" class="tpl" data-tpl-show="apps"><span id="prompts" aria-hidden="true"></span><span id="samples" aria-hidden="true"></span><span id="existing" aria-hidden="true"></span>
     <div class="w">
       <div class="tpl-head"><h2>{{ page.build_heading }}</h2><p>{{ page.build_text }}</p></div>
-      {% if page.build_note %}{% capture note_link %}<a href="{{ page.build_note_href }}">{{ page.build_note_link }}</a>{% endcapture %}<p class="tpl-note">{{ page.build_note | replace: page.build_note_link, note_link }}</p>{% endif %}
-      <ol class="tpl-flow" aria-label="From idea to app">
-        {% for step in page.build_steps %}<li><span aria-hidden="true">{{ forloop.index }}</span>{{ step }}</li>{% endfor %}
-      </ol>
+      {% if page.build_note %}{% capture note_link %}<a href="{{ page.build_note_href }}" data-event="site/action" data-event-action="pathSelected" data-event-path-id="get-running">{{ page.build_note_link }}</a>{% endcapture %}<p class="tpl-note">{{ page.build_note | replace: page.build_note_link, note_link }}</p>{% endif %}
       <div class="tpl-filter" role="group" aria-label="{{ page.template_filter }}">
         {%- for g in page.template_groups %}
         {%- if g.key == 'apps' %}{% assign gn = page.templates | size %}{% else %}{% assign gn = page.scenarios | size %}{% endif %}
@@ -665,17 +570,18 @@ html:has(.qs-dialog[open]){overflow:hidden}
       <div class="tpl-grid" data-tpl="{{ g.key }}">
         {%- if g.key == 'apps' %}
         {%- for t in page.templates %}
-        {%- assign prompt_href = hub_repo | append: '/blob/main/build/' | append: t.slug | append: '.md' %}
+        {%- assign prompt_page = '/build/' | append: t.slug | append: '.html' | relative_url %}
         <article class="tpl-card" id="{{ t.slug }}">
-          <a class="tpl-shot" href="{{ prompt_href }}" data-tpl-open="tpl-{{ t.slug }}" tabindex="-1" aria-hidden="true"><div class="ha-app">{% include app-shot.html key=t.shot window=true %}</div></a>
+          <a class="tpl-shot" href="{{ prompt_page }}" data-tpl-open="tpl-{{ t.slug }}" tabindex="-1" aria-hidden="true"><div class="ha-app">{% include app-shot.html key=t.shot window=true %}</div></a>
           <div class="tpl-body">
             <div class="tpl-top"><h3>{{ t.title }}</h3><span class="tpl-tag">{{ t.tag }}</span></div>
             <p>{{ t.blurb }}</p>
+            {%- if t.needs %}<p class="tpl-needs"><span>Needs {{ t.needs }}</span></p>{% endif %}
             <div class="tpl-act">
               <button class="tpl-link" type="button" data-hprompt="{{ '/build/' | append: t.slug | append: '.md' | relative_url }}"
                       data-event="site/action" data-event-action="copyPrompt" data-event-action-location="skill-card"
                       data-event-scenario="{{ t.slug }}" data-clarity-event="copy_prompt_{{ t.slug }}">Copy prompt</button>
-              <a class="tpl-link" href="{{ prompt_href }}" data-tpl-open="tpl-{{ t.slug }}" aria-haspopup="dialog"
+              <a class="tpl-link" href="{{ prompt_page }}" data-tpl-open="tpl-{{ t.slug }}" aria-haspopup="dialog"
                  data-event="site/action" data-event-action="contentOpened" data-event-action-location="skill-card"
                  data-event-content-id="template-{{ t.slug }}" data-event-content-type="scenario">View details</a>
             </div>
@@ -684,18 +590,20 @@ html:has(.qs-dialog[open]){overflow:hidden}
         {%- endfor %}
         {%- else %}
         {%- for s in page.scenarios %}
+        {%- assign prompt_page = '/build/' | append: s.slug | append: '.html' | relative_url %}
         <article class="tpl-card" id="{{ s.slug }}">
-          <div class="tpl-shot" aria-hidden="true"><div class="ha-app">{% include app-shot.html key=s.shot window=true %}</div></div>
+          <a class="tpl-shot" href="{{ prompt_page }}" tabindex="-1" aria-hidden="true"><div class="ha-app">{% include app-shot.html key=s.shot window=true %}</div></a>
           <div class="tpl-body">
             <div class="tpl-top"><h3>{{ s.title }}</h3><span class="tpl-tag">{{ s.tag }}</span></div>
             <p>{{ s.blurb }}</p>
+            {%- if s.after or s.cloud %}<p class="tpl-needs">{% if s.after %}<span>Builds on <a href="#{{ s.after }}">{{ s.after_title }}</a></span>{% endif %}{% if s.cloud %}<span>Cloud only</span>{% endif %}</p>{% endif %}
             <div class="tpl-act">
               <button class="tpl-link" type="button" data-hprompt="{{ '/build/' | append: s.slug | append: '.md' | relative_url }}"
                       data-event="site/action" data-event-action="copyPrompt" data-event-action-location="skill-card"
                       data-event-scenario="{{ s.slug }}" data-clarity-event="copy_prompt_{{ s.slug }}">Copy prompt</button>
-              <a class="tpl-link" href="{{ hub_repo }}/blob/main/build/{{ s.slug }}.md" target="_blank" rel="noopener"
+              <a class="tpl-link" href="{{ prompt_page }}"
                  data-event="site/action" data-event-action="viewPrompt" data-event-action-location="skill-card"
-                 data-event-scenario="{{ s.slug }}" data-clarity-event="view_prompt_{{ s.slug }}">View prompt</a>
+                 data-event-scenario="{{ s.slug }}" data-clarity-event="view_prompt_{{ s.slug }}">Read the prompt</a>
             </div>
           </div>
         </article>
@@ -713,33 +621,25 @@ html:has(.qs-dialog[open]){overflow:hidden}
           <div class="tpl-dtop">
             <div class="tpl-dshot" aria-hidden="true"><div class="ha-app">{% include app-shot.html key=t.shot window=true %}</div></div>
             <div class="tpl-dinfo">
-              <p class="tpl-sum">{{ t.summary }}</p>
-              <dl class="tpl-meta">
-                <dt>Stack</dt><dd>{{ page.template_stack }}</dd>
-                <dt>Covers</dt><dd>{{ t.covers }}</dd>
-                <dt>Runs on</dt><dd class="tpl-runs">{% for r in page.template_runs_on %}<span>{{ r }}</span>{% endfor %}</dd>
-              </dl>
+              <p class="tpl-sum">{{ t.blurb }}</p>
+              <div class="tpl-runs">{% for r in page.template_runs_on %}<span>{{ r }}</span>{% endfor %}</div>
+              {%- if t.needs %}<p class="tpl-dneeds">Needs {{ t.needs }}.</p>{% endif %}
               <div class="tpl-dact">
                 <button class="tpl-primary" type="button" data-hprompt="{{ '/build/' | append: t.slug | append: '.md' | relative_url }}"
                         data-event="site/action" data-event-action="copyPrompt" data-event-action-location="scenario"
                         data-event-scenario="{{ t.slug }}" data-clarity-event="copy_prompt_{{ t.slug }}">Copy prompt</button>
-                <a href="{{ hub_repo }}/blob/main/build/{{ t.slug }}.md" target="_blank" rel="noopener"
+                <a href="{{ '/build/' | append: t.slug | append: '.html' | relative_url }}"
                    data-event="site/action" data-event-action="viewPrompt" data-event-action-location="scenario"
-                   data-event-scenario="{{ t.slug }}" data-clarity-event="view_prompt_{{ t.slug }}">Read the prompt<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17L17 7M9 7h8v8"/></svg></a>
+                   data-event-scenario="{{ t.slug }}" data-clarity-event="view_prompt_{{ t.slug }}">Read the prompt</a>
+                <a href="{{ page.template_create.href }}" target="_blank" rel="noopener"
+                   data-event="site/action" data-event-action="outboundClicked" data-event-action-location="scenario"
+                   data-event-destination-id="azure-sql-free-database" data-event-destination-type="signup">{{ page.template_create.label }}<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17L17 7M9 7h8v8"/></svg></a>
               </div>
             </div>
           </div>
-          <div>
-            <h3 class="tpl-dh">{{ page.template_inside.heading }}</h3>
-            <div class="tpl-boxes">
-              <div class="tpl-box"><h4>{{ page.template_inside.features }}</h4><ul class="tpl-feat">{% for f in t.features %}<li>{{ f }}</li>{% endfor %}</ul></div>
-              <div class="tpl-box"><h4>{{ page.template_inside.tables }}</h4><ul class="tpl-pairs">{% for x in t.tables %}<li><code>{{ x[0] }}</code><span>{{ x[1] }}</span></li>{% endfor %}</ul></div>
-              <div class="tpl-box tpl-sqlbox"><h4>{{ page.template_inside.sql }}</h4><ul class="tpl-pairs">{% for x in t.sql %}<li><b>{{ x[0] }}</b><span>{{ x[1] }}</span></li>{% endfor %}</ul></div>
-            </div>
-          </div>
-          <div>
-            <h3 class="tpl-dh">{{ page.template_inside.try }}</h3>
-            <ul class="tpl-try">{% for x in t.try %}<li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M8.5 12.5l2.5 2.5 4.5-5"/></svg><div><b>{{ x[0] }}</b><span>{{ x[1] }}</span></div></li>{% endfor %}</ul>
+          <div class="tpl-boxes">
+            <div class="tpl-box"><h3>{{ page.template_inside.tables }}</h3><p class="tpl-tables">{% for x in t.tables %}<code>{{ x }}</code>{% endfor %}</p></div>
+            <div class="tpl-box"><h3>{{ page.template_inside.sql }}</h3><ul class="tpl-pairs">{% for x in t.sql %}<li><b>{{ x[0] }}</b><span>{{ x[1] }}</span></li>{% endfor %}</ul></div>
           </div>
         </div>
       </dialog>
@@ -758,7 +658,7 @@ html:has(.qs-dialog[open]){overflow:hidden}
           <p>{{ t.text }}</p>
           {%- if t.link %}
           {%- assign ext = false %}{% if t.link.href contains 'http' %}{% assign ext = true %}{% endif %}
-          <a class="wl-link{% if ext %} ext{% endif %}{% if t.link.label contains '_' %} mono{% endif %}" href="{{ t.link.href }}"{% if ext %}
+          <a class="wl-link{% if ext %} ext{% endif %}{% if t.link.label contains '_' %} mono{% endif %}" href="{{ t.link.href }}"{% if ext %} target="_blank" rel="noopener"
              data-event="site/action" data-event-action="outboundClicked" data-event-destination-id="workload-{{ t.title | slugify }}" data-event-destination-type="docs"
              {% else %} data-event="site/action" data-event-action="pathSelected" data-event-path-id="{{ t.link.href | remove: '#' }}"{% endif %}>{{ t.link.label }}{% if ext %}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17L17 7M9 7h8v8"/></svg>{% else %}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>{% endif %}</a>
           {%- endif %}
@@ -768,49 +668,10 @@ html:has(.qs-dialog[open]){overflow:hidden}
     </div>
   </section>
 
-  <section id="skills" class="skills">
-    <div class="w sk-in">
-      <div class="sk-main">
-        <h2>{{ page.skills.heading }}</h2>
-        <p class="sk-lead">{{ page.skills.text }}</p>
-        <div class="sk-seg" role="group" aria-label="Choose your coding agent">
-          {%- for a in page.skills.agents %}
-          <button type="button" aria-pressed="{% if forloop.first %}true{% else %}false{% endif %}" data-agent="{{ a.key }}" data-cmd="{{ a.code | escape }}"
-                  data-event="site/action" data-event-action="harnessSelected" data-event-action-location="install-panel"
-                  data-event-harness-id="{{ a.key }}">{{ a.logo }}<span>{{ a.name }}</span></button>
-          {%- endfor %}
-        </div>
-        {%- assign a0 = page.skills.agents[0] %}
-        <div class="code-box"><code id="hInstall">{{ a0.code }}</code><button class="code-copy" type="button" id="hInstallCopy" data-hcopy="{{ a0.code | escape }}"
-          data-event="site/action" data-event-action="contentCopied" data-event-action-location="install-panel"
-          data-event-content-id="microsoft-sql" data-event-content-type="harness-install"
-          data-event-harness-id="{{ a0.key }}" data-clarity-event="copy_skill_install_{{ a0.key }}">Copy</button></div>
-        <p class="sk-links">
-          <a href="{{ skills_site }}" data-event="site/action" data-event-action="outboundClicked"
-             data-event-destination-id="skills-catalog" data-event-destination-type="github"
-             data-clarity-event="browse_skills">Browse the skills</a>
-          <a href="{{ skills_site }}#installation" data-event="site/action" data-event-action="outboundClicked"
-             data-event-destination-id="skills-install-guide" data-event-destination-type="github">Per-tool install guide</a>
-        </p>
-      </div>
-      <div class="sk-side">
-        <p class="sk-label" id="skAskLabel">Then just ask:</p>
-        <div class="sk-asks" role="group" aria-labelledby="skAskLabel">
-          {%- for c in page.skills.chips %}
-          <button class="sk-ask" type="button" data-hcopy="{{ c.text | escape }}"
-                  data-event="site/action" data-event-action="contentCopied" data-event-action-location="install-panel"
-                  data-event-content-id="{{ c.key }}" data-event-content-type="suggested-ask"
-                  data-clarity-event="copy_ask_{{ c.key }}"><span>{{ c.text }}</span><span class="sk-act" aria-hidden="true">Copy</span></button>
-          {%- endfor %}
-        </div>
-      </div>
-    </div>
-  </section>
-
   <section id="watch" class="videos">
     <div class="w">
       <div class="vid-head">
-        <div><h2>{{ page.videos_heading }}</h2><p>{{ page.videos_text }}</p></div>
+        <div><h2>{{ page.videos_heading }}</h2>{% if page.videos_text %}<p>{{ page.videos_text }}</p>{% endif %}</div>
         <div class="vid-nav">
           <button type="button" data-vscroll="-1" aria-controls="vidRow" aria-label="Scroll videos left"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg></button>
           <button type="button" data-vscroll="1" aria-controls="vidRow" aria-label="Scroll videos right"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
@@ -833,7 +694,7 @@ html:has(.qs-dialog[open]){overflow:hidden}
 
   <section id="faq" class="faqs">
     <div class="w faqs-in">
-      <div class="faqs-head"><h2>Before you build</h2></div>
+      <div class="faqs-head"><h2>{{ page.faq_heading }}</h2></div>
       <div class="faq">{% for f in page.faqs %}<details><summary>{{ f.question }}<span class="chev" aria-hidden="true">+</span></summary><p>{{ f.answer }}</p></details>{% endfor %}</div>
     </div>
   </section>
@@ -868,7 +729,12 @@ html:has(.qs-dialog[open]){overflow:hidden}
     pick(tabs.filter(function(t){return t.getAttribute('aria-selected')==='true'})[0]||tabs[0]);
     return pick;
   }
-  document.querySelectorAll('.qs-tabs').forEach(tabGroup);
+  // The address can name a tab: #containers and #local open the Local container
+  // tab, on load or from a link on the page.
+  var qsTabs=document.querySelector('.qs-tabs');
+  if(qsTabs){var qsPick=tabGroup(qsTabs),qsAlias={containers:'local',local:'local',cloud:'cloud'};
+    var qsFollow=function(){var k=qsAlias[location.hash.slice(1)],tab=k&&document.getElementById('qs-tab-'+k);if(tab)qsPick(tab)};
+    qsFollow();window.addEventListener('hashchange',qsFollow)}
   // Build templates: the filter shows one group, and opens the other when the
   // address names a card in it, on load or from a link on the page. Each app's details open as a modal dialog;
   // without one, View details goes on to the prompt.
@@ -886,18 +752,8 @@ html:has(.qs-dialog[open]){overflow:hidden}
     });
     tpl.querySelectorAll('[data-tpl-open]').forEach(function(a){a.addEventListener('click',function(e){var d=document.getElementById(a.getAttribute('data-tpl-open'));if(!d||!d.showModal)return;e.preventDefault();d.showModal();d.scrollTop=0;d.focus()})});
   }
-  // Container setup guide: a modal dialog, opened on the tab its link names.
-  // Links within the page close it first. Without scripts it shows in place.
-  var setup=document.getElementById('container-setup');
-  if(setup&&setup.showModal){
-    var pickSetup=tabGroup(setup.querySelector('[role="tablist"]'));
-    document.querySelectorAll('[data-setup-open]').forEach(function(a){a.addEventListener('click',function(e){e.preventDefault();pickSetup(document.getElementById(a.getAttribute('data-setup-open')));setup.showModal();setup.focus()})});
-    setup.querySelector('.qs-x').addEventListener('click',function(){setup.close()});
-    setup.addEventListener('click',function(e){if(e.target===setup)setup.close()});
-    setup.querySelectorAll('a[href^="#"]').forEach(function(a){a.addEventListener('click',function(){setup.close()})});
-  }
-  var cmdEl=document.getElementById('hInstall'),copyEl=document.getElementById('hInstallCopy');
-  document.querySelectorAll('[data-agent]').forEach(function(a){a.addEventListener('click',function(){var agent=a.getAttribute('data-agent');document.querySelectorAll('[data-agent]').forEach(function(x){x.setAttribute('aria-pressed','false')});a.setAttribute('aria-pressed','true');cmdEl.textContent=a.getAttribute('data-cmd');copyEl.setAttribute('data-hcopy',a.getAttribute('data-cmd'));copyEl.setAttribute('data-event-harness-id',agent);copyEl.setAttribute('data-clarity-event','copy_skill_install_'+agent)})});
+  var cmdEl=document.getElementById('hInstall'),copyEl=document.getElementById('hInstallCopy'),noteEl=document.getElementById('hInstallNote');
+  document.querySelectorAll('[data-agent]').forEach(function(a){a.addEventListener('click',function(){var agent=a.getAttribute('data-agent');document.querySelectorAll('[data-agent]').forEach(function(x){x.setAttribute('aria-pressed','false')});a.setAttribute('aria-pressed','true');cmdEl.textContent=a.getAttribute('data-cmd');if(noteEl)noteEl.innerHTML=a.getAttribute('data-note')||'';copyEl.setAttribute('data-hcopy',a.getAttribute('data-cmd'));copyEl.setAttribute('data-event-harness-id',agent);copyEl.setAttribute('data-clarity-event','copy_skill_install_'+agent)})});
   // Videos. Each arrow scrolls the row by one card and the gap after it,
   // without the smooth glide when reduced motion is asked for.
   var vidRow=document.getElementById('vidRow');

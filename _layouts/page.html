@@ -1,6 +1,8 @@
 <!doctype html>
 <html lang="en">
 {% include head.html %}
+{%- assign is_prompt = false -%}
+{%- if page.path contains 'build/' and page.kind -%}{%- assign is_prompt = true -%}{%- endif -%}
 {%- if page.path contains 'build/' -%}
 <body data-view="scenarioPage" data-scenario="{{ page.name | remove: '.md' | remove: '.html' }}">
 {%- else -%}
@@ -10,9 +12,40 @@
 <main id="main">
   {%- comment -%} A page with doc: true reads the redesign's tokens and follows the
   visitor's theme; see .doc in main.scss. Its pill sits beside the eyebrow, and
-  with eyebrow_href the eyebrow is a link back to the section the page belongs to. {%- endcomment %}
+  with eyebrow_href the eyebrow is a link back to the section the page belongs to.
+
+  A build prompt (a page under build/ with a kind) gets a header of its own:
+  a link back to the Build section, what the prompt needs, and the actions a
+  reader came for. Copy prompt fetches the page's markdown twin, so what is
+  copied is the prompt and nothing else. The prompt carries its own H1, so the
+  layout does not print the title again. {%- endcomment %}
   <div class="prosePage{% if page.doc %} doc{% endif %}">
     <div class="wrap prose">
+      {%- if is_prompt %}
+      {%- assign scenario_id = page.name | remove: '.md' | remove: '.html' %}
+      {%- assign twin = page.url | replace: '.html', '.md' | relative_url %}
+      <div class="doc-kicker">
+        <a class="doc-back" href="{{ '/' | relative_url }}#build" aria-label="Back to build prompts"
+           data-event="site/action" data-event-action="pathSelected" data-event-path-id="build"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 8H3M7 4 3 8l4 4"/></svg>Build prompts</a>
+        <span class="doc-pill plain">{{ page.tag }}</span></div>
+      <div class="prompt-head">
+        <p class="doc-lead">{{ page.description }}</p>
+        <dl class="prompt-meta">
+          {%- if page.after %}<dt>Builds on</dt><dd><a href="{{ '/build/' | append: page.after | append: '.html' | relative_url }}">{{ page.after_title }}</a></dd>{% endif %}
+          {%- if page.needs %}<dt>You need</dt><dd>{{ page.needs }}</dd>{% endif %}
+          {%- if page.kind == 'app' and page.needs == nil %}<dt>You need</dt><dd>A free Azure SQL database or the local container.</dd>{% endif %}
+        </dl>
+        <div class="prompt-actions">
+          <button class="prompt-copy" type="button" data-copy-url="{{ twin }}"
+                  data-event-action="copyPrompt" data-event-action-location="scenario"
+                  data-event-scenario="{{ scenario_id }}" data-clarity-event="copy_prompt_{{ scenario_id }}">Copy prompt</button>
+          <a href="{{ twin }}" data-event="site/action" data-event-action="viewPrompt" data-event-action-location="scenario"
+             data-event-scenario="{{ scenario_id }}" data-clarity-event="view_prompt_{{ scenario_id }}">View as Markdown</a>
+          <a href="{{ site.azure_portal_hub }}" target="_blank" rel="noopener" data-event="site/action" data-event-action="outboundClicked" data-event-action-location="scenario"
+             data-event-destination-id="azure-sql-free-database" data-event-destination-type="signup">Create a free database</a>
+        </div>
+      </div>
+      {%- else %}
       {%- if page.pill %}
       <div class="doc-kicker">
         {%- if page.eyebrow_href %}<a class="doc-back" href="{{ page.eyebrow_href | relative_url }}" aria-label="Back to {{ page.eyebrow }}"
@@ -21,6 +54,7 @@
         <span class="doc-pill">{{ page.pill }}</span></div>
       {%- elsif page.eyebrow %}<div class="sectionLabel">{{ page.eyebrow }}</div>{% endif %}
       {%- if page.title %}<h1>{{ page.title }}</h1>{% endif %}
+      {%- endif %}
       {{ content }}
     </div>
   </div>

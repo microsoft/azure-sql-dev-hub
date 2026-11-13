@@ -1,22 +1,24 @@
 ---
 layout: page
-title: Wire up RAG
-description: Build a RAG workflow on Azure SQL Database
+title: Search text by meaning
+description: Store embeddings in a native VECTOR column on Azure SQL Database and rank sample text with VECTOR_DISTANCE. The retrieval half of a RAG app.
 tag: Python / AI
+kind: block
+needs: Python 3.10 or later, the Azure CLI signed in with az login, an Azure SQL Database, and an embedding model you can call.
 last_verified: 2026-09-16
 validated: false
 ---
 
-# AI Prompt: Build a RAG workflow on Azure SQL Database
+# AI Prompt: Search text by meaning on Azure SQL Database
 
-**Role:** You are an expert AI engineer building a retrieval-augmented-generation data layer in the current project, using Azure SQL Database in the cloud as the vector store.
+**Role:** You are an expert AI engineer building the retrieval layer of a retrieval-augmented-generation app in the current project, using Azure SQL Database in the cloud as the vector store.
 
-**Purpose:** Create a table with a native `VECTOR` column in an existing Azure SQL Database, embed a few text chunks with a hosted embedding model, store the vectors, and run top-k similarity search with `VECTOR_DISTANCE`. Source text and embeddings live in the same database; no separate vector store.
+**Purpose:** Create a table with a native `VECTOR` column in an existing Azure SQL Database, embed a few text chunks with a hosted embedding model, store the vectors, and run top-k similarity search with `VECTOR_DISTANCE`. Source text and embeddings live in the same database; no separate vector store. This prompt stops at retrieval: it does not chunk documents or call a chat model.
 
 **Scope:**
 - Assumes Python 3.10+, an Azure SQL Database that already exists, and `az login` done.
 - The embedding model is hosted. **Before writing any code, ask which embedding service the person can access** (Azure OpenAI Service, OpenAI, or another provider) and what the model's dimension is. Do not assume one.
-- Uses `mssql-python` with an Entra access token, same pattern as the Python API scenario.
+- Uses `mssql-python` with Microsoft Entra sign-in for the database. The embedding service signs in separately, with whatever the person has: an API key kept in `.env`, or keyless Microsoft Entra sign-in if their account supports it and they ask for it.
 
 Read the entire instruction set before executing.
 
@@ -42,7 +44,37 @@ pip install mssql-python==1.15.0 azure-identity==1.25.3 python-dotenv==1.2.3 ope
 
 ### 3. Configure
 
-Create `.env` with the database names plus the embedding settings the person gave you (endpoint, key or identity, model, dimension). Reuse `db.py` from the Python API scenario if it exists; otherwise create it with the token-provider `connect()` from that scenario.
+Create `.env` with the database names plus the embedding settings the person gave you. The script below reads these names:
+
+```dotenv
+SQL_SERVER=<server>.database.windows.net
+SQL_DATABASE=<database>
+AOAI_ENDPOINT=<embedding endpoint>
+AOAI_KEY=<embedding key>
+EMBED_MODEL=<model or deployment name>
+EMBED_DIM=<output dimension>
+```
+
+Make sure `.env` is listed in `.gitignore`. If `db.py` already exists with a `connect()` function, reuse it. Otherwise create it:
+
+```python
+import os
+
+import mssql_python
+from azure.identity import DefaultAzureCredential
+from dotenv import load_dotenv
+
+load_dotenv()
+credential = DefaultAzureCredential()
+
+def connect():
+    conn_str = (
+        f"Server=tcp:{os.environ['SQL_SERVER']},1433;"
+        f"Database={os.environ['SQL_DATABASE']};"
+        "Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30;"
+    )
+    return mssql_python.connect(conn_str, token_provider=credential)
+```
 
 ### 4. Create the RAG script
 
@@ -79,9 +111,6 @@ if cur.fetchone()[0] > 0:
     print("dbo.documents already has rows; skipping the sample insert. Query runs against existing data.")
     chunks = []
 else:
-    chunks = None
-
-if chunks is None:
     chunks = [
         "Azure SQL Database has a native VECTOR type.",
         "VECTOR_DISTANCE ranks rows by cosine, euclidean, or dot product distance.",
@@ -132,5 +161,5 @@ python rag.py
 
 - Do not pick an embedding provider without asking.
 - Do not mix models or dimensions between writing and querying.
-- Do not store the API key in code.
+- Do not store the API key in code, print it, or commit `.env`.
 - Do not drop `dbo.documents`. If a reset is wanted, the person runs it themselves after confirming the database is disposable.

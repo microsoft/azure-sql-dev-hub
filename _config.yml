@@ -16,7 +16,8 @@ repo: "https://github.com/microsoft/azure-sql-dev-hub"
 
 # Sites this hub points at. Kept here so a link change is one edit, not twelve.
 container_repo: "https://github.com/microsoft/azure-sql-database-container"
-skills_catalog: "https://github.com/microsoft/azure-sql-database-container/tree/main/skills"
+skills_site: "https://aka.ms/azuresql-skills"
+skills_catalog: "https://github.com/microsoft/microsoft-sql"
 azure_free_tier: "https://learn.microsoft.com/azure/azure-sql/database/free-tier"
 azure_portal_hub: "https://aka.ms/azuresqlhub"
 azure_sql_docs: "https://learn.microsoft.com/azure/azure-sql/"
@@ -44,6 +45,19 @@ defaults:
       path: ""
     values:
       layout: page
+  # Prose pages read the redesign's tokens and follow the visitor's theme.
+  - scope:
+      path: "build"
+    values:
+      doc: true
+  - scope:
+      path: "privacy.md"
+    values:
+      doc: true
+  - scope:
+      path: "prompts.md"
+    values:
+      doc: true
 
 # Everything that is repository plumbing rather than a page of the site.
 exclude:
@@ -64,6 +78,9 @@ exclude:
   - vendor
 
   - outputs
+  # The prompt evaluation harness is repository tooling, not a page of the site.
+  - eval
+  - redesign
   - eval/.venv
   - eval/__pycache__
   - eval/hub_eval/__pycache__

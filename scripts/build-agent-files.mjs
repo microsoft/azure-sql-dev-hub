@@ -20,20 +20,26 @@ import yaml from 'js-yaml';
 
 const SITE = '_site';
 const SKIP_FILES = new Set(['README.md', 'CONTRIBUTING.md', 'CODE_OF_CONDUCT.md', 'SECURITY.md', 'SUPPORT.md']);
-const SKIP_DIRS = new Set(['_site', '_includes', '_layouts', '__pycache__', 'docs', 'runs', 'scripts', 'node_modules', '.github', '.git', 'assets', 'vendor', '.jekyll-cache', 'outputs']);
+const SKIP_DIRS = new Set(['_site', '_includes', '_layouts', '__pycache__', 'docs', 'eval', 'redesign', 'runs', 'scripts', 'node_modules', '.github', '.git', 'assets', 'vendor', '.jekyll-cache', 'outputs']);
 
 // Reading order for llms-full.txt. Anything discovered but not listed appends
 // alphabetically, so a new page is never silently dropped.
 const ORDER = [
   'index.md',
+  'build/team-board.md',
+  'build/inventory-reservations.md',
+  'build/knowledge-base.md',
+  'build/revenue-reporting.md',
+  'build/shipment-tracker.md',
+  'build/multi-tenant-helpdesk.md',
   'build/javascript-app.md',
   'build/python-api.md',
   'build/rag-app.md',
   'build/serverless-api.md',
   'build/event-driven-app.md',
   'build/multi-tenant.md',
-  'prompts.md',
-  'for-agents.md',
+  'build/data-api.md',
+  'build/local-to-cloud.md',
   'container/get-started.md',
   'container/faq.md',
 ];
@@ -114,25 +120,12 @@ function twinHref(href) {
   return /^\//.test(href) ? href.replace(/\.html(?=#|$)/, '.md') : href;
 }
 
-// The local container's setup guide, a dialog on the page: both routes, with
-// every command, so an agent reading the twin can run them.
-function containerSetup(cs) {
-  if (!cs) return [];
-  const out = [`#### ${cs.title}`, ''];
-  const steps = (list) => {
-    for (const [i, st] of (list || []).entries()) {
-      out.push(`${i + 1}. ${st.title}. ${plain(st.text)}`, '');
-      if (st.code) out.push(fence(st.code, 'bash'), '');
-      if (st.prompt) out.push(`> ${st.prompt}`, '');
-    }
-  };
-  out.push(`${cs.manual.tab}. ${plain(cs.manual.intro)}`, '');
-  steps(cs.manual.steps);
-  out.push(`${cs.agent.tab}. ${plain(cs.agent.intro)}`, '');
-  steps(cs.agent.steps);
-  for (const l of [cs.prerequisites, cs.limitations, cs.troubleshooting]) if (l) out.push(`- ${l.label}: ${twinHref(l.href)}`);
-  out.push('');
-  return out;
+// A link in the home page's data. One that starts with `/` is a page on this
+// site and points at its markdown twin; one that starts with `#` stays on the
+// page and is left out, since the twin has no anchors to land on.
+function linkLine(l) {
+  if (!l || !l.href || l.href.startsWith('#')) return null;
+  return `- ${l.label}: ${twinHref(l.href)}`;
 }
 
 // The home page's structured front matter, rendered back into markdown.
@@ -144,44 +137,39 @@ function homeToMarkdown(d) {
   out.push(h.subline, '');
   if (h.agents) out.push(`Works with ${sentenceList(h.agents)}.`, '');
 
-  const v = d.demo || {};
-  if (v.title) out.push(`## ${v.title}`, '', v.sub, '');
-
-  out.push('## Get running {#get-running}', '', d.quickstart_text || '', '');
+  // Get a database: each tab with its steps and every command, so an agent
+  // reading the twin can run them.
+  out.push(`## ${d.quickstart_heading || 'Get a database'} {#get-running}`, '', d.quickstart_text || '', '');
   for (const m of d.quickstart || []) {
-    out.push(`### ${m.name}: ${m.title}`, '', m.desc, '');
-    if (m.code) out.push(fence(m.code, 'bash'), '');
-    for (const c of m.checks || []) out.push(`- ${c[0]}: ${c[1]}`);
-    out.push('');
+    out.push(`### ${m.name}: ${m.title}`, '', m.pill ? `${m.pill}. ${m.desc}` : m.desc, '');
     if (m.button) out.push(`${m.button.label}: ${m.button.href}`, '');
-    if (m.link) out.push(`${m.link.label}: ${m.link.href}`, '');
-    if (m.key === 'local') out.push(...containerSetup(d.container_setup));
+    for (const [i, st] of (m.steps || []).entries()) {
+      out.push(`${i + 1}. ${st.title}.${st.text ? ` ${plain(st.text)}` : ''}`, '');
+      if (st.code) out.push(fence(st.code, /^SELECT/i.test(st.code) ? 'sql' : 'bash'), '');
+    }
+    if (m.extra) {
+      out.push(m.extra.label, '', fence(m.extra.code, 'bash'), '');
+      if (m.extra.note) out.push(m.extra.note, '');
+    }
+    if (m.agent) out.push(m.agent.label, '', `> ${m.agent.prompt}`, '');
+    if (m.note) out.push(m.note, '');
+    const links = (m.links || []).map(linkLine).filter(Boolean);
+    if (links.length) out.push(...links, '');
   }
-  if (d.then) out.push(`Then: ${d.then.from} to ${d.then.to}. ${d.then.note}`, '');
 
-  // The container section: its cards open the setup guide above, so the twin
-  // names them and lists the resources, with the guide's own links.
-  const ct = d.containers;
-  if (ct) {
-    const cs = d.container_setup || {};
-    out.push(`## ${ct.heading} {#containers}`, '', `${ct.pill}. ${ct.text}`, '');
-    for (const c of ct.cards || []) out.push(`- ${c.title}: ${c.text} The steps are in the setup guide under Get running.`);
-    out.push('', `- ${ct.image.label}: ${ct.image.href}`);
-    if (cs.prerequisites) out.push(`- ${ct.prerequisites}: ${twinHref(cs.prerequisites.href)}`);
-    for (const l of [cs.limitations, cs.troubleshooting, cs.faq]) if (l) out.push(`- ${l.label}: ${twinHref(l.href)}`);
-    out.push('');
+  const sk = d.skills || {};
+  out.push(`## ${sk.heading || 'Skills'} {#skills}`, '', sk.text || '', '');
+  for (const a of sk.agents || []) {
+    out.push(`### ${a.name}`, '', fence(a.code, 'bash'), '', plain(a.note), '');
   }
+  if (sk.chips) out.push(`${sk.asks_label || 'Then ask:'}`, '', ...sk.chips.map((c) => `- ${c.text || c}`), '');
+  if (sk.catalog && sk.catalog.text) out.push(plain(sk.catalog.text), '');
 
   out.push(`## ${d.build_heading || 'Build'} {#build}`, '', d.build_text || '', '');
-  if (d.build_note) {
-    const note = d.build_note_link && d.build_note_href
-      ? d.build_note.replace(d.build_note_link, `[${d.build_note_link}](${d.build_note_href})`)
-      : d.build_note;
-    out.push(note, '');
-  }
+  if (d.build_note) out.push(d.build_note, '');
   for (const [i, step] of (d.build_steps || []).entries()) out.push(`${i + 1}. ${step}`);
   out.push('');
-  // Two groups of templates, as the page's filter shows them: full apps, with
+  // Two groups of prompts, as the page's filter shows them: full apps, with
   // the details their dialogs show, then the building blocks.
   const groups = Object.fromEntries((d.template_groups || []).map((g) => [g.key, g.label]));
   const inside = d.template_inside || {};
@@ -189,40 +177,34 @@ function homeToMarkdown(d) {
     out.push(`### ${groups.apps || 'Apps'}`, '');
     for (const t of d.templates) {
       out.push(`#### [${t.title}](build/${t.slug}.md)`, '', `${t.tag}. ${t.blurb}`, '');
-      out.push(`- Stack: ${d.template_stack}`, `- Covers: ${t.covers}`);
       if (d.template_runs_on) out.push(`- Runs on: ${d.template_runs_on.join(', ')}`);
-      out.push('', `${inside.features || 'What it does'}:`, '', ...t.features.map((f) => `- ${f}`), '');
-      out.push(`${inside.tables || 'Tables it creates'}:`, '', ...t.tables.map(([n, x]) => `- \`${n}\`: ${x}`), '');
-      out.push(`${inside.sql || 'Azure SQL features it uses'}:`, '', ...t.sql.map(([n, x]) => `- ${n}: ${x}`), '');
-      out.push(`${inside.try || 'Try it yourself'}:`, '', ...t.try.map(([n, x]) => `- ${n}. ${x}`), '');
+      if (t.needs) out.push(`- Needs: ${t.needs}`);
+      out.push(`- ${inside.tables || 'Tables'}: ${t.tables.map((n) => `\`${n}\``).join(', ')}`);
+      out.push(`- ${inside.sql || 'Azure SQL features'}: ${t.sql.map(([n, x]) => `${n} (${String(x).replace(/\.$/, '')})`).join('; ')}`, '');
       out.push(`Full prompt: build/${t.slug}.md`, '');
     }
     out.push(`### ${groups.blocks || 'Building blocks'}`, '');
   }
+  const titles = Object.fromEntries((d.scenarios || []).map((s) => [s.slug, s.title]));
   for (const s of d.scenarios || []) {
-    out.push(`#### [${s.title}](build/${s.slug}.md)`, '', `${s.tag}. ${s.blurb}`, '', `Full prompt: build/${s.slug}.md`, '');
+    out.push(`#### [${s.title}](build/${s.slug}.md)`, '', `${s.tag}. ${s.blurb}`, '');
+    if (s.after) out.push(`- Builds on: [${titles[s.after] || s.after_title}](build/${s.after}.md)`);
+    if (s.needs) out.push(`- Needs: ${s.needs}`);
+    out.push(`- Database: ${s.cloud ? 'Azure SQL Database in the cloud' : 'Azure SQL Database in the cloud, or the local container'}`);
+    out.push('', `Full prompt: build/${s.slug}.md`, '');
   }
 
-  out.push('## Built for AI workloads {#workloads}', '', d.workloads_text || '', '');
+  out.push(`## ${d.workloads_heading || 'Built for AI workloads'} {#workloads}`, '', d.workloads_text || '', '');
   for (const t of d.workloads || []) {
     out.push(`- ${t.title}: ${plain(t.text)}${t.link && /^https?:/.test(t.link.href) ? ` (${t.link.href})` : ''}`);
   }
   out.push('');
 
-  const sk = d.skills || {};
-  out.push('## Skills {#skills}', '', sk.heading, '', sk.text, '');
-  for (const a of sk.agents || []) {
-    out.push(`### ${a.name}`, '', fence(a.code, 'bash'), '', plain(a.note), '');
-  }
-  if (sk.chips) out.push('Example prompts once the skills are installed:', '', ...sk.chips.map((c) => `- ${c.text || c}`), '');
-  const skNote = [sk.catalog, sk.note].filter(Boolean).map(plain).join(' ');
-  if (skNote) out.push(skNote, '');
-
-  out.push('## Videos {#watch}', '', d.videos_text || '', '');
+  out.push(`## ${d.videos_heading || 'Videos'} {#watch}`, '', d.videos_text || '', '');
   for (const vv of d.videos || []) out.push(`- [${vv.title}](${vv.href}): ${vv.text}`);
   out.push('');
 
-  out.push('## Before you build', '');
+  out.push(`## ${d.faq_heading || 'Frequently asked questions'} {#faq}`, '');
   for (const f of d.faqs || []) out.push(`### ${f.question}`, '', f.answer, '');
   return out.join('\n');
 }
@@ -264,7 +246,11 @@ for (const file of pages) {
   writeFileSync(dest, markdown, 'utf8');
   console.log(`  markdown twin  ${dest}`);
 
-  const url = file === 'index.md' ? '/' : `/${file.replace(/\.md$/, '.html')}`;
+  // A page that has moved keeps a twin that says where it went, and stays out
+  // of the one-file corpus.
+  if (data.redirect_to) continue;
+
+  const url = file === 'index.md' ? '/' :`/${file.replace(/\.md$/, '.html')}`;
   parts.push(`<!-- source: ${file} | page: ${url} -->\n\n${markdown}`);
 }
 
