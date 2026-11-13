@@ -19,13 +19,17 @@ For the hub, a copy of each app was restyled, and the evaluation's own copies we
 - **Type and shape:** Segoe UI and Fluent corner radii.
 - **Names:** the agents' made-up product names became Contoso names.
 
-Behaviour was not changed. Each copy was rebuilt on a fresh database with its own seed data. It was then used the way a person first would, before the screenshot:
+Behaviour was not changed. Each copy was rebuilt on a fresh database with its own seed data. It was then used in the app, through its own pages, until it showed the feature the template is about. Each picture is cropped to that feature:
 
-- **ask-your-data and docs-chat:** asked a sample question.
-- **catalog-search:** searched.
-- **job-queue:** seeded the demo jobs.
-- **room-bookings:** moved to the next weekday.
-- **saas-starter:** signed in.
-- **wiki-history:** opened a page.
+| Picture | What it shows | How it got there |
+|---|---|---|
+| `docs-chat` | An answer with the passage it cites | Asked two questions |
+| `ask-your-data` | The generated SQL, marked read-only | Ran the "Monthly revenue" sample question |
+| `catalog-search` | Filters with counts beside ranked results | Searched for "wireless" |
+| `iot-telemetry` | A room's temperature crossing the 30°C alert line | Opened the mechanical room's chart |
+| `job-queue` | A dead job after 3 of 3 attempts | Seeded the demo jobs and opened a dead one |
+| `room-bookings` | The day's bookings on the room timeline | Opened the next weekday |
+| `saas-starter` | Members, their roles, and the plan's seat limit | Signed in and opened Members |
+| `wiki-history` | Two versions of a page compared line by line | Edited the onboarding checklist and compared it with the version before |
 
-The screenshots were taken at 1280×800, at twice the pixel density, and saved as WebP at 1600 and 800 pixels wide.
+Most pictures were taken in a window 480 pixels wide, where the app lays out in one column. Catalog search was taken at 1280 pixels, because its filters fold away in a narrow window. All were taken at three times the pixel density, and saved as WebP at 1600 and 800 pixels wide.
