@@ -26,6 +26,19 @@
         <button type="button" class="ht-pause" id="hDemoPause" aria-controls="hDemo" aria-pressed="false" aria-label="Pause animation" title="Pause animation"><svg class="i-pause" width="14" height="14" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><rect x="3.5" y="2.5" width="3" height="11" rx="1"/><rect x="9.5" y="2.5" width="3" height="11" rx="1"/></svg><svg class="i-play" width="14" height="14" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M4.5 2.8v10.4a.6.6 0 0 0 .9.5l8.3-5.2a.6.6 0 0 0 0-1L5.4 2.3a.6.6 0 0 0-.9.5Z"/></svg></button>
       </div>
     </div>
+    {%- assign hp = page.hero.proof %}
+    {%- if hp %}
+    <div class="hero-proof" id="hProof">
+      <div class="w hp-in">
+        <p class="hp-phrase">{{ hp.phrase }} <span>{{ hp.phrase_accent }}</span></p>
+        <ul class="hp-stats">
+          {%- for s in hp.stats %}
+          <li><a class="hp-stat" href="{{ s.href }}" aria-label="{{ s.value }} {{ s.label }}"><b{% if forloop.first %} data-count="{{ s.value }}"{% endif %}>{{ s.value }}</b> {{ s.label }}</a></li>
+          {%- endfor %}
+        </ul>
+      </div>
+    </div>
+    {%- endif %}
   </header>
 
   <section id="get-running" class="quick" aria-labelledby="su-title">
@@ -371,6 +384,21 @@
   // without the smooth glide when reduced motion is asked for.
   var vidRow=document.getElementById('vidRow');
   if(vidRow)document.querySelectorAll('[data-vscroll]').forEach(function(b){b.addEventListener('click',function(){var card=vidRow.querySelector('.vid'),step=card?card.offsetWidth+16:336;vidRow.scrollBy({left:step*Number(b.getAttribute('data-vscroll')),behavior:document.documentElement.classList.contains('motion')?'smooth':'auto'})})});
+  // Proof strip. Its figures rise in one after another, once, the first time
+  // the strip is on screen, and the first figure counts up to its value.
+  // Without motion they rest in place.
+  var proof=document.getElementById('hProof');
+  if(proof){
+    var proofGo=function(){
+      proof.classList.add('play');
+      var c=proof.querySelector('[data-count]'),n=c?parseInt(c.getAttribute('data-count'),10):NaN,t0=null;
+      if(!c||isNaN(n)||!document.documentElement.classList.contains('motion')||!window.requestAnimationFrame)return;
+      var step=function(ts){if(t0===null)t0=ts;var p=Math.min((ts-t0)/700,1);c.textContent=String(Math.round(n*(1-Math.pow(1-p,3))));if(p<1)requestAnimationFrame(step)};
+      requestAnimationFrame(step);
+    };
+    if('IntersectionObserver' in window){var proofSeen=new IntersectionObserver(function(es){if(es[0].isIntersecting){proofSeen.disconnect();proofGo()}},{threshold:.6});proofSeen.observe(proof)}
+    else proofGo();
+  }
   // Hero demo. The animation is CSS. The first run's clock ends after the
   // first app has shown for a few seconds; from then on the demo is .cycling,
   // the terminal rests, and each app's tick moves to the next app, showing its

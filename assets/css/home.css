@@ -204,6 +204,25 @@
   .motion .h .ht-body p:first-child{min-height:3.4em}
   .h .ht-app{width:auto;margin:-18px -6px 0 24px}
 }
+/* Proof strip: the phrase and three figures on one line in the hero's bottom
+   margin. On wide screens it is laid over that margin, exactly as tall, so
+   the hero keeps its height and nothing above or below it moves. Where one
+   line no longer fits, the figures go and the phrase stays, in the smaller
+   margin the hero has there. The figures rise in once, under .motion, when
+   the script marks the strip .play. */
+.h .hero-proof{position:absolute;z-index:1;left:0;right:0;bottom:0;display:flex;align-items:center;height:64px}
+.h .hp-in{display:flex;flex:1 1 auto;align-items:baseline;justify-content:space-between;gap:10px 32px;min-width:0}
+.h .hp-phrase{font-size:19px;line-height:1.4;font-weight:600;white-space:nowrap}.h .hp-phrase span{color:var(--accent)}
+.h .hp-stats{display:flex;gap:8px 28px;margin:0;padding:0;list-style:none}
+.h .hp-stat{display:inline-block;font-size:14px;color:var(--text-3);white-space:nowrap}
+.h .hp-stat b{margin-right:4px;font-size:19px;font-weight:600;color:var(--text);font-variant-numeric:tabular-nums}
+.motion .h .hero-proof:not(.play) .hp-stats li{opacity:0}
+.motion .h .hero-proof.play .hp-stats li{animation:ht-rise .35s cubic-bezier(.2,.7,.2,1) both}
+.motion .h .hero-proof.play .hp-stats li:nth-child(2){animation-delay:.15s}
+.motion .h .hero-proof.play .hp-stats li:nth-child(3){animation-delay:.3s}
+@media (max-width:960px){.h .hp-stats{display:none}}
+@media (max-width:820px){.h .hero-proof{height:44px}.h .hp-phrase{font-size:17px}}
+@media (max-width:380px){.h .hp-phrase{font-size:15px}}
 .h section{padding:60px 0}.h section.alt{background:var(--panel)}
 /* Code box: a command on the dark code surface with Copy in its corner, in
    both themes. Shared by the quickstart, its setup guide, and the skills. */

@@ -152,6 +152,11 @@ function homeToMarkdown(d) {
   if (h.tagline) out.push(h.tagline, '');
   out.push(h.subline, '');
   if (h.agents) out.push(`Works with ${sentenceList(h.agents)}.`, '');
+  const pr = h.proof;
+  if (pr) {
+    out.push([pr.phrase, pr.phrase_accent].filter(Boolean).join(' '), '');
+    if (pr.stats) out.push(pr.stats.map((s) => `${s.value} ${s.label}`).join(', ') + '.', '');
+  }
 
   const v = d.demo || {};
   if (v.title) out.push(`## ${v.title}`, '', v.sub, '');
