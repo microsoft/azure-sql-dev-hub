@@ -173,6 +173,7 @@ function homeToMarkdown(d) {
   if (h.tagline) out.push(h.tagline, '');
   out.push(h.subline, '');
   if (h.agents) out.push(`Works with ${sentenceList(h.agents)}.`, '');
+  if (h.statement) out.push(`${h.statement.text} [${h.statement.link_text}](${h.statement.href} "${h.statement.link_label}")`, '');
 
   const v = d.demo || {};
   if (v.title) out.push(`## ${v.title}`, '', v.sub, '');

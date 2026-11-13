@@ -20,6 +20,9 @@
           <a class="btn btn-s" href="#build">Browse templates</a>
         </div>
         <p class="agentline">Works with <span>{% for a in page.hero.agents %}{{ a }}{% unless forloop.last %}{% if forloop.rindex == 2 %}, and {% else %}, {% endif %}{% endunless %}{% endfor %}.</span></p>
+        {%- if page.hero.statement %}
+        <p class="hero-statement">{{ page.hero.statement.text | escape }} <a href="{{ page.hero.statement.href | escape }}" aria-label="{{ page.hero.statement.link_label | escape }}" data-event="site/action" data-event-action="outboundClicked" data-event-destination-id="hero-free-tier" data-event-destination-type="docs">{{ page.hero.statement.link_text | escape }}</a></p>
+        {%- endif %}
       </div>
       <div class="hero-media">
         {%- include hero-demo.html %}
