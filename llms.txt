@@ -20,6 +20,14 @@ Each is a specification: rules, sample data, the database design, and checks. Th
 - [Revenue reporting](https://microsoft.github.io/azure-sql-dev-hub/build/revenue-reporting.md): exact money math in integer cents, partial refunds, and totals that count each sale once.
 - [Shipment tracker](https://microsoft.github.io/azure-sql-dev-hub/build/shipment-tracker.md): import event batches atomically with `OPENJSON`, catch duplicates and conflicts, and order late events the same way on every run.
 - [Multi-tenant helpdesk](https://microsoft.github.io/azure-sql-dev-hub/build/multi-tenant-helpdesk.md): tenant isolation in the API and with row-level security, role checks, and safe connection reuse.
+- [Chat with your docs](https://microsoft.github.io/azure-sql-dev-hub/build/docs-chat.md): answers grounded in your documents with citations, passages found with `VECTOR_DISTANCE`, and saved conversations.
+- [Ask your data](https://microsoft.github.io/azure-sql-dev-hub/build/ask-your-data.md): plain-English questions become one read-only query, run by a database user that can only read.
+- [Product catalog search](https://microsoft.github.io/azure-sql-dev-hub/build/catalog-search.md): ranked keyword search, filter counts that match the data, and keyset paging.
+- [IoT telemetry](https://microsoft.github.io/azure-sql-dev-hub/build/iot-telemetry.md): batched ingest without duplicates, a columnstore readings table, exact rollups by time window, and alerts.
+- [Background job queue](https://microsoft.github.io/azure-sql-dev-hub/build/job-queue.md): workers claim jobs with `READPAST`, retries back off, and each side effect goes out once.
+- [Room bookings](https://microsoft.github.io/azure-sql-dev-hub/build/room-bookings.md): meeting-room bookings that cannot overlap, even when requests arrive at once.
+- [SaaS starter](https://microsoft.github.io/azure-sql-dev-hub/build/saas-starter.md): organizations, members and roles, plan limits, row-level security, and billing webhooks applied once.
+- [Team wiki with history](https://microsoft.github.io/azure-sql-dev-hub/build/wiki-history.md): full version history from temporal tables, with compare, restore, and edit conflicts caught.
 
 ## Building-block prompts
 Short, step-by-step additions with the code included. They target Azure SQL Database in the cloud unless noted.

@@ -3,6 +3,7 @@ layout: page
 title: Build a product catalog with search
 description: "Build a product catalog on Azure SQL Database with ranked search, filters, facet counts that match the data, and keyset pagination that never skips or repeats an item."
 tag: Full app
+kind: app
 last_verified: 2026-11-12
 validated: false
 ---

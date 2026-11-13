@@ -3,6 +3,7 @@ layout: page
 title: Build a SaaS starter with organizations and billing
 description: "Build a multi-tenant SaaS starter on Azure SQL Database: organizations, members and roles, plan limits, row-level security, and idempotent billing webhooks."
 tag: Full app
+kind: app
 last_verified: 2026-11-12
 validated: false
 ---

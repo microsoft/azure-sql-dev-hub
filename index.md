@@ -206,6 +206,98 @@ templates:
   - [Row-level security, "Each organization stays in its own rows."]
   - [SESSION_CONTEXT, "Set per request, cleared on reuse."]
   - [Least-privilege app user, "The app cannot change the policy."]
+# The apps below show a screenshot in place of a drawn screen: `img` names
+# its files in assets/img/apps and `window` is the window's title. Each is a
+# real app built from its prompt (assets/img/apps/SOURCES.md). Their prompts
+# leave the table design to the agent, so `tables` lists what the build used.
+- slug: docs-chat
+  img: docs-chat
+  window: Contoso Handbook
+  title: Chat with your docs
+  tag: Full app · AI
+  blurb: Ask your documents a question and get answers that cite their passages.
+  tables: [documents, passages, conversations, messages]
+  sql:
+  - [VECTOR type, "Embeddings live in the database."]
+  - [VECTOR_DISTANCE, "The nearest passages are found in SQL."]
+  - [Transactions, "A document and its passages go together."]
+- slug: ask-your-data
+  img: ask-your-data
+  window: Contoso Sales
+  title: Ask your data
+  tag: Full app · AI
+  blurb: Plain-English questions become one read-only query, with the SQL and a chart.
+  tables: [sales.orders, sales.order_lines, sales.products, sales.customers, app.saved_questions]
+  sql:
+  - [Read-only database user, "Generated SQL can only read."]
+  - [Separate schemas, "The query user cannot reach the app's data."]
+  - [Integer cents, "Totals match to the cent."]
+- slug: catalog-search
+  img: catalog-search
+  window: Contoso Store
+  title: Product catalog search
+  tag: Full app
+  blurb: Ranked search, filters with counts, and paging that returns each product once.
+  tables: [products]
+  sql:
+  - [Keyset pagination, "No product skipped or repeated."]
+  - [Grouped counts, "Filter counts computed in SQL."]
+  - [Escaped pattern matching, "% and _ are matched as text."]
+- slug: iot-telemetry
+  img: iot-telemetry
+  window: Contoso Buildings
+  title: IoT telemetry
+  tag: Full app
+  blurb: Sensor readings ingested in batches, with exact rollups and alerts.
+  tables: [devices, readings]
+  sql:
+  - [Clustered columnstore index, "Compressed and quick to aggregate."]
+  - ["Unique key on device, metric, and time", "A repeated reading is stored once."]
+  - [Windowed aggregates, "Rollups match the raw readings."]
+- slug: job-queue
+  img: job-queue
+  window: Contoso Jobs
+  title: Background job queue
+  tag: Full app
+  blurb: Workers share one queue without double claims, with retries and an outbox.
+  tables: [jobs, outbox, workers]
+  sql:
+  - ["UPDLOCK, READPAST, and ROWLOCK", "One statement claims a job and skips locked ones."]
+  - [Transactions, "A job's success and its outbox row commit together."]
+  - [Unique idempotency key, "Enqueuing twice makes one job."]
+- slug: room-bookings
+  img: room-bookings
+  window: Contoso Rooms
+  title: Room bookings
+  tag: Full app
+  blurb: Book meeting rooms; two bookings for one room cannot overlap.
+  tables: [rooms, bookings]
+  sql:
+  - [Transactions, "The overlap check and the insert happen together."]
+  - [UTC instants, "Daylight saving cannot move a booking."]
+  - [CHECK constraints, "Every booking ends after it starts."]
+- slug: saas-starter
+  img: saas-starter
+  window: Contoso Projects
+  title: SaaS starter
+  tag: Full app
+  blurb: Organizations, roles, plan limits, and billing webhooks applied once.
+  tables: [organizations, memberships, projects, billing_events, invoices]
+  sql:
+  - [Row-level security, "Each organization stays in its own rows."]
+  - [SESSION_CONTEXT, "Set per request from the signed-in user."]
+  - [Unique event ID, "A repeated webhook is applied once."]
+- slug: wiki-history
+  img: wiki-history
+  window: Contoso Wiki
+  title: Team wiki with history
+  tag: Full app
+  blurb: A team wiki where the database keeps every version of every page.
+  tables: [pages, pages_history]
+  sql:
+  - [Temporal tables, "The engine records every version."]
+  - [FOR SYSTEM_TIME AS OF, "A page as it was at any moment."]
+  - [Version check on save, "A stale edit is rejected."]
 # The building blocks. `shot` picks each one's picture from
 # _includes/app-shot.html. `after` names the block whose project this one
 # extends, and `cloud` marks a block that needs Azure SQL Database in the

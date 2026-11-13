@@ -3,6 +3,7 @@ layout: page
 title: Build an IoT telemetry dashboard
 description: "Build an IoT telemetry dashboard on Azure SQL Database: batched ingest without duplicates, a columnstore readings table, exact rollups by time window, late readings, and alerts."
 tag: Full app
+kind: app
 last_verified: 2026-11-12
 validated: false
 ---

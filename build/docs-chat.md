@@ -3,6 +3,7 @@ layout: page
 title: Build a chat-with-your-docs app
 description: "Build a document Q&A app on Azure SQL Database: answers grounded in your documents with citations, passages searched with VECTOR_DISTANCE, and saved conversations."
 tag: Full app
+kind: app
 last_verified: 2026-11-12
 validated: false
 ---

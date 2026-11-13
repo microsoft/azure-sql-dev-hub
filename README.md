@@ -8,7 +8,7 @@ Curated by the Azure SQL Database product team.
 
 ## What is here
 
-- **Build prompts.** Fourteen prompts in [`build/`](build/): six apps and eight building blocks.
+- **Build prompts.** Twenty-two prompts in [`build/`](build/): fourteen apps and eight building blocks.
 - **Two ways to get a database.** The free cloud tier, or the local container (public preview).
 - **Agent skills.** Install the plugin for your agent from [aka.ms/azuresql-skills](https://aka.ms/azuresql-skills); the skills load themselves when the work matches.
 - **An agent-readable layer.** Every page has a markdown twin at `<page>.md`, an index at [`llms.txt`](llms.txt), and an alternate link in its head.
@@ -25,6 +25,14 @@ Apps are specifications: rules, sample data, a database design, and checks. The 
 | Revenue reporting | `bigint` cents, `GENERATE_SERIES`, columnstore | [revenue-reporting.md](build/revenue-reporting.md) |
 | Shipment tracker | `OPENJSON`, composite key, binary collation | [shipment-tracker.md](build/shipment-tracker.md) |
 | Multi-tenant helpdesk | Row-level security, `SESSION_CONTEXT` | [multi-tenant-helpdesk.md](build/multi-tenant-helpdesk.md) |
+| Chat with your docs | `VECTOR`, `VECTOR_DISTANCE`, transactions | [docs-chat.md](build/docs-chat.md) |
+| Ask your data | Read-only database user, separate schemas | [ask-your-data.md](build/ask-your-data.md) |
+| Product catalog search | Keyset pagination, grouped counts | [catalog-search.md](build/catalog-search.md) |
+| IoT telemetry | Clustered columnstore, windowed aggregates | [iot-telemetry.md](build/iot-telemetry.md) |
+| Background job queue | `UPDLOCK`, `READPAST`, `ROWLOCK`, outbox | [job-queue.md](build/job-queue.md) |
+| Room bookings | Transactions, UTC instants, `CHECK` constraints | [room-bookings.md](build/room-bookings.md) |
+| SaaS starter | Row-level security, `SESSION_CONTEXT`, unique event ID | [saas-starter.md](build/saas-starter.md) |
+| Team wiki with history | Temporal tables, `FOR SYSTEM_TIME AS OF` | [wiki-history.md](build/wiki-history.md) |
 
 Building blocks are short, with the code included: role, scope, numbered steps, validation rules, and what not to do.
 
@@ -39,7 +47,7 @@ Building blocks are short, with the code included: role, scope, numbered steps, 
 | Get a REST and GraphQL API | Data API builder | [data-api.md](build/data-api.md) |
 | Move from the container to the cloud | Any stack | [local-to-cloud.md](build/local-to-cloud.md) |
 
-The first six building blocks passed the evaluation harness in [`eval/`](eval/) on 2026-09-29 and have been edited since. The apps and the last two building blocks have not been run through it. Every prompt carries `validated: false` until it is rerun.
+The first six building blocks passed the evaluation harness in [`eval/`](eval/) on 2026-09-29 and have been edited since. The first six apps and the last two building blocks have not been run through it. The last eight apps were built from their prompts during the template evaluation, which is where their screenshots come from ([`assets/img/apps/SOURCES.md`](assets/img/apps/SOURCES.md)). Every prompt carries `validated: false` until it is rerun.
 
 Five earlier pages (`build/connect-app`, `build/query-performance`, `build/rag`, `build/start-database`, and `prompts`) are kept as redirects so old links land.
 

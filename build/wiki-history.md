@@ -3,6 +3,7 @@ layout: page
 title: Build a team wiki with version history
 description: "Build a team wiki on Azure SQL Database with full version history from temporal tables: view any page as it was, compare and restore versions, and catch conflicting edits."
 tag: Full app
+kind: app
 last_verified: 2026-11-12
 validated: false
 ---

@@ -3,6 +3,7 @@ layout: page
 title: Build an ask-your-data app
 description: "Build an app on Azure SQL Database that turns plain-English questions into one read-only SQL query, shows the SQL, the result, and a chart, and runs as a login that can only read."
 tag: Full app
+kind: app
 last_verified: 2026-11-12
 validated: false
 ---

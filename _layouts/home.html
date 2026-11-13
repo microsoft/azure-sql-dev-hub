@@ -164,6 +164,9 @@
 .h .ha-bar i+i{background:#e8b04a}.h .ha-bar i+i+i{background:#5db37a}
 .h .ha-bar span{position:absolute;left:50%;max-width:calc(100% - 112px);overflow:hidden;transform:translateX(-50%);color:#3d4b5f;font-size:10.5px;font-weight:600;white-space:nowrap;text-overflow:ellipsis}
 .h .ha-bar~.ha-head{display:none}
+/* A template's screenshot (_includes/app-photo.html) fills the window under its bar,
+   from the top left, so the app's header and navigation stay in view. */
+.h .ha-photo{display:block;flex:1;min-height:0;width:100%;height:auto;object-fit:cover;object-position:left top}
 @container (max-width:360px){
   .h .ha-list .ha-av{display:none}
   .h .ha-th{letter-spacing:0;text-transform:none}
@@ -572,7 +575,7 @@ html:has(.qs-dialog[open]){overflow:hidden}
         {%- for t in page.templates %}
         {%- assign prompt_page = '/build/' | append: t.slug | append: '.html' | relative_url %}
         <article class="tpl-card" id="{{ t.slug }}">
-          <a class="tpl-shot" href="{{ prompt_page }}" data-tpl-open="tpl-{{ t.slug }}" tabindex="-1" aria-hidden="true"><div class="ha-app">{% include app-shot.html key=t.shot window=true %}</div></a>
+          <a class="tpl-shot" href="{{ prompt_page }}" data-tpl-open="tpl-{{ t.slug }}" tabindex="-1" aria-hidden="true"><div class="ha-app">{% if t.img %}{% include app-photo.html img=t.img title=t.window sizes="(max-width: 700px) 100vw, 420px" %}{% else %}{% include app-shot.html key=t.shot window=true %}{% endif %}</div></a>
           <div class="tpl-body">
             <div class="tpl-top"><h3>{{ t.title }}</h3><span class="tpl-tag">{{ t.tag }}</span></div>
             <p>{{ t.blurb }}</p>
@@ -619,7 +622,7 @@ html:has(.qs-dialog[open]){overflow:hidden}
         </div>
         <div class="qs-dlg-body tpl-dbody">
           <div class="tpl-dtop">
-            <div class="tpl-dshot" aria-hidden="true"><div class="ha-app">{% include app-shot.html key=t.shot window=true %}</div></div>
+            <div class="tpl-dshot" aria-hidden="true"><div class="ha-app">{% if t.img %}{% include app-photo.html img=t.img title=t.window sizes="(max-width: 900px) 100vw, 720px" %}{% else %}{% include app-shot.html key=t.shot window=true %}{% endif %}</div></div>
             <div class="tpl-dinfo">
               <p class="tpl-sum">{{ t.blurb }}</p>
               <div class="tpl-runs">{% for r in page.template_runs_on %}<span>{{ r }}</span>{% endfor %}</div>

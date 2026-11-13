@@ -3,6 +3,7 @@ layout: page
 title: Build a background job queue
 description: "Build a background job queue on Azure SQL Database: workers claim jobs safely with READPAST, retries back off, crashed workers' jobs are picked up again, and side effects go out once."
 tag: Full app
+kind: app
 last_verified: 2026-11-12
 validated: false
 ---
