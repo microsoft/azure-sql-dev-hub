@@ -327,13 +327,15 @@ html:has(.qs-dialog[open]){overflow:hidden}
    Without scripts the filter hides, both groups show under their labels, and
    View details goes to the prompt on GitHub. */
 .h .tpl{padding:56px 0;border-top:1px solid var(--border);background:var(--bg);color:var(--text)}
-.h .tpl-head{max-width:640px}
+/* The header: the heading, one line of text with the no-database note at its
+   end, and the three steps as a compact row under it. */
+.h .tpl-head{max-width:880px}
 .h .tpl h2{font-size:28px;line-height:1.2;font-weight:600;letter-spacing:-.015em}
-.h .tpl-head p{margin-top:8px;font-size:16px;color:var(--text-3)}
-.h .tpl-note{max-width:640px;margin-top:10px;font-size:14px;color:var(--text-3)}
-.h .tpl-flow{display:flex;flex-wrap:wrap;gap:8px 24px;margin:16px 0 0;padding:0;list-style:none;font-size:14px;color:var(--text-2)}
-.h .tpl-flow li{display:flex;align-items:center;gap:8px}
-.h .tpl-flow span{display:grid;place-items:center;width:22px;height:22px;border:1px solid var(--border-3);border-radius:50%;font-size:12px;font-weight:600;color:var(--text-nav)}
+.h .tpl-head p{margin-top:8px;font-size:15px;line-height:1.55;color:var(--text-3)}
+.h .tpl-note{white-space:nowrap}
+.h .tpl-flow{display:flex;flex-wrap:wrap;gap:6px 18px;margin:12px 0 0;padding:0;list-style:none;font-size:13px;color:var(--text-2)}
+.h .tpl-flow li{display:flex;align-items:center;gap:6px}
+.h .tpl-flow span{display:grid;place-items:center;width:18px;height:18px;border:1px solid var(--border-3);border-radius:50%;font-size:10.5px;font-weight:600;color:var(--text-nav)}
 .h .tpl-filter{display:flex;flex-wrap:wrap;gap:8px;margin:24px 0 16px}
 .h .tpl-chip{display:inline-flex;align-items:center;gap:6px;min-height:36px;padding:0 14px;border:1px solid var(--border-3);border-radius:18px;background:var(--bg);color:var(--text-2);font:inherit;font-size:13px;font-weight:500;cursor:pointer}
 .h .tpl-chip span{font-weight:500;opacity:.7}

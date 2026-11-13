@@ -152,8 +152,8 @@
 
   <section id="build" class="tpl" data-tpl-show="apps"><span id="prompts" aria-hidden="true"></span><span id="samples" aria-hidden="true"></span><span id="existing" aria-hidden="true"></span>
     <div class="w">
-      <div class="tpl-head"><h2>{{ page.build_heading }}</h2><p>{{ page.build_text }}</p></div>
-      {% if page.build_note %}{% capture note_link %}<a href="{{ page.build_note_href }}">{{ page.build_note_link }}</a>{% endcapture %}<p class="tpl-note">{{ page.build_note | replace: page.build_note_link, note_link }}</p>{% endif %}
+      {%- if page.build_note %}{% capture note_link %}<a href="{{ page.build_note_href }}">{{ page.build_note_link }}</a>{% endcapture %}{% capture build_note %} <span class="tpl-note">{{ page.build_note | replace: page.build_note_link, note_link }}</span>{% endcapture %}{% endif %}
+      <div class="tpl-head"><h2>{{ page.build_heading }}</h2><p>{{ page.build_text }}{{ build_note }}</p></div>
       <ol class="tpl-flow" aria-label="From idea to app">
         {% for step in page.build_steps %}<li><span aria-hidden="true">{{ forloop.index }}</span>{{ step }}</li>{% endfor %}
       </ol>
