@@ -394,6 +394,250 @@ templates:
   - [Sign in as the other organization, "You see only that organization's tickets, in the API and in the database."]
   - [Change the organization in a request, "It's ignored. The signed identity decides."]
   - [Assign a ticket as a member, "It's refused. Only that organization's administrators can assign."]
+# The apps below show a screenshot in place of a drawn screen: `img` names
+# its files in assets/img/apps and `window` is the window's title. Each is a
+# real app built from its prompt, restyled in the Fluent look and shown in use
+# (assets/img/apps/SOURCES.md).
+- slug: docs-chat
+  img: docs-chat
+  window: Contoso Handbook
+  title: Chat with your docs
+  tag: Full app
+  blurb: Answers grounded in your documents, each citing the passages it used. Passages are found with VECTOR_DISTANCE in SQL, and conversations pick up where they left off.
+  summary: Ask your team's documents a question and see where the answer came from.
+  covers: Vector search, citations, conversations
+  description:
+  - >-
+    A question-and-answer app for a team handbook. Add text or Markdown documents, ask questions in a chat, and get answers that cite the passages they came from. Conversations are saved, so you can open one later and keep going.
+  - >-
+    Azure SQL holds everything, embeddings included. Each passage's embedding sits in a VECTOR column, and the three passages nearest a question are found with VECTOR_DISTANCE in SQL rather than in app code. When nothing is close enough, the answer says the documents don't cover it. Deleting a document removes its passages in one transaction, so it's never cited again.
+  features:
+  - Text or Markdown documents, split into numbered passages
+  - Answers that cite each passage by document and number
+  - A plain "not covered" when the documents don't say
+  - Saved conversations you can reopen and continue
+  tables:
+  - [documents, "Title and body"]
+  - [passages, "Each document's numbered passages and their embeddings"]
+  - [conversations, "A title for each saved chat"]
+  - [messages, "Role, text, citations and time, in order"]
+  sql:
+  - [VECTOR type, "Embeddings are stored in the database, not in a separate vector store."]
+  - [VECTOR_DISTANCE, "Cosine distance in SQL finds the three passages nearest a question."]
+  - [Transactions, "A document, its passages and their embeddings are deleted together."]
+  try:
+  - [Ask about vacation, "Ask how many vacation days you get. The answer says 20 and cites the Leave policy."]
+  - [Ask what it doesn't know, "Ask for the office Wi-Fi password. The answer says the documents don't cover it and cites nothing."]
+  - [Delete a document, "Delete the Expense policy. A question about meal limits no longer cites it."]
+- slug: ask-your-data
+  img: ask-your-data
+  window: Contoso Sales
+  title: Ask your data
+  tag: Full app
+  blurb: Plain-English questions become one read-only query. See the SQL, the result and a chart, run by a database user that can only read.
+  summary: Ask questions about sales data in plain English.
+  covers: Read-only access, query limits, charts
+  description:
+  - >-
+    An app for asking questions about a sales dataset in plain English. Each question becomes one SQL query, and the app shows the SQL it wrote, the result table and a chart. Save a question to run it again later against current data.
+  - >-
+    The database is the safety boundary. Generated SQL runs as a database user that can only read the sales tables: it can't write, can't change the schema and can't see the app's own data. Each query stops after 5 seconds and returns at most 1,000 rows, and the app says when a result was cut off.
+  features:
+  - Plain-English questions turned into one SELECT
+  - The generated SQL, the result table and a bar or line chart
+  - Saved questions that run again on current data
+  - A 5-second timeout and a 1,000-row limit
+  tables:
+  - [sales.orders, "Customer, order date and status"]
+  - [sales.order_lines, "Product, quantity and unit price in cents"]
+  - [sales.products, "Each product and its category"]
+  - [sales.customers, "Each customer and their region"]
+  - [app.saved_questions, "A saved question's text and SQL"]
+  sql:
+  - [A read-only database user, "Generated SQL runs with SELECT on the sales schema and nothing else."]
+  - [Separate schemas, "Sales data and the app's own data live apart, so the query user can't reach saved questions."]
+  - [Integer cents, "Money is stored as whole cents, so totals match a direct query to the cent."]
+  try:
+  - [Ask for revenue by region, "Ask for total revenue by region for completed orders in 2025. The totals match a direct SQL query, with a bar chart of the four regions."]
+  - [Ask it to delete, "Ask it to delete all refunded orders. Nothing changes, and the app says it only runs read-only queries."]
+  - [Ask for too much, "List every order line. The app shows 1,000 rows and says the result was cut off."]
+- slug: catalog-search
+  img: catalog-search
+  window: Contoso Store
+  title: Product catalog search
+  tag: Full app
+  blurb: Ranked keyword search, filters with counts that match the data, and keyset paging that never skips or repeats a product.
+  summary: Search, filter and page through a store's catalog.
+  covers: Ranking, facet counts, keyset paging
+  description:
+  - >-
+    A product catalog for an electronics and home store. Search by keyword, narrow by category, brand, price and stock, see how many products each filter would show, sort, and page through the results. The search, filters and page are in the URL, so a shared link shows the same results.
+  - >-
+    Ranking, filtering, counting and paging all happen in Azure SQL. Products with every word in the name rank first. Each filter's counts reflect the search and the other filters. Pages use a keyset cursor instead of an offset, so paging through returns each product exactly once, even across equal prices. Characters like % and _ in a search are matched as text.
+  features:
+  - Keyword search ranked by name match, then rating
+  - Filters by category, brand, price and stock, with counts
+  - Sort by relevance, price or rating, 20 to a page
+  - Shareable URLs for any search, filter and page
+  tables:
+  - [products, "Name, description, category, brand, price in cents, rating and stock"]
+  sql:
+  - [Keyset pagination, "An opaque cursor picks up after the last row shown, so no product is skipped or repeated."]
+  - [Grouped counts, "Facet counts are computed in SQL for the current search and the other filters."]
+  - [Escaped pattern matching, "Characters such as %, _ and [ are matched literally and never cause an error."]
+  try:
+  - [Search for wireless headphones, "Every result has both words, and results with both in the name come first."]
+  - [Check the counts, "Filter to Audio and one brand. Each count matches a direct SQL count."]
+  - [Page through by price, "Sort by price, low to high, and page through. Prices never go down, even across pages."]
+- slug: iot-telemetry
+  img: iot-telemetry
+  window: Contoso Buildings
+  title: IoT telemetry
+  tag: Full app
+  blurb: Batched ingest without duplicates, a columnstore readings table, exact rollups by time window, late readings, and alerts.
+  summary: A dashboard for sensor readings from three buildings.
+  covers: Ingest, columnstore, rollups, alerts
+  description:
+  - >-
+    A dashboard for temperature and humidity sensors in three buildings. Devices send readings in batches, and the dashboard shows each site's devices, a chart for any device, metric and time window, and the current alerts.
+  - >-
+    Azure SQL keeps the numbers exact. Raw readings go into a table with a clustered columnstore index, and a repeated reading is counted as a duplicate rather than stored twice. Minimum, maximum, average and count for 5-minute, hourly and daily windows are computed in SQL, so they agree with the raw readings even after a late reading lands. A 5-minute window that averages above 30 degrees raises an alert.
+  features:
+  - Batches of up to 1,000 readings, with duplicates counted and skipped
+  - Readings up to 7 days late land in the right window
+  - Minimum, maximum, average and count by 5 minutes, hour or day
+  - Alerts for windows that run hot
+  tables:
+  - [devices, "Name and site: north, south or east"]
+  - [readings, "Device, metric, value, and when it was recorded and received"]
+  sql:
+  - [Clustered columnstore index, "Raw readings are stored by column, compressed and quick to aggregate."]
+  - [A unique key on device, metric and time, "A repeated reading is recognized and stored once."]
+  - [Windowed aggregates, "Rollups group readings by UTC window in SQL, so they match the raw data."]
+  try:
+  - [Check an hour, "A device's hourly minimum, maximum, average and count match a direct SQL query."]
+  - [Send a duplicate, "Repeat a stored reading. The response counts it as a duplicate, and it's stored once."]
+  - [Send a late reading, "Send a reading from two hours ago. Its 5-minute window's average and count change."]
+- slug: job-queue
+  img: job-queue
+  window: Contoso Jobs
+  title: Background job queue
+  tag: Full app
+  blurb: Workers claim jobs safely with READPAST, retries back off, a crashed worker's job is picked up again, and each side effect goes out once.
+  summary: A job queue with a dashboard, where every job's side effect goes out once.
+  covers: Locking hints, leases, retries, outbox
+  description:
+  - >-
+    A background job queue with a dashboard. Apps enqueue jobs, three worker processes run them, and failed jobs retry with growing delays until they're marked dead. Watch the queue, enqueue test jobs and retry dead ones from the dashboard.
+  - >-
+    Azure SQL does the coordination. A worker claims the oldest runnable job in one statement with UPDLOCK, READPAST and ROWLOCK, so two workers never take the same job and a locked job doesn't hold up the rest. Each claim is a 30-second lease, so a crashed worker's job runs again. A job's success and its outbox row are written in one transaction, and each outbox row is published once.
+  features:
+  - Three workers sharing one queue without double claims
+  - Retries after 2, then 4 seconds, then marked dead
+  - Idempotency keys, so enqueuing twice makes one job
+  - A dashboard with counts, recent jobs and retry for dead jobs
+  tables:
+  - [jobs, "Type, payload, status, attempts, lease and result"]
+  - [outbox, "One row per succeeded job, and whether it's published"]
+  - [workers, "The worker processes and when each was last seen"]
+  sql:
+  - [UPDLOCK, READPAST and ROWLOCK, "A worker claims a job in one statement and skips jobs other workers hold."]
+  - [Transactions, "A job's success and its outbox row commit together."]
+  - [A unique idempotency key, "A second enqueue with the same key finds the first job."]
+  try:
+  - [Seed demo jobs, "Enqueue the 20 demo jobs. Eighteen succeed, and the two that fail are tried three times, then marked dead."]
+  - [Stop a worker mid-job, "After its lease ends, another worker finishes the job."]
+  - [Count the outbox, "Every succeeded job has exactly one outbox row, published once."]
+- slug: room-bookings
+  img: room-bookings
+  window: Contoso Rooms
+  title: Room bookings
+  tag: Full app
+  blurb: Book meeting rooms in office time. Two bookings for the same room can't overlap, even when requests arrive at once.
+  summary: Book meeting rooms without double bookings.
+  covers: Concurrency, time zones, validation
+  description:
+  - >-
+    A meeting-room booking app for a small office. See each room's bookings for a day, book a room for a time range and cancel a booking. Times are entered and shown in the office's time zone, and errors appear next to the field they're about.
+  - >-
+    Azure SQL makes sure a room is never double-booked. The overlap check and the insert happen in one transaction, so when ten people grab the same slot at once, one succeeds and the rest get a conflict that names the booking already there. Starts and ends are stored as exact instants, so daylight saving can't move a booking, and a cancelled booking frees its time.
+  features:
+  - A day view of every room's bookings
+  - 15-minute slots, from 15 minutes to 8 hours
+  - Conflict errors that name the booking already there
+  - Cancellations kept in the history
+  tables:
+  - [rooms, "Name and capacity"]
+  - [bookings, "Room, title, who booked it, start, end and status"]
+  sql:
+  - [Transactions, "The overlap check and the insert happen together, so concurrent requests can't both win."]
+  - [UTC instants, "Starts and ends are stored as exact moments, so a booking keeps its time across daylight-saving changes."]
+  - [CHECK constraints, "Status stays active or cancelled, and every booking ends after it starts."]
+  try:
+  - [Book an overlapping slot, "Book Aurora from 10:00 to 11:00, then from 10:30 to 11:30. The second is rejected and names the first."]
+  - [Book back to back, "Book Aurora from 11:00 to 12:00, straight after. It's accepted."]
+  - [Race for one slot, "Send ten identical requests at once. Exactly one booking is made."]
+- slug: saas-starter
+  img: saas-starter
+  window: Contoso Projects
+  title: SaaS starter
+  tag: Full app
+  blurb: Organizations, members and roles, plan limits, row-level security, and billing webhooks applied exactly once.
+  summary: The start of a multi-tenant business app, with plans and billing.
+  covers: Row-level security, roles, plan limits, webhooks
+  description:
+  - >-
+    The base of a business SaaS app. Organizations have members with roles and work on projects. Each organization is on a plan, Free or Team, and the app enforces its limits on members and projects. A billing page shows the current plan and paid invoices.
+  - >-
+    Azure SQL keeps each organization's data to itself with row-level security keyed on SESSION_CONTEXT, so even a query that forgets to filter can't reach another organization's rows. Billing events arrive at a signed webhook: a repeated event changes nothing, and an older subscription event that arrives late doesn't undo a newer one.
+  features:
+  - A development sign-in you can swap for a real identity provider
+  - Owner, admin and member roles, and the last owner can't leave
+  - Plan limits, with messages that name the limit and the plan
+  - A signed billing webhook, applied once per event
+  tables:
+  - [organizations, "Name and current plan"]
+  - [memberships, "Who belongs to each organization, and their role"]
+  - [projects, "Each organization's projects"]
+  - [billing_events, "Every webhook event, by event ID"]
+  - [invoices, "Paid invoices in integer cents"]
+  sql:
+  - [Row-level security, "A filter predicate and a block predicate keep each organization in its own rows."]
+  - [SESSION_CONTEXT, "Set for each request with sp_set_session_context from the signed-in user."]
+  - [A unique event ID, "A repeated webhook event is recognized and applied once."]
+  try:
+  - [Sign in as Cara, "Only Acme's projects and members appear. Nothing from Globex does."]
+  - [Hit the Free plan limit, "As Gus, a third Globex project is rejected with the limit named. After a Team activation event, it's accepted."]
+  - [Send an invoice twice, "The same signed invoice.paid event, sent twice, records one invoice."]
+- slug: wiki-history
+  img: wiki-history
+  window: Contoso Wiki
+  title: Team wiki with history
+  tag: Full app
+  blurb: Full version history from temporal tables. View any page as it was, compare and restore versions, and catch conflicting edits.
+  summary: A team wiki where the database keeps every version.
+  covers: Temporal tables, conflicts, restore
+  description:
+  - >-
+    A team wiki for Markdown pages. See each page's full history, view it as it was at any moment, compare two versions line by line and restore an old one. Deleted pages can be brought back.
+  - >-
+    The history comes from Azure SQL itself. The pages table is a system-versioned temporal table, so every save, restore and delete is recorded by the database, and FOR SYSTEM_TIME AS OF shows a page as it stood at any time. Each save carries the version it started from, so when two people edit the same version, the second save is caught and its text kept instead of silently overwriting the first.
+  features:
+  - Markdown pages with a full history, newest first
+  - Any page as of any moment, and two versions side by side
+  - Restore an old version as a new one, keeping every version
+  - Deleted pages you can bring back with their history
+  tables:
+  - [pages, "Slug, title, Markdown body, author and edit summary"]
+  - [pages_history, "Every earlier version, kept by the database"]
+  sql:
+  - [Temporal tables, "The database records every version in a history table, not app code."]
+  - [FOR SYSTEM_TIME AS OF, "Shows a page exactly as it was at any moment."]
+  - [Optimistic concurrency, "A save based on an old version is rejected, so no edit is lost."]
+  try:
+  - [Edit three times, "Create a page and edit it three times. Its history lists four versions, newest first."]
+  - [Go back in time, "View the page as of a moment between the second and third edits. The second edit's text shows."]
+  - [Save the same version twice, "Open one version in two places and save both. The second save is rejected, and its text is kept."]
 # The building blocks. `shot` picks each one's picture from
 # _includes/app-shot.html, drawn like the apps above.
 scenarios:

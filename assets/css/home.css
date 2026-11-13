@@ -162,6 +162,9 @@
 .h .ha-bar i+i{background:#e8b04a}.h .ha-bar i+i+i{background:#5db37a}
 .h .ha-bar span{position:absolute;left:50%;max-width:calc(100% - 112px);overflow:hidden;transform:translateX(-50%);color:#3d4b5f;font-size:10.5px;font-weight:600;white-space:nowrap;text-overflow:ellipsis}
 .h .ha-bar~.ha-head{display:none}
+/* A template's screenshot (_includes/app-photo.html) fills the window under its bar,
+   from the top left, so the app's header and navigation stay in view. */
+.h .ha-photo{display:block;flex:1;min-height:0;width:100%;height:auto;object-fit:cover;object-position:left top}
 @container (max-width:360px){
   .h .ha-list .ha-av{display:none}
   .h .ha-th{letter-spacing:0;text-transform:none}

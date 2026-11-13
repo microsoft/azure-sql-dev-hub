@@ -179,7 +179,7 @@
         {%- for t in page.templates %}
         {%- assign prompt_href = hub_repo | append: '/blob/main/build/' | append: t.slug | append: '.md' %}
         <article class="tpl-card" id="{{ t.slug }}">
-          <a class="tpl-shot" href="{{ prompt_href }}" data-tpl-open="tpl-{{ t.slug }}" tabindex="-1" aria-hidden="true"><div class="ha-app">{% include app-shot.html key=t.shot window=true %}</div></a>
+          <a class="tpl-shot" href="{{ prompt_href }}" data-tpl-open="tpl-{{ t.slug }}" tabindex="-1" aria-hidden="true"><div class="ha-app">{% if t.img %}{% include app-photo.html img=t.img title=t.window sizes="(max-width: 700px) 100vw, 420px" %}{% else %}{% include app-shot.html key=t.shot window=true %}{% endif %}</div></a>
           <div class="tpl-body">
             <div class="tpl-top"><h3>{{ t.title }}</h3></div>
             <p>{{ t.blurb }}</p>
@@ -248,7 +248,7 @@
             <p class="tpl-need">{{ ti.before_text }}</p>
           </aside>
           <div class="tpl-dmain">
-            <div class="tpl-dshot" aria-hidden="true"><div class="ha-app">{% include app-shot.html key=t.shot window=true %}</div></div>
+            <div class="tpl-dshot" aria-hidden="true"><div class="ha-app">{% if t.img %}{% include app-photo.html img=t.img title=t.window sizes="(max-width: 900px) 100vw, 720px" %}{% else %}{% include app-shot.html key=t.shot window=true %}{% endif %}</div></div>
             {%- for para in t.description %}
             <p class="tpl-desc">{{ para }}</p>
             {%- endfor %}

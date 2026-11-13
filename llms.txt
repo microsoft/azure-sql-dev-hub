@@ -48,6 +48,14 @@ Build briefs with requirements and validation checks for Azure SQL Database in t
 - [Build a revenue reporting app]({{ site.url }}{{ site.baseurl }}/build/revenue-reporting.md): Full app. Exact money arithmetic in integer cents, partial refunds, order-date cohorts, and totals that count each sale once.
 - [Build a shipment tracker]({{ site.url }}{{ site.baseurl }}/build/shipment-tracker.md): Full app. Import shipment-event batches atomically, catch duplicates and conflicts, replay safely, and order late events the same way on every run.
 - [Build a multi-tenant helpdesk]({{ site.url }}{{ site.baseurl }}/build/multi-tenant-helpdesk.md): Full app. Signed identities, tenant isolation in the API and with row-level security, role checks, and safe connection reuse.
+- [Build a chat-with-your-docs app]({{ site.url }}{{ site.baseurl }}/build/docs-chat.md): Full app. Answers grounded in your documents, each citing the passages it used. Passages are found with VECTOR_DISTANCE in SQL, and conversations pick up where they left off.
+- [Build an ask-your-data app]({{ site.url }}{{ site.baseurl }}/build/ask-your-data.md): Full app. Plain-English questions become one read-only query. See the SQL, the result and a chart, run by a database user that can only read.
+- [Build a product catalog with search]({{ site.url }}{{ site.baseurl }}/build/catalog-search.md): Full app. Ranked keyword search, filters with counts that match the data, and keyset paging that never skips or repeats a product.
+- [Build an IoT telemetry dashboard]({{ site.url }}{{ site.baseurl }}/build/iot-telemetry.md): Full app. Batched ingest without duplicates, a columnstore readings table, exact rollups by time window, late readings, and alerts.
+- [Build a background job queue]({{ site.url }}{{ site.baseurl }}/build/job-queue.md): Full app. Workers claim jobs safely with READPAST, retries back off, a crashed worker's job is picked up again, and each side effect goes out once.
+- [Build a room booking app]({{ site.url }}{{ site.baseurl }}/build/room-bookings.md): Full app. Book meeting rooms in office time. Two bookings for the same room can't overlap, even when requests arrive at once.
+- [Build a SaaS starter with organizations and billing]({{ site.url }}{{ site.baseurl }}/build/saas-starter.md): Full app. Organizations, members and roles, plan limits, row-level security, and billing webhooks applied exactly once.
+- [Build a team wiki with version history]({{ site.url }}{{ site.baseurl }}/build/wiki-history.md): Full app. Full version history from temporal tables. View any page as it was, compare and restore versions, and catch conflicting edits.
 
 ## Key facts
 - Target: Azure SQL Database in the Microsoft Azure cloud. The free tier covers every prompt on this site, within its limits. Connect with Microsoft Entra; never a password in code or config.
