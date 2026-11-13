@@ -67,41 +67,25 @@
             {%- if o.vscode %}
             <a class="su-vcard" href="vscode://ms-mssql.mssql/deploy?type={{ o.vscode.type }}&amp;source=azure-sql-dev-hub"
                data-event="site/action" data-event-action="outboundClicked" data-event-destination-id="{{ o.id }}-vscode" data-event-destination-type="other">
-              <span class="su-vlogo" aria-hidden="true"><img src="{{ '/assets/img/vscode.png' | relative_url }}" alt="" width="26" height="26"></span>
+              <span class="su-vlogo" aria-hidden="true"><img src="{{ '/assets/img/vscode.png' | relative_url }}" alt="" width="24" height="24"></span>
               <span class="su-vtext"><b>{{ sl.vscode_title }}</b><span>{{ sl.vscode_sub }}</span></span>
               <svg class="su-vgo" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>
             </a>
             {%- endif %}
-            <div class="ag-head">
-              <h3 id="setup-{{ o.key }}-agent">{{ sl.agent }}</h3>
-              {% include agent-logos.html label=sl.agents_label %}
-            </div>
-            {%- if o.agent.text %}<p class="tpl-how">{{ o.agent.text }}</p>{% endif %}
-            <div class="tpl-dact">
-              <button class="tpl-primary" type="button" data-hcopy="{{ o.agent.prompt | escape }}"
+            {%- assign agent_id = 'setup-' | append: o.key | append: '-agent' %}
+            {%- assign skills_id = o.id | append: '-skills' %}
+            {%- capture agent_actions %}<button class="tpl-primary" type="button" data-hcopy="{{ o.agent.prompt | escape }}"
                       data-event="site/action" data-event-action="contentCopied" data-event-action-location="install-panel"
                       data-event-content-id="{{ o.id }}-prompt" data-event-content-type="suggested-ask">{{ sl.copy }}</button>
-            </div>
-            <details class="tpl-skills">
-              <summary>{{ sl.show_prompt }}</summary>
-              <p class="su-prompt">{{ o.agent.prompt }}</p>
-            </details>
-            <details class="tpl-skills">
-              <summary>{{ ti.skills_title }}</summary>
-              <p>{{ ti.skills_text }}</p>
-              <div class="code-box tpl-cmd"><code>{{ ti.skills_code }}</code><button class="code-copy tpl-icopy" type="button" aria-label="Copy" title="Copy" data-hcopy="{{ ti.skills_code | escape }}"
-                data-event="site/action" data-event-action="contentCopied" data-event-action-location="install-panel"
-                data-event-content-id="{{ o.id }}-skills" data-event-content-type="collection-install"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><span class="sk-act"></span></button></div>
-            </details>
-            {%- if o.agent.check %}
-            <p class="tpl-need">{{ o.agent.check }}</p>
-            {%- endif %}
+              <button class="dg-reveal" type="button" aria-expanded="false" aria-controls="setup-{{ o.key }}-prompt">{{ sl.show_prompt }}</button>{% endcapture %}
+            {%- capture agent_after %}<p class="su-prompt" id="setup-{{ o.key }}-prompt">{{ o.agent.prompt }}</p>{% endcapture %}
+            {% include dialog-agent.html id=agent_id heading=sl.agent actions=agent_actions after=agent_after location="install-panel" skills_id=skills_id note=o.agent.check %}
             <nav class="su-links" aria-label="{{ sl.resources }}">
               <h4>{{ sl.resources }}</h4>
               {%- for l in o.links %}
               {%- assign lead = l.href | slice: 0 %}
               {%- if lead == '/' %}
-              <a href="{{ l.href | relative_url }}" data-event="site/action" data-event-action="pathSelected" data-event-path-id="{{ l.id }}">{{ l.label }}</a>
+              <a href="{{ l.href | relative_url }}" data-event="site/action" data-event-action="pathSelected" data-event-path-id="{{ l.id }}">{{ l.label }}<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17L17 7M9 7h8v8"/></svg></a>
               {%- else %}
               <a href="{{ l.href }}" target="_blank" rel="noopener" data-event="site/action" data-event-action="outboundClicked" data-event-destination-id="{{ l.id }}" data-event-destination-type="{{ l.type | default: 'docs' }}">{{ l.label }}<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17L17 7M9 7h8v8"/></svg></a>
               {%- endif %}
@@ -117,6 +101,7 @@
             </div>
             {%- endif %}
             <h3>{{ sl.manual }}</h3>
+            {%- if o.need %}<p class="su-need">{{ o.need }}</p>{% endif %}
             {%- if o.engines %}
             {%- assign e0 = o.engines[0] %}
             <div class="su-engine">
@@ -135,10 +120,16 @@
             {%- endif %}
             <ol class="qs-steps qs-dsteps">
               {%- for st in o.steps %}
-              <li><span class="qs-n">{{ forloop.index }}</span><div class="qs-dstep"><div><b>{{ st.title }}</b><p>{{ st.text }}</p></div>
-                {%- if st.link %}
-                <a class="qs-dlink" href="{{ st.link.href }}" target="_blank" rel="noopener" data-event="site/action" data-event-action="outboundClicked"
-                   data-event-destination-id="{{ o.id }}-{{ st.key }}" data-event-destination-type="other">{{ st.link.label }}<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17L17 7M9 7h8v8"/></svg></a>
+              {%- comment %} A step's link sits inside its text when the text names it, and under the text otherwise. {% endcomment %}
+              {%- assign st_text = st.text %}{% assign st_inline = false %}
+              {%- if st.link %}
+              {%- capture st_a %}<a class="qs-dlink" href="{{ st.link.href }}" target="_blank" rel="noopener" data-event="site/action" data-event-action="outboundClicked"
+                   data-event-destination-id="{{ o.id }}-{{ st.key }}" data-event-destination-type="other">{{ st.link.label }}<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17L17 7M9 7h8v8"/></svg></a>{% endcapture %}
+              {%- if st.text contains st.link.label %}{% assign st_text = st.text | replace_first: st.link.label, st_a %}{% assign st_inline = true %}{% endif %}
+              {%- endif %}
+              <li><span class="qs-n">{{ forloop.index }}</span><div class="qs-dstep"><div><b>{{ st.title }}</b><p>{{ st_text }}</p></div>
+                {%- if st.link and st_inline == false %}
+                {{ st_a }}
                 {%- endif %}
                 {%- if st.code %}
                 <div class="code-box sm"{% for e in o.engines %}{% assign ec = st.code %}{% for r in e.swap %}{% assign ec = ec | replace: r[0], r[1] %}{% endfor %} data-ecode-{{ e.key }}="{{ ec | escape }}" data-erun-{{ e.key }}="{{ e.runtime | default: e.key }}"{% endfor %}><pre><code>{{ st.code | escape }}</code></pre><button class="code-copy" type="button" data-hcopy="{{ st.code | escape }}"
@@ -225,27 +216,14 @@
             <p class="tpl-sum">{{ t.summary }}</p>
           </div>
           <aside class="tpl-side" aria-labelledby="tpl-{{ t.slug }}-build">
-            <div class="ag-head">
-              <h3 id="tpl-{{ t.slug }}-build">{{ ti.build_ai }}</h3>
-              {% include agent-logos.html label=sl.agents_label %}
-            </div>
-            <p class="tpl-how">{{ ti.copy_text }}</p>
-            <div class="tpl-dact">
-              <button class="tpl-primary" type="button" data-hprompt="{{ '/build/' | append: t.slug | append: '.md' | relative_url }}"
+            {%- assign agent_id = 'tpl-' | append: t.slug | append: '-build' %}
+            {%- capture agent_actions %}<button class="tpl-primary" type="button" data-hprompt="{{ '/build/' | append: t.slug | append: '.md' | relative_url }}"
                       data-event="site/action" data-event-action="copyPrompt" data-event-action-location="scenario"
                       data-event-scenario="{{ t.slug }}" data-clarity-event="copy_prompt_{{ t.slug }}">Copy prompt</button>
               <a href="{{ hub_repo }}/blob/main/build/{{ t.slug }}.md" target="_blank" rel="noopener"
                  data-event="site/action" data-event-action="viewPrompt" data-event-action-location="scenario"
-                 data-event-scenario="{{ t.slug }}" data-clarity-event="view_prompt_{{ t.slug }}">Read the prompt<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17L17 7M9 7h8v8"/></svg></a>
-            </div>
-            <details class="tpl-skills">
-              <summary>{{ ti.skills_title }}</summary>
-              <p>{{ ti.skills_text }}</p>
-              <div class="code-box tpl-cmd"><code>{{ ti.skills_code }}</code><button class="code-copy tpl-icopy" type="button" aria-label="Copy" title="Copy" data-hcopy="{{ ti.skills_code | escape }}"
-                data-event="site/action" data-event-action="contentCopied" data-event-action-location="scenario"
-                data-event-content-id="template-skills" data-event-content-type="collection-install"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><span class="sk-act"></span></button></div>
-            </details>
-            <p class="tpl-need">{{ ti.before_text }}</p>
+                 data-event-scenario="{{ t.slug }}" data-clarity-event="view_prompt_{{ t.slug }}">{{ sl.show_prompt }}<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17L17 7M9 7h8v8"/></svg></a>{% endcapture %}
+            {% include dialog-agent.html id=agent_id heading=ti.build_ai actions=agent_actions after="" location="scenario" skills_id="template-skills" note=ti.before_text %}
           </aside>
           <div class="tpl-dmain">
             <div class="tpl-dshot" aria-hidden="true"><div class="ha-app">{% if t.img %}{% include app-photo.html img=t.img title=t.window sizes="(max-width: 900px) 100vw, 720px" %}{% else %}{% include app-shot.html key=t.shot window=true %}{% endif %}</div></div>
@@ -446,6 +424,14 @@
     if(!d.open)d.showModal();
     d.scrollTop=0;d.focus();
   })});
+  // See the prompt, in the setup dialogs: without the script the prompt shows;
+  // with it, the prompt starts folded and the button opens and closes it.
+  document.querySelectorAll('.dg-reveal').forEach(function(b){
+    var t=document.getElementById(b.getAttribute('aria-controls'));
+    if(!t)return;
+    t.hidden=true;
+    b.addEventListener('click',function(){var open=t.hidden;t.hidden=!open;b.setAttribute('aria-expanded',String(open))});
+  });
   var cmdEl=document.getElementById('hInstall'),copyEl=document.getElementById('hInstallCopy');
   document.querySelectorAll('[data-agent]').forEach(function(a){a.addEventListener('click',function(){var agent=a.getAttribute('data-agent');document.querySelectorAll('[data-agent]').forEach(function(x){x.setAttribute('aria-pressed','false')});a.setAttribute('aria-pressed','true');cmdEl.textContent=a.getAttribute('data-cmd');copyEl.setAttribute('data-hcopy',a.getAttribute('data-cmd'));copyEl.setAttribute('data-event-harness-id',agent);copyEl.setAttribute('data-clarity-event','copy_skill_install_'+agent)})});
   // Container engine picker in the setup dialog. Each command is rendered for

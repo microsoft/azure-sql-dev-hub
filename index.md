@@ -68,7 +68,6 @@ setup_labels:
   open: Set it up
   manual: Set it up yourself
   agent: Set it up with your coding agent
-  agents_label: Works with
   copy: Copy prompt
   show_prompt: See the prompt
   resources: Resources
@@ -86,23 +85,29 @@ setup:
   title: Azure SQL Database, free tier
   icon: <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 18a4.5 4.5 0 0 1-.6-8.96A6 6 0 0 1 18 8.5a4 4 0 0 1-.5 9.5H7z"/></svg>
   card: A serverless database in Azure with a monthly free allowance. Up to 10 free databases per subscription.
-  summary: A General Purpose serverless database with a monthly free allowance, created in the Azure portal in a few minutes.
+  summary: A serverless database with a monthly free allowance, created in the Azure portal in a few minutes.
+  # Shown under Set it up yourself, before the steps.
+  need: You need an Azure subscription that can create resources. Azure for Students Starter doesn't work.
   steps:
-  - key: before
-    title: Before you start
-    text: You need an Azure subscription with permission to create resources. Most subscription types work; Azure for Students Starter doesn't.
+  # A step's link is set inside its text where the text names it.
   - key: create
-    title: Create the database
-    text: Open the Azure SQL hub and select <b>Start free</b>. On <b>Basics</b>, pick the subscription, resource group, database name and server. If you create a new server, choose Microsoft Entra authentication. Check that <b>Estimated cost/month</b> shows 0, then select <b>Review + create</b> and <b>Create</b>.
+    title: Start a free database
+    text: Open the Azure SQL hub and select <b>Start free</b>.
     link:
       label: Open the Azure SQL hub
       href: https://aka.ms/azuresqlhub
+  - key: basics
+    title: Fill in the basics
+    text: Pick the subscription, resource group, database name and server. For a new server, choose Microsoft Entra authentication.
+  - key: review
+    title: Create it
+    text: Check that <b>Estimated cost/month</b> shows 0, then select <b>Review + create</b> and <b>Create</b>.
   - key: access
     title: Open access
-    text: Add your IP to the firewall and sign in with Microsoft Entra. Both are on the server, under Networking and Microsoft Entra ID.
+    text: On the server, add your IP under <b>Networking</b> and sign in under <b>Microsoft Entra ID</b>.
   - key: verify
     title: Verify
-    text: Run SELECT 1 in the portal's query editor or the MSSQL extension for VS Code. The database's Overview page shows <b>Free monthly vCore amount</b>.
+    text: Run this in the portal's query editor or the MSSQL extension for VS Code.
     code: SELECT 1 AS connected;
   vscode:
     type: azureSqlDatabase
@@ -112,8 +117,8 @@ setup:
     # Each tile: label, value, and an optional unit shown small under the value.
     tiles:
     - [Compute, '100,000', vCore seconds]
-    - [Data storage, 32 GB]
-    - [Backup storage, 32 GB]
+    - [Data storage, 32 GB, per database]
+    - [Backup storage, 32 GB, per database]
     - [Free databases, '10', per subscription]
   agent:
     prompt: Create a free Azure SQL Database in my Azure subscription using the free offer, and pause it when the monthly free limit is reached. Use Microsoft Entra authentication only, add my current IP address to the server firewall, then connect and run SELECT 1. Ask me which subscription and region to use, and show me each command before you run it.
@@ -140,11 +145,11 @@ setup:
   steps:
   - key: pull
     title: Get the image
-    text: Pull the public image from Microsoft Container Registry. No sign-up needed.
+    text: It's public on Microsoft Container Registry. No sign-up needed.
     code: docker pull mcr.microsoft.com/mssql/azure-sql-db-server:latest
   - key: run
     title: Start the container
-    text: In a bash or zsh shell, generate a strong SA password, then start the engine on port 1433, bound to localhost.
+    text: In bash or zsh. This makes a strong SA password and starts the engine on localhost, port 1433.
     code: |-
       MSSQL_SA_PASSWORD="Aa1$(openssl rand -hex 16)"
       docker run --name sqldb -e "ACCEPT_EULA=Y" \
@@ -153,16 +158,17 @@ setup:
         mcr.microsoft.com/mssql/azure-sql-db-server:latest
   - key: query
     title: Connect and query
-    text: The container bundles sqlcmd. A result that names Microsoft SQL Azure confirms the Azure SQL Database engine.
+    text: Run this in the same terminal, so it can read the password. The result should name <b>Microsoft SQL Azure</b>.
     code: |-
       docker exec sqldb /opt/mssql-tools18/bin/sqlcmd \
-        -S localhost -U sa -P "$MSSQL_SA_PASSWORD" -C -Q "SELECT @@VERSION;"
+        -S localhost -U sa -P "$MSSQL_SA_PASSWORD" -C \
+        -Q "SELECT @@VERSION;"
   copy_all: Copy all three commands
   engines:
   - key: docker
     name: Docker
     use: <code>docker</code>
-    note: Docker 24 or later, with the engine running. <code>docker info</code> checks it.
+    note: You need Docker 24 or later, with the engine running. <code>docker info</code> checks it.
   - key: podman
     name: Podman
     use: <code>podman</code>
@@ -238,9 +244,10 @@ template_runs_on: [Azure SQL Database, Microsoft Entra ID]
 # for the markdown twin.
 template_inside:
   build_ai: Build it with your coding agent
-  copy_text: Paste it into Claude Code, GitHub Copilot, Codex or Cursor, and your agent builds the app.
-  # A collapsed section under Copy prompt.
+  agents_for: For Claude Code, GitHub Copilot, Codex or Cursor.
+  # The agent route's two steps, in the setup and template dialogs.
   skills_title: First time? Add the Azure SQL skills
+  paste_title: Paste the prompt into your agent
   skills_text: One install for Claude Code, GitHub Copilot, Codex and Cursor.
   skills_code: npx skills add microsoft/microsoft-sql
   before_text: Needs an Azure SQL Database. No database yet? <a href="#get-running">Get one running</a>.

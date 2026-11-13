@@ -244,13 +244,14 @@
 .h .qs-steps li{display:flex;gap:12px}
 .h .qs-steps li > div{flex:1 1 auto;min-width:0}
 .h .qs-n{flex:0 0 22px;display:flex;align-items:center;justify-content:center;height:22px;border:1px solid var(--border-3);border-radius:11px;color:var(--text-nav);font-size:12px;font-weight:600}
-.h .qs-steps b{display:block;font-size:14px;font-weight:600}
-.h .qs-steps p{font-size:14px;color:var(--text-3)}
+.h .qs-steps b{display:block;font-size:14px;line-height:1.4;font-weight:600}
+.h .qs-steps p{font-size:13.5px;line-height:1.55;color:var(--text-3)}
 .h .qs-steps p b{display:inline;font-size:inherit;color:var(--text-2)}
-.h .qs-dsteps{gap:18px}
-.h .qs-dstep{display:flex;flex-direction:column;gap:8px}
-.h .qs-dlink{display:inline-flex;align-items:center;gap:4px;align-self:flex-start;font-size:14px;font-weight:600}
-.h .qs-all{display:none;align-self:flex-start;min-height:28px;padding:0;border:0;background:none;color:var(--accent);font:inherit;font-size:14px;font-weight:600;cursor:pointer}
+.h .qs-dsteps{gap:20px}
+.h .qs-dstep{display:flex;flex-direction:column;gap:10px}
+.h .qs-dstep > div{display:flex;flex-direction:column;gap:2px}
+.h .qs-dlink{display:inline-flex;align-items:center;gap:4px;align-self:flex-start;font-size:13.5px;font-weight:600}
+.h .qs-all{display:none;align-self:flex-start;min-height:28px;margin-left:34px;padding:0;border:0;background:none;color:var(--accent);font:inherit;font-size:13.5px;font-weight:600;cursor:pointer}
 .js .h .qs-all{display:block}.h .qs-all:hover{color:var(--accent-hover);text-decoration:underline}
 /* Dialogs: the setup dialogs and the template details share this frame. */
 .h .qs-dialog{margin:auto;width:calc(100% - 48px);max-width:720px;max-height:calc(100vh - 48px);padding:0;overflow-y:auto;border:1px solid var(--border-2);border-radius:12px;background:var(--bg);color:var(--text);box-shadow:0 20px 50px rgba(0,0,0,.35)}
@@ -263,51 +264,59 @@ html:has(.qs-dialog[open]){overflow:hidden}
 :root:not(.js) .h .qs-dialog{display:block;position:static;width:auto;max-width:none;max-height:none;margin:24px 0 0;overflow:visible;box-shadow:none}
 @media (max-width:640px){.h .qs-dialog{width:calc(100% - 24px);max-height:calc(100vh - 24px)}}
 /* The free tier's allowance, in its setup dialog. */
-.h .qs-free{display:flex;flex-direction:column;gap:12px}
+.h .qs-free{display:flex;flex-direction:column;gap:12px;margin-bottom:12px}
 .h .qs-free h3,.h .tpl-dmain .qs-free h3{margin-top:0;font-size:15px;font-weight:600}
-.h .qs-tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,128px),1fr));gap:10px;margin:0}
-.h .qs-tiles div{display:flex;flex-direction:column;gap:6px;padding:14px 16px;border:1px solid var(--border-2);border-radius:10px;background:var(--bg-subtle)}
-.h .qs-tiles dt{font-size:12.5px;line-height:1.3;color:var(--text-3)}
+.h .qs-tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,112px),1fr));gap:8px;margin:0}
+.h .qs-tiles div{display:flex;flex-direction:column;gap:4px;padding:12px 14px;border:1px solid var(--border-2);border-radius:8px;background:var(--bg-subtle)}
+.h .qs-tiles dt{font-size:12px;line-height:1.3;color:var(--text-3)}
 .h .qs-tiles dd{display:flex;flex-direction:column;gap:2px;margin:0}
-.h .qs-v{font-size:22px;line-height:1.15;font-weight:600;letter-spacing:-.01em;white-space:nowrap;font-variant-numeric:tabular-nums}
-.h .qs-u{font-size:12.5px;line-height:1.3;color:var(--text-3)}
+.h .qs-v{font-size:19px;line-height:1.2;font-weight:700;letter-spacing:-.01em;white-space:nowrap;font-variant-numeric:tabular-nums}
+.h .qs-u{font-size:12px;line-height:1.3;color:var(--text-3)}
 .h .qs-free ul{display:flex;flex-direction:column;gap:6px;margin:0;padding-left:18px;font-size:13.5px;line-height:1.5;color:var(--text-2)}
 /* Setup dialog specifics: the title with its badge, the prompt shown on
    request, the resource links, and the container engine picker, which reuses
    the agent picker's segmented control. Without the script the picker hides
    and one line says which command to use for each engine. */
 .h .su-dtitle{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;padding-right:32px}
-.h .su-dtitle .qs-badge{padding:2px 8px;font-size:12px}
-.h .tpl-dialog .su-dtitle h2{padding-right:0}
-.h .su-prompt{margin-top:8px;padding:12px 14px;border:1px solid var(--border-2);border-radius:8px;background:var(--bg-soft);color:var(--text-code);font-size:13.5px;line-height:1.6}
-.h .su-engine{display:flex;flex-direction:column;gap:2px}
-.h .su-engine .sk-seg{align-self:flex-start;margin-bottom:6px}
-.h .su-enote,.h .su-enojs{font-size:13.5px;line-height:1.5;color:var(--text-3)}
+.h .su-dtitle .qs-badge{padding:2px 7px;font-size:11.5px}
+.h .tpl-dialog .tpl-dhead .su-dtitle h2{padding-right:0}
+.h .su-prompt{margin-top:10px;padding:12px 14px;border:1px solid var(--border-2);border-radius:8px;background:var(--bg-soft);color:var(--text-code);font-size:13.5px;line-height:1.6}
+.h .su-need{margin-top:-6px;font-size:13.5px;line-height:1.55;color:var(--text-3)}
+.h .su-engine{display:flex;flex-direction:column;gap:2px;margin-bottom:6px}
+.h .su-engine .sk-seg{align-self:flex-start;margin-bottom:6px;border:1px solid var(--border-2);background:var(--bg-subtle)}
+.h .su-engine .sk-seg button[aria-pressed="true"]{background:var(--seg-on,var(--bg))}
+:root[data-theme="dark"] .h .su-engine{--seg-on:var(--bg-muted)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .h .su-engine{--seg-on:var(--bg-muted)}}
+.h .qs-dialog .code-copy{font-weight:600}
+.h .qs-dstep p .qs-dlink{display:inline;font-size:inherit;font-weight:500}.h .qs-dstep p .qs-dlink svg{display:inline;margin-left:2px;vertical-align:-1px}
+.h .su-enote,.h .su-enojs{font-size:13px;line-height:1.5;color:var(--text-3)}
 .h .su-engine .sk-seg,.h .su-enote{display:none}.js .h .su-engine .sk-seg{display:inline-flex}.js .h .su-enote:not([hidden]){display:block}.js .h .su-enojs{display:none}
 @media (max-width:560px){.js .h .su-engine .sk-seg{display:grid;grid-template-columns:1fr 1fr;align-self:stretch}.h .su-engine .sk-seg button{justify-content:center}}
-.h .su-links{display:flex;flex-direction:column;align-items:flex-start;gap:6px;font-size:13.5px}
-.h .su-links h4{margin:4px 0 2px;font-size:12px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--text-3)}
+.h .su-links{display:flex;flex-direction:column;align-items:flex-start;gap:8px;font-size:13.5px}
+.h .su-links h4{margin:0 0 2px;font-size:11.5px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--text-3)}
 .h .su-links a{display:inline-flex;align-items:center;gap:3px}
-/* The coding agents beside an agent route's heading, in the setup and
-   template dialogs (agent-logos.html): the Skills picker's logos, each naming
-   itself in a tooltip on hover. The tooltip opens below, so it never covers
-   the heading, and starts at its icon's left edge, since the logos sit at the
-   column's left and a centered one would be clipped by the dialog. */
-.h .ag-head{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 12px}
-.h .ag-list{display:flex;gap:6px;margin:0;padding:0;list-style:none}
-.h .ag-item{position:relative;display:grid;place-items:center;width:30px;height:30px;border:1px solid var(--border-2);border-radius:8px;background:var(--bg-subtle);color:var(--text-2)}
-.h .ag-item svg{display:block;width:16px;height:16px}
-.h .ag-item::after{content:attr(data-name);position:absolute;top:calc(100% + 6px);left:0;z-index:2;padding:4px 8px;border-radius:6px;background:var(--text);color:var(--bg);font-size:12px;font-weight:500;line-height:1.3;white-space:nowrap;opacity:0;pointer-events:none;transform:translateY(-2px);transition:opacity .12s,transform .12s}
-.h .ag-item:hover::after{opacity:1;transform:none}
-@media (prefers-reduced-motion:reduce){.h .ag-item::after{transition:none}}
-.h .su-vcard{display:flex;align-items:center;gap:14px;margin-bottom:8px;padding:16px 16px 16px 18px;border:1px solid var(--border-2);border-radius:14px;background:var(--bg);color:var(--text);transition:border-color .15s}
+/* The coding-agent route (dialog-agent.html): a heading, who it is for, and
+   two numbered steps, each with its command or buttons under it. */
+.h .dg-agent{display:flex;flex-direction:column;gap:4px}
+.h .dg-for{font-size:13px;line-height:1.5;color:var(--text-3)}
+.h .dg-asteps{display:flex;flex-direction:column;gap:14px;margin:12px 0 0;padding:0;list-style:none;counter-reset:dg}
+.h .dg-asteps li{counter-increment:dg}
+.h .dg-asteps b{display:block;margin-bottom:8px;font-size:13.5px;line-height:1.4;font-weight:600}
+.h .dg-asteps b::before{content:counter(dg) ". "}
+.h .dg-cmd{padding:15px 74px 15px 12px}
+.h .dg-cmd code{overflow-x:auto;font-size:11.5px;line-height:1.5;white-space:nowrap;overflow-wrap:normal;scrollbar-width:none}.h .dg-cmd code::-webkit-scrollbar{display:none}
+.h .code-box.dg-cmd .code-copy{top:6px;right:6px;bottom:6px;min-height:0;padding:0 14px}
+.h .dg-reveal{display:none;padding:0;border:0;background:none;color:var(--accent);font:inherit;font-size:13.5px;font-weight:600;cursor:pointer}
+.js .h .dg-reveal{display:inline-flex}.h .dg-reveal:hover{text-decoration:underline}
+.h .dg-agent .tpl-need{margin-top:14px}
+.h .su-vcard{display:flex;align-items:center;gap:14px;padding:14px 18px 14px 16px;border:1px solid var(--border-2);border-radius:12px;background:var(--bg-subtle);color:var(--text);transition:border-color .15s}
 .h .su-vcard:hover{border-color:var(--border-3);text-decoration:none}
 .h .su-vcard:hover .su-vgo{color:var(--text);transform:translateX(2px)}
-.h .su-vlogo{display:grid;place-items:center;flex:none;width:48px;height:48px;border-radius:12px;background:var(--bg-muted)}
-.h .su-vlogo img{display:block;width:26px;height:26px}
+.h .su-vlogo{display:grid;place-items:center;flex:none;width:40px;height:40px;border-radius:10px;background:var(--bg-muted)}
+.h .su-vlogo img{display:block;width:24px;height:24px}
 .h .su-vtext{display:flex;flex-direction:column;gap:2px;flex:1;min-width:0}
-.h .su-vtext b{font-size:16px;line-height:1.3;font-weight:600}
-.h .su-vtext span{font-size:14px;line-height:1.4;color:var(--text-3)}
+.h .su-vtext b{font-size:15px;line-height:1.3;font-weight:600}
+.h .su-vtext span{font-size:13px;line-height:1.4;color:var(--text-3)}
 .h .su-vgo{flex:none;color:var(--text-3);transition:transform .15s,color .15s}
 @media (prefers-reduced-motion:reduce){.h .su-vcard,.h .su-vgo{transition:none}}
 @media (max-width:640px){.h .su-card{padding:20px}}
@@ -361,45 +370,36 @@ html:has(.qs-dialog[open]){overflow:hidden}
    under the title. The close button floats over the top right corner. */
 .h .tpl-dialog{max-width:1120px}
 .h .tpl-xbar{position:sticky;top:0;z-index:2;display:flex;justify-content:flex-end;height:0;padding:0 10px}
-.h .tpl-xbar .qs-x{margin-top:10px;background:var(--bg)}
-.h .tpl-dbody{display:grid;grid-template-columns:minmax(0,1.75fr) minmax(240px,1fr);grid-template-areas:"head side" "body side";align-items:start;gap:0 56px;padding:44px 48px 48px}
+.h .tpl-xbar .qs-x{width:36px;height:36px;flex-basis:36px;margin-top:12px;background:var(--bg)}
+.h .tpl-dbody{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(280px,1fr);grid-template-areas:"head side" "body side";align-items:start;gap:0 48px;padding:40px 40px 44px}
 .h .tpl-dhead{grid-area:head}
-.h .tpl-dialog .tpl-dhead h2{padding-right:32px;font-size:28px;line-height:1.2;font-weight:600;letter-spacing:-.015em}
-.h .tpl-sum{margin-top:8px;font-size:16px;line-height:1.5;color:var(--text-3)}
-/* Building it: open space rather than a box. One paragraph, Copy prompt as
-   the one accent button (as Get started is in the hero), the skills install
-   folded away below it, and a footnote on the database. */
-/* Its sticky top matches .tpl-dbody's top padding (44px), so it stays put from the
-   first scroll instead of riding up to a smaller offset first. */
-.h .tpl-side{grid-area:side;position:sticky;top:44px;display:flex;flex-direction:column;gap:12px;padding-top:4px}
-.h .tpl-side h3{font-size:17px;line-height:1.3;font-weight:600;letter-spacing:-.01em}
-.h .tpl-how{font-size:14px;line-height:1.5;color:var(--text-3)}
-.h .tpl-dact{display:flex;flex-wrap:wrap;align-items:center;gap:6px 14px;margin:2px 0 4px}
-.h .tpl-skills summary{display:flex;align-items:center;gap:8px;min-height:24px;list-style:none;color:var(--text-2);font-size:13.5px;font-weight:500;cursor:pointer}
-.h .tpl-skills summary::-webkit-details-marker{display:none}
-.h .tpl-skills summary::before{content:"";flex:none;width:6px;height:6px;border:solid currentColor;border-width:0 1.5px 1.5px 0;transform:rotate(-45deg);transition:transform .15s}
-.h .tpl-skills[open] summary::before{transform:rotate(45deg)}
-.h .tpl-skills summary:hover{color:var(--text)}
-.h .tpl-skills > p{margin:6px 0 10px;font-size:13.5px;line-height:1.5;color:var(--text-3)}
-.h .tpl-cmd{padding:10px 48px 10px 12px}
-.h .tpl-cmd code{overflow-x:auto;font-size:12px;white-space:nowrap;overflow-wrap:normal;scrollbar-width:none}.h .tpl-cmd code::-webkit-scrollbar{display:none}
-.h .tpl-icopy{top:6px;right:6px;align-items:center;gap:6px;min-height:30px;padding:0 8px}
-.js .h .tpl-icopy{display:inline-flex}.h .tpl-icopy .sk-act{color:inherit}.h .tpl-icopy .sk-act:empty{display:none}
-.h .tpl-dact a{display:inline-flex;align-items:center;gap:3px;font-size:13px;font-weight:500}
-.h .tpl-primary{min-height:36px;padding:0 14px;border:0;border-radius:8px;background:var(--accent);color:var(--on-accent);font:inherit;font-size:14px;font-weight:600;cursor:pointer}
+.h .tpl-dialog .tpl-dhead h2{padding-right:32px;font-size:24px;line-height:1.2;font-weight:700;letter-spacing:-.02em}
+.h .tpl-sum{margin-top:8px;font-size:14.5px;line-height:1.55;color:var(--text-2)}
+/* The side column: open space rather than a box. The VS Code card, the agent
+   route with Copy prompt as the one accent button (as Get started is in the
+   hero), then the resource links. Its sticky top matches .tpl-dbody's top
+   padding (40px), so it stays put from the first scroll instead of riding up
+   to a smaller offset first. */
+.h .tpl-side{grid-area:side;position:sticky;top:40px;display:flex;flex-direction:column;gap:32px}
+.h .tpl-side h3{font-size:15px;line-height:1.35;font-weight:600;letter-spacing:-.005em}
+.h .tpl-dact{display:flex;flex-wrap:wrap;align-items:center;gap:6px 16px}
+.h .tpl-dact a{display:inline-flex;align-items:center;gap:3px;font-size:13.5px;font-weight:600}
+.h .tpl-primary{min-height:42px;padding:0 20px;border:0;border-radius:6px;background:var(--accent);color:var(--on-accent);font:inherit;font-size:13.5px;font-weight:600;cursor:pointer}
 .h .tpl-primary:hover{background:var(--accent-hover)}
-.h .tpl-need{font-size:13px;line-height:1.5;color:var(--text-3)}
+.h .tpl-need{font-size:12.5px;line-height:1.5;color:var(--text-3)}
 .h .tpl-dmain{grid-area:body;display:flex;flex-direction:column;gap:14px;margin-top:28px}
+.h .tpl-dmain .qs-dsteps,.h .tpl-dmain .su-engine{margin-top:4px}
+.h .tpl-dmain > h3:first-child{margin-top:0}
 .h .tpl-dshot{margin-bottom:10px;aspect-ratio:8/5;padding:16px 18px;overflow:hidden;border:1px solid var(--border-2);border-radius:12px;background:var(--shot-bg)}
-.h .tpl-desc{font-size:16px;line-height:1.65;color:var(--text-2)}
-.h .tpl-dmain h3{margin-top:18px;font-size:18px;line-height:1.3;font-weight:600;letter-spacing:-.01em}
-.h .tpl-prose{display:flex;flex-direction:column;gap:10px;margin:0;padding:0;font-size:15px;line-height:1.6;color:var(--text-2)}
+.h .tpl-desc{font-size:14.5px;line-height:1.65;color:var(--text-2)}
+.h .tpl-dmain h3{margin-top:14px;font-size:15px;line-height:1.35;font-weight:600;letter-spacing:-.005em}
+.h .tpl-prose{display:flex;flex-direction:column;gap:10px;margin:0;padding:0;font-size:14px;line-height:1.6;color:var(--text-2)}
 .h ol.tpl-prose{padding-left:22px}
 .h .tpl-prose b{font-weight:600;color:var(--text)}
 @media (max-width:860px){
   .h .tpl-dbody{grid-template-columns:minmax(0,1fr);grid-template-areas:"head" "side" "body";padding:32px 20px 24px}
   .h .tpl-side{position:static;margin-top:24px;padding:20px 0;border-top:1px solid var(--border-soft);border-bottom:1px solid var(--border-soft)}
-  .h .tpl-dialog .tpl-dhead h2{font-size:24px}
+  .h .tpl-dialog .tpl-dhead h2{font-size:22px}
 }
 :root:not(.js) .h .tpl-dialog{display:none}:root:not(.js) .h .su-dialog{display:block}
 @media (max-width:820px){.h .tpl{padding:44px 0}}

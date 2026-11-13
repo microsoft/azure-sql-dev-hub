@@ -131,6 +131,7 @@ function setupOption(o, labels, skills) {
     out.push('');
   }
   out.push(`${labels.manual || 'Set it up yourself'}:`, '');
+  if (o.need) out.push(plain(o.need), '');
   if (o.engines && o.engines.length) {
     const [first, ...rest] = o.engines;
     out.push(`The commands use ${plain(first.use)}. Other engines' full commands follow the steps.`, '');

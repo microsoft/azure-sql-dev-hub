@@ -109,9 +109,11 @@
     // layouts from swapping places after the first paint.
     document.documentElement.classList.add("js");
   </script>
-  <link rel="stylesheet" href="{{ '/assets/css/main.css' | relative_url }}">
+  {%- comment %} The build time on each stylesheet's URL, so a rebuild is never hidden behind a cached copy. {% endcomment %}
+  {%- assign css_v = site.time | date: '%s' %}
+  <link rel="stylesheet" href="{{ '/assets/css/main.css' | relative_url }}?v={{ css_v }}">
   {%- if include.css %}
-  <link rel="stylesheet" href="{{ include.css | relative_url }}">
+  <link rel="stylesheet" href="{{ include.css | relative_url }}?v={{ css_v }}">
   {%- endif %}
   {% include analytics.html %}
 </head>
