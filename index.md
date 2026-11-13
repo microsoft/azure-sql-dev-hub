@@ -117,7 +117,6 @@ setup:
     - [Free databases, '10', per subscription]
   agent:
     prompt: Create a free Azure SQL Database in my Azure subscription using the free offer, and pause it when the monthly free limit is reached. Use Microsoft Entra authentication only, add my current IP address to the server firewall, then connect and run SELECT 1. Ask me which subscription and region to use, and show me each command before you run it.
-    check: Your agent should report that the database uses the free limit (useFreeLimit is true) and that SELECT 1 returned 1.
   links:
   - label: Full guide on Microsoft Learn
     id: free-setup-docs
@@ -189,7 +188,6 @@ setup:
     type: azureSqlContainer
     text: The MSSQL extension creates the container in a few clicks and connects to it. No Azure subscription needed.
   agent:
-    text: The container skills are part of the microsoft-sql plugin. They cover pulling the image, waiting for the engine to be ready and creating the database, with you reviewing each step.
     prompt: Add a local Azure SQL Database to this project, then scaffold the schema, migrations and data-access layer for my stack.
   links:
   - label: Prerequisites

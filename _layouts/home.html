@@ -64,14 +64,6 @@
             <p class="tpl-sum">{{ o.summary }}</p>
           </div>
           <aside class="tpl-side" aria-labelledby="setup-{{ o.key }}-agent">
-            {%- if o.vscode %}
-            <a class="su-vcard" href="vscode://ms-mssql.mssql/deploy?type={{ o.vscode.type }}&amp;source=azure-sql-dev-hub"
-               data-event="site/action" data-event-action="outboundClicked" data-event-destination-id="{{ o.id }}-vscode" data-event-destination-type="other">
-              <span class="su-vlogo" aria-hidden="true"><img src="{{ '/assets/img/vscode.png' | relative_url }}" alt="" width="26" height="26"></span>
-              <span class="su-vtext"><b>{{ sl.vscode_title }}</b><span>{{ sl.vscode_sub }}</span></span>
-              <svg class="su-vgo" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>
-            </a>
-            {%- endif %}
             <div class="ag-head">
               <h3 id="setup-{{ o.key }}-agent">{{ sl.agent }}</h3>
               {% include agent-logos.html label=sl.agents_label %}
@@ -95,6 +87,14 @@
             </details>
             {%- if o.agent.check %}
             <p class="tpl-need">{{ o.agent.check }}</p>
+            {%- endif %}
+            {%- if o.vscode %}
+            <a class="su-vcard" href="vscode://ms-mssql.mssql/deploy?type={{ o.vscode.type }}&amp;source=azure-sql-dev-hub"
+               data-event="site/action" data-event-action="outboundClicked" data-event-destination-id="{{ o.id }}-vscode" data-event-destination-type="other">
+              <span class="su-vlogo" aria-hidden="true"><img src="{{ '/assets/img/vscode.png' | relative_url }}" alt="" width="26" height="26"></span>
+              <span class="su-vtext"><b>{{ sl.vscode_title }}</b><span>{{ sl.vscode_sub }}</span></span>
+              <svg class="su-vgo" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>
+            </a>
             {%- endif %}
             <nav class="su-links" aria-label="{{ sl.resources }}">
               <h4>{{ sl.resources }}</h4>
