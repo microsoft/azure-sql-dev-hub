@@ -286,7 +286,6 @@ html:has(.qs-dialog[open]){overflow:hidden}
 .h .su-engine .sk-seg{align-self:flex-start;margin-bottom:6px;border:1px solid var(--border-2);background:var(--bg-subtle)}
 .h .su-engine .sk-seg button[aria-pressed="true"]{background:var(--seg-on,var(--bg))}
 :root[data-theme="dark"] .h .su-engine{--seg-on:var(--bg-muted)}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .h .su-engine{--seg-on:var(--bg-muted)}}
 .h .qs-dialog .code-copy{font-weight:600}
 .h .qs-dstep p .qs-dlink{display:inline;font-size:inherit;font-weight:500}.h .qs-dstep p .qs-dlink svg{display:inline;margin-left:2px;vertical-align:-1px}
 .h .su-enote,.h .su-enojs{font-size:13px;line-height:1.5;color:var(--text-3)}

@@ -149,9 +149,6 @@
   .theme-icon-sun{display:block}
 }
 :root[data-theme="dark"]{@include dark-regions}
-@media (prefers-color-scheme:dark){
-  :root:not([data-theme="light"]){@include dark-regions}
-}
 
 *{box-sizing:border-box}
 html{scroll-behavior:smooth}
