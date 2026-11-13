@@ -73,8 +73,8 @@ setup_labels:
   show_prompt: See the prompt
   resources: Resources
   vscode: Set it up in VS Code
-  vscode_title: Prefer VS Code?
-  vscode_sub: Set it up with the MSSQL extension
+  vscode_title: Set it up in VS Code
+  vscode_sub: A few clicks with the MSSQL extension
   vscode_open: Open in VS Code
   vscode_need: Needs the MSSQL extension 1.49 or later.
   vscode_get: Get the extension
