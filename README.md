@@ -94,7 +94,7 @@ The prompt Copy buttons fetch the page's markdown twin over HTTP, so use a serve
 
 ## Contributing
 
-Pull requests are welcome. Read [`docs/DECISIONS.md`](docs/DECISIONS.md) first for why the site is shaped the way it is. House rules run in CI on every pull request: no em dashes in copy, and the agent layer (`llms.txt`, markdown twins, alternate links) must be present on every build.
+Pull requests are welcome. House rules run in CI on every pull request: no em dashes in copy, and the agent layer (`llms.txt`, markdown twins, alternate links) must be present on every build.
 
 A prompt is ready to merge when it has been run once, end to end, against a fresh Azure SQL Database and its validation rules held.
 
