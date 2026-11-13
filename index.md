@@ -11,6 +11,23 @@ hero:
   - GitHub Copilot
   - Codex
   - Cursor
+  # Proof strip: one line in the hero's bottom margin, above Get a database
+  # running. The phrase, then three figures, each a link to the section that
+  # backs it. It takes no room of its own on wide screens, so nothing else
+  # moves. Keep the skills figure in step with the published skill count.
+  proof:
+    phrase: Build with agents.
+    phrase_accent: Run on Azure SQL.
+    stats:
+    - value: "56"
+      label: SQL skills
+      href: "#skills"
+    - value: "1"
+      label: command to install
+      href: "#skills"
+    - value: $0
+      label: to start
+      href: "#get-running"
 demo:
   # Hero demo (_includes/hero-demo.html). It plays like an animated GIF: the
   # terminal types the prompt with the first app's name, shows the skills and
