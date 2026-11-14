@@ -47,10 +47,7 @@ back into markdown for the twin, so edit the front matter and let the script reg
    `npm test` applies the house rules in `scripts/check-house-rules.mjs`. `check:links` reads the
    built site, so it needs the build and the agent-file generator to have run first. This is the
    order CI uses, so a green run locally and a green run in CI mean the same thing.
-4. Append a dated line to `docs/DECISIONS.md` if the pull request makes an irreversible or
-   debatable choice. Do not rewrite past entries: if a decision is reversed, add a new line
-   saying so and why.
-5. Describe the change, its user impact, and how you validated it.
+4. Describe the change, its user impact, and how you validated it.
 
 By participating in this project, you agree to follow its
 [Code of Conduct](CODE_OF_CONDUCT.md).

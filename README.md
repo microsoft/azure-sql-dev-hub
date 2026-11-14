@@ -2,14 +2,14 @@
 
 **https://aka.ms/azuresql-hub**
 
-The front door for building applications on Azure SQL Database with an AI coding agent. Start free in the cloud, hand your agent a build prompt, and verify a working app.
+App templates and practical patterns for Azure SQL Database. Explore dashboards, APIs, search, and multi-tenant applications, then adapt a starting point to your project.
 
 Curated by the Azure SQL Database product team.
 
 ## What is here
 
-- **Build prompts.** Six copy-and-run prompts, each targeting Azure SQL Database in the cloud and ending in a working app with validation rules at the end. They live in [`build/`](build/).
-- **Setup paths.** Free cloud tier, the local container (Preview), or with your coding agent.
+- **App templates and building blocks.** Five full-app briefs and six focused build prompts for Azure SQL Database, with requirements and validation checks. These are instructions for building an app, not prebuilt codebases. They live in [`build/`](build/).
+- **Setup paths.** Free cloud tier, the local container (public preview), or with your coding agent.
 - **Agent skills.** Install once from [aka.ms/azuresql-skills](https://aka.ms/azuresql-skills); the skills load themselves when the work matches.
 - **An agent-readable layer.** Every page has a markdown twin at `<page>.md`, an index at [`llms.txt`](llms.txt), and an alternate link in its head. Agents read that; people read the page.
 
@@ -26,7 +26,7 @@ Curated by the Azure SQL Database product team.
 
 Each prompt is the whole instruction set: role, scope, numbered steps with code, validation rules, and what not to do. Copy it from the site or from the file, paste it into your agent, check the result against the rules.
 
-Prompts here target the cloud. Prompts that target the local container live with the [Azure SQL Database container](https://microsoft.github.io/azure-sql-database-container/).
+Prompts here target the cloud. Prompts that target the local container live in the [Azure SQL Database container repository](https://github.com/microsoft/azure-sql-database-container/tree/main/docs/prompts).
 
 ## Install the skills
 
@@ -51,11 +51,42 @@ Cloud means Azure SQL Database. Not Managed Instance, not Fabric SQL, not SQL Se
 
 The site is Jekyll, served from the repository root. Scenario pages live in `build/`, the homepage content in `index.md` front matter.
 
+Start Docker Desktop with Linux containers enabled. No local Ruby or Node.js
+installation is required.
+
+In VS Code, select **Website: launch with live reload** in Run and Debug and
+press **F5**. Its **Website: serve** task builds the development image, starts
+the preview at http://localhost:4000, and opens Edge after the server is ready.
+The first build downloads Ruby, Node.js, and the project dependencies.
+Stopping the debugger runs **Website: stop** to shut down the container.
+If your network requires an npm mirror, set `NPM_CONFIG_REGISTRY` in a local
+`.env` file before building. The file is ignored by Git and the Docker build.
+
+To run the same preview without VS Code:
+
+```bash
+docker compose up --build --renew-anon-volumes
+```
+
+Saving pages, layouts, includes, or assets rebuilds the site and reloads the
+browser. Markdown twins and `llms-full.txt` are regenerated on every build, so
+the prompt Copy buttons stay current too. Restart the task after changing
+`_config.yml`. Run `docker compose down` to stop a manually started preview.
+
+For a one-off build and checks using the development image:
+
+```bash
+docker compose run --rm website npm run build:site
+docker compose run --rm website npm test
+```
+
+Alternatively, with Ruby, Bundler, Node.js, and npm on your PATH:
+
 ```bash
 bundle install
-bundle exec jekyll build --baseurl ""
-npm install
-npm run build:agent-files      # markdown twins and llms-full.txt into _site
+npm ci
+npm start                      # watch, serve, and live reload at http://localhost:4000
+npm run build:site             # Jekyll plus markdown twins and llms-full.txt into _site
 npm test                       # house rules
 ```
 
@@ -63,7 +94,7 @@ The prompt Copy buttons fetch the page's markdown twin over HTTP, so use a serve
 
 ## Contributing
 
-Pull requests are welcome. Read [`docs/DECISIONS.md`](docs/DECISIONS.md) first for why the site is shaped the way it is. House rules run in CI on every pull request: no em dashes in copy, and the agent layer (`llms.txt`, markdown twins, alternate links) must be present on every build.
+Pull requests are welcome. House rules run in CI on every pull request: no em dashes in copy, and the agent layer (`llms.txt`, markdown twins, alternate links) must be present on every build.
 
 A prompt is ready to merge when it has been run once, end to end, against a fresh Azure SQL Database and its validation rules held.
 

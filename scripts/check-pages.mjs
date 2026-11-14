@@ -79,6 +79,17 @@ siteCheck('llms-txt', 'llms.txt', 10,
   !!llms && /^# \S/m.test(llms) && /\]\(https?:\/\//.test(llms),
   llms ? 'needs an H1 and at least one absolute link' : 'missing', !llms);
 siteCheck('llms-full', 'llms-full.txt', 5, !!read('llms-full.txt'), 'missing');
+
+// Required, not scored: llms.txt tells agents when to use the site, with at
+// least three jobs, and how to work from a template.
+if (llms) {
+  const section = (/^## When to use this site\n([\s\S]*?)(?=^## )/m.exec(llms) || [])[1];
+  if (!section) errors.push('llms.txt: no "## When to use this site" section');
+  else {
+    if ((section.match(/^- /gm) || []).length < 3) errors.push('llms.txt: "When to use this site" names fewer than three jobs');
+    if (!/^1\. /m.test(section)) errors.push('llms.txt: "When to use this site" has no numbered steps for working from a template');
+  }
+}
 const sitemap = read('sitemap.xml');
 siteCheck('sitemap', 'Sitemap', 5, !!sitemap && /<loc>/.test(sitemap), sitemap ? 'no <loc> entries' : 'missing');
 siteCheck('robots', 'robots.txt', 5, !!read('robots.txt'), 'missing');
@@ -121,6 +132,25 @@ for (const file of htmlFiles(SITE)) {
 
   const ld = [...html.matchAll(/<script\b[^>]*type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/gi)];
   if (!ld.length) fail('json-ld', 'none');
+  // Required, not scored: the publisher's Organization entity keeps its
+  // public facts (see the comment in _includes/head.html).
+  const entities = [];
+  for (const [, body] of ld) {
+    try {
+      const data = JSON.parse(body);
+      for (const item of [].concat(data)) entities.push(...(item['@graph'] || [item]));
+    } catch { /* reported below */ }
+  }
+  const org = entities.find((e) => [].concat(e['@type']).includes('Organization'));
+  if (ld.length) {
+    if (!org) errors.push(`${path}: JSON-LD has no Organization`);
+    else {
+      const missing = ['name', 'url', 'description'].filter((k) => !org[k]);
+      if (!(org.logo && (org.logo.url || typeof org.logo === 'string'))) missing.push('logo');
+      if (!Array.isArray(org.sameAs) || org.sameAs.length < 3) missing.push('sameAs (three links)');
+      if (missing.length) errors.push(`${path}: JSON-LD Organization is missing ${missing.join(', ')}`);
+    }
+  }
   for (const [, body] of ld) {
     try { JSON.parse(body); } catch (e) { fail('json-ld', `does not parse: ${e.message}`); errors.push(`${path}: JSON-LD does not parse`); }
   }

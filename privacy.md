@@ -10,8 +10,7 @@ usability, content, and agent-skill installation guidance.
 
 ## How Clarity is configured
 
-These settings are recorded as a decision in `docs/DECISIONS.md`, and they are
-the configuration this site runs with:
+This is the configuration this site runs with:
 
 - **Strict masking.** Text and input values are masked in the browser before
   anything is sent, so page content in a session replay is obscured rather than

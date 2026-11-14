@@ -1,0 +1,34 @@
+{%- comment -%}
+  The coding-agent route in a details dialog's side column, shared by the
+  setup and template dialogs: a heading, the agents it works with, then two
+  numbered steps. Step 1 installs the Azure SQL skills; step 2 copies the
+  prompt. The caller passes what differs:
+    id        the heading's id, which the side column is labelled by
+    heading   the heading's text
+    actions   step 2's buttons and links, captured HTML
+    after     optional, captured HTML shown under step 2's buttons
+    location  data-event-action-location for the skills copy event
+    skills_id data-event-content-id for the skills copy event
+    note      optional, a line under the steps
+{%- endcomment -%}
+{%- assign ti = page.template_inside -%}
+<div class="dg-agent">
+  <h3 id="{{ include.id }}">{{ include.heading }}</h3>
+  <p class="dg-for">{{ ti.agents_for }}</p>
+  <ol class="dg-asteps">
+    <li>
+      <b>{{ ti.skills_title }}</b>
+      <div class="code-box sm dg-cmd"><code>{{ ti.skills_code }}</code><button class="code-copy" type="button" data-hcopy="{{ ti.skills_code | escape }}"
+        data-event="site/action" data-event-action="contentCopied" data-event-action-location="{{ include.location }}"
+        data-event-content-id="{{ include.skills_id }}" data-event-content-type="collection-install">Copy</button></div>
+    </li>
+    <li>
+      <b>{{ ti.paste_title }}</b>
+      <div class="tpl-dact">{{ include.actions }}</div>
+      {{- include.after }}
+    </li>
+  </ol>
+  {%- if include.note %}
+  <p class="tpl-need">{{ include.note }}</p>
+  {%- endif %}
+</div>

@@ -22,7 +22,11 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+      # Full history, so the sitemap dates each page by its last commit
+      # (scripts/build-agent-files.mjs) instead of by today.
       - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
       - uses: actions/configure-pages@v5
         id: pages
       - uses: ruby/setup-ruby@v1

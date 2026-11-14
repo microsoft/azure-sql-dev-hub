@@ -4,6 +4,7 @@
   "description": "Build and check scripts for the Azure SQL Developer Hub site.",
   "type": "module",
   "scripts": {
+    "start": "node scripts/build-site.mjs --serve",
     "test": "node scripts/check-house-rules.mjs && node scripts/check-telemetry.mjs",
     "build:site": "node scripts/build-site.mjs",
     "build:site:telemetry": "node scripts/build-site.mjs --telemetry",

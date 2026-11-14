@@ -1,8 +1,8 @@
 title: Azure SQL Developer Hub
 description: >-
-  The front door for building with Azure SQL Database in the age of AI-assisted
-  development. Start locally or in Azure, build with the coding agent you
-  already use, and move from first prompt to production on Azure SQL.
+  App templates and practical patterns for Azure SQL Database. Explore
+  dashboards, APIs, search, and multi-tenant applications. Start locally
+  or in Azure and build with your preferred stack.
 
 # These two are local-preview defaults only. The deploy workflow overwrites both
 # from the Pages API at build time, because where this site actually publishes
@@ -16,9 +16,7 @@ repo: "https://github.com/microsoft/azure-sql-dev-hub"
 
 # Sites this hub points at. Kept here so a link change is one edit, not twelve.
 container_repo: "https://github.com/microsoft/azure-sql-database-container"
-container_site: "https://microsoft.github.io/azure-sql-database-container"
 skills_catalog: "https://github.com/microsoft/azure-sql-database-container/tree/main/skills"
-container_signup: "https://aka.ms/sqldbcontainerpreview-signup"
 azure_free_tier: "https://learn.microsoft.com/azure/azure-sql/database/free-tier"
 azure_portal_hub: "https://aka.ms/azuresqlhub"
 azure_sql_docs: "https://learn.microsoft.com/azure/azure-sql/"
@@ -63,13 +61,28 @@ exclude:
   - package-lock.json
   - Gemfile
   - Gemfile.lock
+  - Dockerfile
+  - compose.yaml
   - vendor
 
   - outputs
-  - eval/.venv
+  # Prompt evaluation tooling, documented in eval/README.md; not a page of the site.
+  - eval
   - eval/__pycache__
   - eval/hub_eval/__pycache__
   - eval/runs
   - eval/tests/__pycache__
   - eval/verifications/__pycache__
   - eval/configuration.yml
+
+# The announcement above the top bar on every page. Dismissing it hides it for
+# that visitor in that browser; a new `key` shows it again. `open` names the
+# home page dialog that Try it opens; elsewhere, and without scripts, Try it
+# goes to `href`.
+banner:
+  key: container-preview
+  pill: Public preview
+  text: Run the Azure SQL Database engine locally in a container.
+  link: Try it
+  href: /#containers
+  open: setup-container

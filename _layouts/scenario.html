@@ -50,7 +50,7 @@
 
         <aside class="scenarioAside">
           <div class="asideCard">
-            <h4>Skill</h4>
+            <h2>Skill</h2>
             <p>{{ page.skill.note }}</p>
             {%- if page.skill.install %}
             <div class="codeBox">
@@ -72,12 +72,18 @@
           </div>
 
           <div class="asideCard">
-            <h4>Go deeper</h4>
+            <h2>Go deeper</h2>
             <div class="asideActions">
+              {%- if page.docs.href contains '://' %}
               <a class="actionLink primary" href="{{ page.docs.href }}" rel="noopener"
                  data-event="site/action" data-event-action="outboundClicked"
                  data-event-destination-id="{{ scenario_id }}-docs"
                  data-event-destination-type="docs">{{ page.docs.label }} <span aria-hidden="true">→</span></a>
+              {%- else %}
+              <a class="actionLink primary" href="{{ page.docs.href | relative_url }}"
+                 data-event="site/action" data-event-action="pathSelected"
+                 data-event-path-id="{{ scenario_id }}-docs">{{ page.docs.label }} <span aria-hidden="true">→</span></a>
+              {%- endif %}
               <a class="actionLink" href="{{ page.url | replace: '.html', '.md' | relative_url }}"
                  data-event="site/action" data-event-action="viewPrompt"
                  data-event-action-location="scenario"

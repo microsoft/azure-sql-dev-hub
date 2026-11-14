@@ -1,0 +1,14 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Website: launch with live reload",
+      "type": "msedge",
+      "request": "launch",
+      "url": "http://localhost:4000",
+      "webRoot": "${workspaceFolder}",
+      "preLaunchTask": "Website: serve",
+      "postDebugTask": "Website: stop"
+    }
+  ]
+}

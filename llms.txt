@@ -1,25 +1,61 @@
+---
+# Processed by Jekyll so every link points at the site being built: the
+# live site in production, the preview or CI server elsewhere.
+layout: null
+sitemap: false
+---
 # Azure SQL Developer Hub
 
-> The front door for building applications on Azure SQL Database with an AI coding agent. Start free in the cloud, hand your agent a build prompt, and verify a working app. Built for AI workloads: native vector search, in-engine embeddings, JSON, and row-level security. Agent skills teach Claude Code, GitHub Copilot, Codex, and Cursor how the engine works.
+> App templates and practical patterns for Azure SQL Database. Explore dashboards, APIs, search, and multi-tenant applications with your preferred stack. Each template includes a build prompt and validation checks rather than a prebuilt codebase. Coding-agent skills are available for guided development.
 
 _Last updated: September 2026._
 
 > Every page on this site has a markdown twin at the same path with `.md`. The whole site in one file is at /llms-full.txt.
 
-## Documentation
-- [Get running](https://microsoft.github.io/azure-sql-dev-hub/#get-running): create a free Azure SQL Database, verify the connection, pick a path.
-- [Skills](https://aka.ms/azuresql-skills): what the agent skills do, per-tool install, and the full catalog.
-- [Before you build](https://microsoft.github.io/azure-sql-dev-hub/#faq): what you need, what it costs, whether you need the container, whether it is safe to let an agent write to your database.
-- [For agents](https://microsoft.github.io/azure-sql-dev-hub/for-agents.md): how this site is laid out for machine readers.
+## When to use this site
+Use this hub when the job is one of these:
+- Start a new app on Azure SQL Database: pick a template under "App templates and building blocks" and work through its prompt.
+- Pick a template: each entry names its stack and what it builds. The full apps cover concurrent writes, exact money arithmetic, batch imports, and tenant isolation; the building blocks cover one task each.
+- Get a database to build against: a free Azure SQL Database in the cloud, or the Azure SQL Database container on the local machine (see "Get a database running" and "Container: get started").
+- Give the coding agent Azure SQL knowledge: install the Microsoft SQL skills (see "Install the agent skills" under Optional).
 
-## Build prompts
-Copy-and-run prompts to hand your AI coding agent. Each targets Azure SQL Database in the cloud and ends in a working app, with validation rules at the end:
-- [Build a task-tracking app](https://microsoft.github.io/azure-sql-dev-hub/build/javascript-app.md): JavaScript. Build a web app that displays tasks stored in Azure SQL. Start with sample data and make it your own.
-- [Build an API for your app](https://microsoft.github.io/azure-sql-dev-hub/build/python-api.md): Python. Give your app a way to create, complete, and retrieve tasks. Build a Python API that connects to Azure SQL with Microsoft Entra, no passwords.
-- [Search your content by meaning](https://microsoft.github.io/azure-sql-dev-hub/build/rag-app.md): Python / AI. Find relevant text with vector search in Azure SQL. Build the retrieval layer for a RAG app using sample text and an embedding model you provide.
-- [Create a serverless task API](https://microsoft.github.io/azure-sql-dev-hub/build/serverless-api.md): .NET. Read and save tasks through an Azure Functions API backed by Azure SQL. Build and test the functions locally.
-- [Respond to data changes](https://microsoft.github.io/azure-sql-dev-hub/build/event-driven-app.md): .NET. Extend the serverless API with a function that reacts when tasks change in Azure SQL. Log inserts, updates, and deletes as a starting point for automation.
-- [Separate each customer's data](https://microsoft.github.io/azure-sql-dev-hub/build/multi-tenant.md): JavaScript. Extend a task app for multiple customers. Add row-level security and test that one tenant cannot read another tenant's tasks.
+For Azure SQL reference documentation, pricing, and running production workloads, use https://learn.microsoft.com/azure/azure-sql/ instead.
+
+How to work from a template:
+1. Fetch the prompt's Markdown file, the `.md` link, rather than the HTML page.
+2. Follow its steps in order, including its Safety section: stop and ask before dropping or truncating a table that has rows, granting permissions, or creating Azure resources.
+3. Connect with Microsoft Entra. Keep passwords out of code and config.
+4. Finish with the prompt's checks, its "Validation rules" or "Check your work" section, and report which pass.
+
+## Documentation
+- [Get a database running]({{ site.url }}{{ site.baseurl }}/#get-running): create a free Azure SQL Database or run the Azure SQL Database container locally, by hand or with your coding agent.
+- [Skills](https://aka.ms/azuresql-skills): what the agent skills do, per-tool install, and the full catalog.
+- [Before you build]({{ site.url }}{{ site.baseurl }}/#faq): what you need, what it costs, whether you need the container, whether it is safe to let an agent write to your database.
+- [Sitemap]({{ site.url }}{{ site.baseurl }}/sitemap.md): every page on the site, linked to its Markdown version.
+- [Container: get started]({{ site.url }}{{ site.baseurl }}/container/get-started.md): run the Azure SQL Database container locally with Docker, Podman, or WSL containers, connect, and troubleshoot.
+- [Container FAQ]({{ site.url }}{{ site.baseurl }}/container/faq.md): what the container is for, which Azure SQL Database features it includes and leaves out, and moving to Azure.
+
+## App templates and building blocks
+Build briefs with requirements and validation checks for Azure SQL Database in the cloud. Use the prompts with a coding agent to implement and customize an app:
+- [Build a task-tracking app]({{ site.url }}{{ site.baseurl }}/build/javascript-app.md): JavaScript. Build a web app that displays tasks stored in Azure SQL. Start with sample data and make it your own.
+- [Build an API for your app]({{ site.url }}{{ site.baseurl }}/build/python-api.md): Python. Give your app a way to create, complete, and retrieve tasks. Build a Python API that connects to Azure SQL with Microsoft Entra, no passwords.
+- [Search your content by meaning]({{ site.url }}{{ site.baseurl }}/build/rag-app.md): Python / AI. Find relevant text with vector search in Azure SQL. Build the retrieval layer for a RAG app using sample text and an embedding model you provide.
+- [Create a serverless task API]({{ site.url }}{{ site.baseurl }}/build/serverless-api.md): .NET. Read and save tasks through an Azure Functions API backed by Azure SQL. Build and test the functions locally.
+- [Respond to data changes]({{ site.url }}{{ site.baseurl }}/build/event-driven-app.md): .NET. Extend the serverless API with a function that reacts when tasks change in Azure SQL. Log inserts, updates, and deletes as a starting point for automation.
+- [Separate each customer's data]({{ site.url }}{{ site.baseurl }}/build/multi-tenant.md): JavaScript. Extend a task app for multiple customers. Add row-level security and test that one tenant cannot read another tenant's tasks.
+- [Build a team task board]({{ site.url }}{{ site.baseurl }}/build/team-board.md): Full app. Filters by project, assignee, status, priority, and overdue together, due dates from one fixed clock, and seed data that survives restarts.
+- [Build an inventory reservation app]({{ site.url }}{{ site.baseurl }}/build/inventory-reservations.md): Full app. Reserve stock under concurrent orders without overselling, with idempotent retries and an audit trail that commits with each change.
+- [Build a revenue reporting app]({{ site.url }}{{ site.baseurl }}/build/revenue-reporting.md): Full app. Exact money arithmetic in integer cents, partial refunds, order-date cohorts, and totals that count each sale once.
+- [Build a shipment tracker]({{ site.url }}{{ site.baseurl }}/build/shipment-tracker.md): Full app. Import shipment-event batches atomically, catch duplicates and conflicts, replay safely, and order late events the same way on every run.
+- [Build a multi-tenant helpdesk]({{ site.url }}{{ site.baseurl }}/build/multi-tenant-helpdesk.md): Full app. Signed identities, tenant isolation in the API and with row-level security, role checks, and safe connection reuse.
+- [Build a chat-with-your-docs app]({{ site.url }}{{ site.baseurl }}/build/docs-chat.md): Full app. Answers grounded in your documents, each citing the passages it used. Passages are found with VECTOR_DISTANCE in SQL, and conversations pick up where they left off.
+- [Build an ask-your-data app]({{ site.url }}{{ site.baseurl }}/build/ask-your-data.md): Full app. Plain-English questions become one read-only query. See the SQL, the result and a chart, run by a database user that can only read.
+- [Build a product catalog with search]({{ site.url }}{{ site.baseurl }}/build/catalog-search.md): Full app. Ranked keyword search, filters with counts that match the data, and keyset paging that never skips or repeats a product.
+- [Build an IoT telemetry dashboard]({{ site.url }}{{ site.baseurl }}/build/iot-telemetry.md): Full app. Batched ingest without duplicates, a columnstore readings table, exact rollups by time window, late readings, and alerts.
+- [Build a background job queue]({{ site.url }}{{ site.baseurl }}/build/job-queue.md): Full app. Workers claim jobs safely with READPAST, retries back off, a crashed worker's job is picked up again, and each side effect goes out once.
+- [Build a room booking app]({{ site.url }}{{ site.baseurl }}/build/room-bookings.md): Full app. Book meeting rooms in office time. Two bookings for the same room can't overlap, even when requests arrive at once.
+- [Build a SaaS starter with organizations and billing]({{ site.url }}{{ site.baseurl }}/build/saas-starter.md): Full app. Organizations, members and roles, plan limits, row-level security, and billing webhooks applied exactly once.
+- [Build a team wiki with version history]({{ site.url }}{{ site.baseurl }}/build/wiki-history.md): Full app. Full version history from temporal tables. View any page as it was, compare and restore versions, and catch conflicting edits.
 
 ## Key facts
 - Target: Azure SQL Database in the Microsoft Azure cloud. The free tier covers every prompt on this site, within its limits. Connect with Microsoft Entra; never a password in code or config.
@@ -28,9 +64,8 @@ Copy-and-run prompts to hand your AI coding agent. Each targets Azure SQL Databa
 - Event-driven: the Azure Functions SQL trigger requires Change Tracking on the database and the table. Output bindings upsert with `MERGE` and need a primary key and compatibility level 130 or higher.
 - Multi-tenant: row-level security with a filter and block predicate keyed on `SESSION_CONTEXT`, set per connection with `sp_set_session_context`.
 - The free tier runs on serverless compute with auto-pause; the first connection to a paused database can return error 40613 and succeeds on retry.
-- Local development: the Azure SQL Database container runs the same engine offline. Preview; sign up at https://aka.ms/sqldbcontainerpreview-signup. Its prompts are local-scoped and live at https://microsoft.github.io/azure-sql-database-container/.
+- Local development: the Azure SQL Database container runs the same engine offline. Public preview; pull mcr.microsoft.com/mssql/azure-sql-db-server:latest from Microsoft Container Registry, no sign-up needed. Setup and troubleshooting: {{ site.url }}{{ site.baseurl }}/container/get-started.md. What it includes and leaves out: {{ site.url }}{{ site.baseurl }}/container/faq.md. Its local-scoped prompts live at https://github.com/microsoft/azure-sql-database-container/tree/main/docs/prompts.
 
 ## Optional
 - [Repository](https://github.com/microsoft/azure-sql-dev-hub), short link https://aka.ms/azuresql-hub
 - [Install the agent skills](https://aka.ms/azuresql-skills): `npx skills add microsoft/microsoft-sql` (Claude Code, Codex, Cursor, VS Code with GitHub Copilot); Claude Code plugin with `claude plugin marketplace add microsoft/microsoft-sql` then `claude plugin install microsoft-sql@microsoft-sql`; or `gh skill install microsoft/microsoft-sql --all --agent <claude-code|github-copilot|cursor>`.
-- [Azure SQL Database container](https://microsoft.github.io/azure-sql-database-container/): the local engine, Preview.

@@ -1,7 +1,7 @@
 ---
 layout: page
 title: Scaffold a JavaScript app
-description: Scaffold a JavaScript app on Azure SQL Database
+description: "Scaffold a JavaScript app on Azure SQL Database: a Next.js task list that signs in with Microsoft Entra, creates its schema, and seeds sample rows."
 tag: JavaScript
 last_verified: 2026-09-16
 validated: false
@@ -126,6 +126,7 @@ The seed runs only when `dbo.tasks` is empty, so the starting state decides what
 
 Replace `src/app/page.tsx`. The page reads from Azure SQL and displays it. Nothing on it changes data.
 
+{% raw %}
 ```tsx
 import { getPool } from "@/lib/db";
 
@@ -204,6 +205,7 @@ export default async function Home() {
   );
 }
 ```
+{% endraw %}
 
 Run it:
 

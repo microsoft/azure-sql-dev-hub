@@ -1,0 +1,12 @@
+{%- comment -%}
+  An app template's screenshot in the same light window as app-shot.html: a
+  window bar with three dots and the app's title, then the picture. The
+  pictures are real apps built from the template's prompt, restyled in the
+  Fluent look and shown in use; see assets/img/apps/SOURCES.md. `img` names
+  the files in assets/img/apps (an 800px and a 1600px WebP), `title` is the
+  window title, and `sizes` is the img sizes attribute for where it shows.
+  The surrounding element is aria-hidden, so the picture's alt is empty.
+{%- endcomment -%}
+{%- assign ha_base = '/assets/img/apps/' | append: include.img -%}
+<div class="ha-bar"><i></i><i></i><i></i><span>{{ include.title }}</span></div>
+<img class="ha-photo" src="{{ ha_base | append: '-800.webp' | relative_url }}" srcset="{{ ha_base | append: '-800.webp' | relative_url }} 800w, {{ ha_base | append: '.webp' | relative_url }} 1600w" sizes="{{ include.sizes | default: '100vw' }}" width="1600" height="1000" alt="" loading="lazy" decoding="async">

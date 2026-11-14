@@ -37,8 +37,8 @@ Claude Code and Codex can install them as a native plugin instead:
 /plugin marketplace add microsoft/azure-sql-database-container
 ```
 
-Per-tool detail and the full catalog live on the
-[agent skills page]({{ site.container_site }}/agent-skills.html).
+Per-tool detail and the full catalog live in the repository's
+[skills folder]({{ site.skills_catalog }}).
 
 ## MCP {#mcp}
 

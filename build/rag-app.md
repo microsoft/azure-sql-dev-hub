@@ -1,7 +1,7 @@
 ---
 layout: page
 title: Wire up RAG
-description: Build a RAG workflow on Azure SQL Database
+description: "Build a RAG workflow on Azure SQL Database: store text and embeddings in a native VECTOR column and find the closest matches with VECTOR_DISTANCE."
 tag: Python / AI
 last_verified: 2026-09-16
 validated: false

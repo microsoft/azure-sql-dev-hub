@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+<title>SQL Server Management Studio</title>
+<defs>
+<radialGradient id="t" cx="60" cy="170" r="440" gradientTransform="matrix(1 0 0 .55 0 76.5)" gradientUnits="userSpaceOnUse"><stop offset=".16" stop-color="#33259a"/><stop offset=".46" stop-color="#1e57cd"/><stop offset=".52" stop-color="#136edb"/><stop offset=".7" stop-color="#058beb"/><stop offset=".98" stop-color="#0fb0ff"/></radialGradient>
+<radialGradient id="b" cx="90" cy="380" r="380" gradientTransform="matrix(1 0 0 .55 0 171)" gradientUnits="userSpaceOnUse"><stop offset=".08" stop-color="#33259a"/><stop offset=".33" stop-color="#2741b7"/><stop offset=".61" stop-color="#0d7be2"/><stop offset=".93" stop-color="#0aa6fa"/></radialGradient>
+<linearGradient id="a" x1="51" y1="150" x2="461" y2="370" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#0296f0"/><stop offset=".25" stop-color="#1490ea"/><stop offset=".45" stop-color="#2a4fcb"/><stop offset=".56" stop-color="#3a64d6"/><stop offset=".78" stop-color="#7cb6f0"/><stop offset="1" stop-color="#9ed4ff"/></linearGradient>
+<linearGradient id="f" x1="461" y1="150" x2="51" y2="370" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#d2ceff"/><stop offset=".3" stop-color="#a9d0fd"/><stop offset=".5" stop-color="#6fc1fa"/><stop offset=".72" stop-color="#1ba1f3"/><stop offset="1" stop-color="#0094f0"/></linearGradient>
+</defs>
+<path fill="url(#t)" d="M139.39 141.24A160 42 0 0 1 372.61 141.24A205 77.5 0 1 0 139.39 141.24Z"/>
+<path fill="url(#b)" d="M372.61 369.76A160 42 0 0 1 139.39 369.76A205 77.5 0 1 0 372.61 369.76Z"/>
+<path fill="url(#a)" d="M51 77.5A205 77.5 0 0 0 104.54 129.73L407.46 255.27A205 77.5 0 0 1 461 307.5V433.5A205 77.5 0 0 0 407.46 381.27L104.54 255.73A205 77.5 0 0 1 51 203.5Z"/>
+<path fill="url(#f)" d="M461 77.5A205 77.5 0 0 1 407.46 129.73L104.54 255.27A205 77.5 0 0 0 51 307.5V433.5A205 77.5 0 0 1 104.54 381.27L407.46 255.73A205 77.5 0 0 0 461 203.5Z"/>
+</svg>

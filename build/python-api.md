@@ -1,7 +1,7 @@
 ---
 layout: page
 title: Create a Python API
-description: Build a Python API on Azure SQL Database
+description: "Build a Python API on Azure SQL Database: a FastAPI task service with list, create, and complete endpoints, connected with a Microsoft Entra token."
 tag: Python
 last_verified: 2026-09-16
 validated: false
