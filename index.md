@@ -6,6 +6,11 @@ hero:
   headline: Azure SQL, built for AI workloads
   tagline: Bring the idea. Build with Azure SQL.
   subline: Start with a prompt. Give your AI coding agent SQL skills, and make your next app yours.
+  statement:
+    text: Idea to app.
+    link_text: $0 to start.
+    link_label: $0 to start with the Azure SQL Database free tier. View limits.
+    href: https://learn.microsoft.com/azure/azure-sql/database/free-tier
   agents:
   - Claude Code
   - GitHub Copilot
