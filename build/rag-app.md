@@ -128,6 +128,10 @@ python rag.py
 - One embedding model and one dimension are used for both insert and query.
 - The database connection uses an Entra token; the embedding key, if any, is read from `.env` and never printed.
 
+## Related resources
+
+- [Azure SQL vector search samples](https://github.com/Azure-Samples/azure-sql-db-vector-search): maintained samples for storing and querying embeddings with the native vector type in Azure SQL and SQL Server.
+
 ## Do not
 
 - Do not pick an embedding provider without asking.

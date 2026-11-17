@@ -43,6 +43,12 @@ the top CPU and IO consumers without any setup. The
 maps which tool answers which question, from DMVs for a live incident to
 automatic tuning for recurring plan regressions.
 
+Two more references are worth keeping nearby:
+[Azure SQL Tips](https://aka.ms/sqldbtips) is a T-SQL script from the Azure SQL
+product group that checks a database's design, configuration, and health, and
+[How to use batching to improve application performance](https://learn.microsoft.com/azure/azure-sql/performance-improve-use-batching)
+explains how batching database calls cuts round trips.
+
 The scenario prompt asks the agent for the smallest safe change. That framing
 is deliberate: one index or one rewritten predicate you can measure beats a
 handful of speculative changes you cannot attribute.
