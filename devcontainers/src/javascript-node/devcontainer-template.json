@@ -1,0 +1,25 @@
+{
+    "id": "javascript-node",
+    "version": "2.0.0",
+    "name": "Node.js and Azure SQL",
+    "description": "A development environment for Node.js and Azure SQL, enabling streamlined local development and testing.",
+    "documentationURL": "https://github.com/microsoft/azure-sql-dev-hub/tree/main/devcontainers/src/javascript-node",
+    "publisher": "Azure SQL Developer Experiences Team",
+    "licenseURL": "https://github.com/microsoft/azure-sql-dev-hub/blob/main/LICENSE",
+    "options": {
+        "imageVariant": {
+            "type": "string",
+            "description": "Node.js version:",
+            "proposals": [
+                "24-trixie",
+                "22-trixie"
+            ],
+            "default": "24-trixie"
+        }
+    },
+    "platforms": [
+        "Javascript",
+        "Node.js",
+        "Azure SQL Database"
+    ]
+}

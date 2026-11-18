@@ -1,0 +1,9 @@
+{
+  "name": "azure-sql-dev-hub-smoke-test",
+  "private": true,
+  "description": "Queries the Library sample database with the mssql driver",
+  "main": "index.js",
+  "dependencies": {
+    "mssql": "12.7.2"
+  }
+}

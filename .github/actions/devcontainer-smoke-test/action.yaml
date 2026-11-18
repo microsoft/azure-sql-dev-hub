@@ -1,0 +1,22 @@
+name: 'Smoke test'
+description: 'Applies a template to a fresh workspace, brings it up, and runs its smoke test'
+inputs:
+  template:
+    description: 'Template id, for example python'
+    required: true
+runs:
+  using: composite
+  steps:
+    - name: Build template
+      shell: bash
+      env:
+        TEMPLATE: ${{ inputs.template }}
+        RUN_TAG: ci
+      run: '"$GITHUB_ACTION_PATH/build.sh" "$TEMPLATE"'
+
+    - name: Test template
+      shell: bash
+      env:
+        TEMPLATE: ${{ inputs.template }}
+        RUN_TAG: ci
+      run: '"$GITHUB_ACTION_PATH/test.sh" "$TEMPLATE"'

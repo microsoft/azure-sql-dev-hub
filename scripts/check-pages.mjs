@@ -92,6 +92,37 @@ if (llms) {
 }
 const sitemap = read('sitemap.xml');
 siteCheck('sitemap', 'Sitemap', 5, !!sitemap && /<loc>/.test(sitemap), sitemap ? 'no <loc> entries' : 'missing');
+const devcontainersPage = read('devcontainers/index.html');
+const devcontainersTwin = read('devcontainers/index.md');
+const sitemapMarkdown = read('sitemap.md');
+if (!devcontainersPage || !devcontainersTwin || !sitemapMarkdown?.includes('(devcontainers/index.md)')) {
+  errors.push('Dev Container landing page, markdown twin, or sitemap entry is missing');
+} else {
+  const canonical = attr(link(devcontainersPage, 'canonical') || '', 'href') || '';
+  const pagePath = new URL(canonical, 'http://localhost').pathname;
+  const suffix = '/devcontainers/';
+  const baseurl = pagePath.endsWith(suffix) ? pagePath.slice(0, -suffix.length) : '';
+  const getStarted = `${baseurl}/container/get-started.html`;
+  if (!tags(devcontainersPage, 'a').some((tag) => attr(tag, 'href') === getStarted)) {
+    errors.push(`Dev Container page link is not baseurl-safe; expected ${getStarted}`);
+  }
+  const homepage = read('index.html') || '';
+  const templatesHref = `${baseurl}/devcontainers/`;
+  if (!tags(homepage, 'a').some((tag) => attr(tag, 'href') === templatesHref)) {
+    errors.push(`Homepage template link is not baseurl-safe; expected ${templatesHref}`);
+  }
+  if (!visibleText(homepage).includes('These are build prompts, not runnable codebases')) {
+    errors.push('Homepage does not distinguish build prompts from runnable Dev Container templates');
+  }
+  for (const hidden of [
+    'devcontainers/README.md',
+    'devcontainers/src/dotnet/devcontainer-template.json',
+    'devcontainers/src/python/NOTES.md',
+    'devcontainers/test/test-utils/check-static.sh',
+  ]) {
+    if (read(hidden)) errors.push(`Internal Dev Container file leaked into the site: ${hidden}`);
+  }
+}
 siteCheck('robots', 'robots.txt', 5, !!read('robots.txt'), 'missing');
 const notFound = read('404.html');
 siteCheck('404', 'Helpful 404 page', 5,

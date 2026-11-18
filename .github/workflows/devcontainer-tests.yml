@@ -1,0 +1,97 @@
+name: "CI - Test Templates"
+on:
+  pull_request:
+  schedule:
+    - cron: '0 6 * * 1' # weekly: base images and packages change under the templates
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: read # dorny/paths-filter lists the changed files through the API on pull_request
+
+jobs:
+  static:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Lint scripts
+        run: find devcontainers/test .github/actions/devcontainer-smoke-test -type f -name '*.sh' -print0 | xargs -0 shellcheck -x -P SCRIPTDIR
+      - name: Shared files are identical across templates
+        run: devcontainers/test/test-utils/check-shared.sh
+      - name: No forbidden content
+        run: devcontainers/test/test-utils/check-forbidden.sh
+      - name: Template ids, Azure SQL target, schema, LocalDev, architecture, and CI integrity
+        run: devcontainers/test/test-utils/check-static.sh
+      - name: Every imageVariant proposal exists for amd64 and arm64
+        run: devcontainers/test/test-utils/check-tags.sh
+
+  detect-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      templates: ${{ steps.pick.outputs.templates }}
+    steps:
+      - uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d # v4.0.3
+        id: filter
+        if: github.event_name == 'pull_request'
+        with:
+          filters: |
+            shared: &shared
+              - '.github/actions/devcontainer-smoke-test/**'
+              - '.github/workflows/devcontainer-tests.yml'
+              - '.github/workflows/devcontainer-release.yml'
+              - 'devcontainers/test/test-utils/**'
+              - 'devcontainers/test/fixtures/**'
+              - 'devcontainers/test/apply-local.sh'
+              - 'devcontainers/test/gauntlet.sh'
+              - 'devcontainers/test/mutants.sh'
+            dotnet:
+              - *shared
+              - 'devcontainers/src/dotnet/**'
+              - 'devcontainers/test/dotnet/**'
+            dotnet-aspire:
+              - *shared
+              - 'devcontainers/src/dotnet-aspire/**'
+              - 'devcontainers/test/dotnet-aspire/**'
+              - 'devcontainers/test/dotnet/**'
+            javascript-node:
+              - *shared
+              - 'devcontainers/src/javascript-node/**'
+              - 'devcontainers/test/javascript-node/**'
+            python:
+              - *shared
+              - 'devcontainers/src/python/**'
+              - 'devcontainers/test/python/**'
+      - name: Pick templates
+        id: pick
+        env:
+          EVENT: ${{ github.event_name }}
+          CHANGES: ${{ steps.filter.outputs.changes }}
+        run: |
+          if [ "$EVENT" = pull_request ]; then
+            templates=$(jq -c 'map(select(. != "shared"))' <<<"$CHANGES")
+          else
+            templates='["dotnet","dotnet-aspire","javascript-node","python"]'
+          fi
+          echo "templates=$templates" >> "$GITHUB_OUTPUT"
+
+  test:
+    needs: detect-changes
+    if: needs.detect-changes.outputs.templates != '[]'
+    strategy:
+      fail-fast: false
+      matrix:
+        template: ${{ fromJSON(needs.detect-changes.outputs.templates) }}
+        runner: [ubuntu-latest, ubuntu-24.04-arm]
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      # Both native architectures run the same full database and language smoke tests.
+      - name: Smoke test '${{ matrix.template }}' on ${{ matrix.runner }}
+        uses: ./.github/actions/devcontainer-smoke-test
+        with:
+          template: ${{ matrix.template }}

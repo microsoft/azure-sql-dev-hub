@@ -61,7 +61,7 @@ demo:
 # extension's deep link type (vscode://ms-mssql.mssql/deploy?type=), a public
 # contract kept stable in vscode-mssql; `vscode.text` and the version note
 # appear in the markdown twin only. `engines` adds a picker above the steps:
-# commands are written for Docker, each other engine lists `swap` pairs,
+# the baseline commands use the Docker CLI, each other engine lists `swap` pairs,
 # applied in order, that turn them into its own (Apple container's match the
 # MSSQL extension's wizard), `use` says which command to use when the picker
 # can't run, and `key` is the telemetry runtime id (`runtime` overrides it).
@@ -251,6 +251,9 @@ setup:
   - label: FAQ
     id: container-faq
     href: /container/faq.html
+  - label: Runnable language Dev Container templates
+    id: container-devcontainers
+    href: /devcontainers/
   - label: View image on MCR
     id: container-image
     type: other
@@ -260,10 +263,10 @@ then:
   to: Azure SQL Database
   note: Same code, connection string changes, app goes live.
 build_heading: Find a template for your next app
-build_text: Full apps and focused building blocks for dashboards, APIs, search, and more.
-build_note: No database yet? Get a database running.
-build_note_link: Get a database running
-build_note_href: '#get-running'
+build_text: Full apps and focused building blocks for dashboards, APIs, search, and more. These are build prompts, not runnable codebases.
+build_note: Looking for a runnable local environment? Browse the Dev Container templates.
+build_note_link: Dev Container templates
+build_note_href: /devcontainers/
 build_steps:
   - Choose a template
   - Review the build prompt

@@ -9,6 +9,7 @@ Curated by the Azure SQL Database product team.
 ## What is here
 
 - **App templates and building blocks.** Five full-app briefs and six focused build prompts for Azure SQL Database, with requirements and validation checks. These are instructions for building an app, not prebuilt codebases. They live in [`build/`](build/).
+- **Runnable local environments.** Four language-specific [Dev Container templates](devcontainers/) that start an Azure SQL Database container and a pre-seeded `Library` database. These are runnable development environments, distinct from the app-building prompts above.
 - **Setup paths.** Free cloud tier, the local container (public preview), or with your coding agent.
 - **Agent skills.** Install once from [aka.ms/azuresql-skills](https://aka.ms/azuresql-skills); the skills load themselves when the work matches.
 - **An agent-readable layer.** Every page has a markdown twin at `<page>.md`, an index at [`llms.txt`](llms.txt), and an alternate link in its head. Agents read that; people read the page.
@@ -26,7 +27,7 @@ Curated by the Azure SQL Database product team.
 
 Each prompt is the whole instruction set: role, scope, numbered steps with code, validation rules, and what not to do. Copy it from the site or from the file, paste it into your agent, check the result against the rules.
 
-Prompts here target the cloud. Prompts that target the local container live in the [Azure SQL Database container repository](https://github.com/microsoft/azure-sql-database-container/tree/main/docs/prompts).
+The app-building prompts target Azure SQL Database in the cloud. For a runnable local development environment, see the [Dev Container templates](devcontainers/); for container setup and feature limits, see [Get started](container/get-started.md) and the [container FAQ](container/faq.md).
 
 ## Install the skills
 
