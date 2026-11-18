@@ -10,6 +10,8 @@
 *.userosscache
 *.sln.docstates
 *.env
+# The Dev Container templates need these checked-in sample environment files.
+!devcontainers/src/*/.devcontainer/.env
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
