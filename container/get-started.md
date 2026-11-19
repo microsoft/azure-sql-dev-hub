@@ -14,6 +14,8 @@ Run the Azure SQL Database container on your machine for development, testing, a
 
 The container is a development target, not a production database. For what it includes and leaves out, see the [FAQ]({{ '/container/faq.html' | relative_url }}).
 
+The runtime guidance below is for running this database image as a single container. The [Dev Container templates]({{ '/devcontainers/' | relative_url }}) start multiple services with Compose and have additional engine, CLI, socket, networking, and volume requirements; an engine that can run this image alone may not support those templates.
+
 - [Prerequisites](#prerequisites)
 - [Set up the container](#set-up)
 - [Set up with your coding agent](#agent)
@@ -38,7 +40,7 @@ On ARM64, full-text search, PolyBase, and extensibility runtimes are not availab
 
 ### Container runtimes
 
-The container is OCI-compliant and runs on any modern runtime. Tested runtimes:
+The container image is OCI-compliant. These runtimes are documented for single-container use:
 
 - Docker 24 or later
 - Podman 5.0 or later
@@ -46,7 +48,7 @@ The container is OCI-compliant and runs on any modern runtime. Tested runtimes:
 - containerd, through nerdctl or Kubernetes
 - [WSL containers](https://learn.microsoft.com/windows/wsl/tutorials/wsl-containers) (`wslc`, included with WSL on Windows)
 
-Pick the runtime that already works on your machine. The container image and the connection behavior are the same across runtimes.
+Choose a runtime supported on your machine. The database behavior is the same, though command syntax and host networking can vary.
 
 ### System resources
 
@@ -93,7 +95,7 @@ docker run --name sqldb -e "ACCEPT_EULA=Y" \
 
 Confirm it is up with `docker ps --filter "name=sqldb"`. You should see `sqldb` with an Up status. If it exited, run `docker logs sqldb`; the most common cause is a password that does not meet the complexity policy. Keep `MSSQL_SA_PASSWORD` in your environment, not in source control.
 
-Prefer docker compose? Export the password with `export MSSQL_SA_PASSWORD`, save this as `docker-compose.yml`, and run `docker compose up -d`:
+For a single-container setup with Docker Compose, export the password with `export MSSQL_SA_PASSWORD`, save this as `docker-compose.yml`, and run `docker compose up -d`:
 
 ```yaml
 services:
@@ -191,7 +193,7 @@ To create a Microsoft Entra server admin at startup, add `MSSQL_AAD_SERVER_ADMIN
 
 ## Troubleshooting {#troubleshooting}
 
-The commands below use `docker`. With another runtime, use its own CLI (`podman`, `nerdctl`, or `wslc`); the behavior is the same.
+The commands below use the Docker CLI. With another runtime, use its own CLI (`podman`, `nerdctl`, or `wslc`); these substitutions apply to this single-container workflow only. For the additional requirements of the Compose-based Dev Container templates, see the [engine compatibility notes]({{ '/devcontainers/' | relative_url }}).
 
 ### Let your coding agent diagnose it {#agent-diagnose}
 
@@ -261,4 +263,5 @@ If `SELECT SERVERPROPERTY('EngineEdition');` does not return 5, you are running 
 ## Related {#related}
 
 - [Container FAQ]({{ '/container/faq.html' | relative_url }}): what the container is for, and which features it includes and leaves out.
+- [Runnable Dev Container templates]({{ '/devcontainers/' | relative_url }}): .NET, Aspire, Node.js, and Python environments that use this engine.
 - [Azure SQL Database free tier]({{ site.azure_free_tier }}): validate in Azure before you deploy.

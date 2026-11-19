@@ -34,6 +34,7 @@ How to work from a template:
 - [Sitemap]({{ site.url }}{{ site.baseurl }}/sitemap.md): every page on the site, linked to its Markdown version.
 - [Container: get started]({{ site.url }}{{ site.baseurl }}/container/get-started.md): run the Azure SQL Database container locally with Docker, Podman, or WSL containers, connect, and troubleshoot.
 - [Container FAQ]({{ site.url }}{{ site.baseurl }}/container/faq.md): what the container is for, which Azure SQL Database features it includes and leaves out, and moving to Azure.
+- [Runnable Dev Container templates]({{ site.url }}{{ site.baseurl }}/devcontainers/index.md): .NET, Aspire, Node.js, and Python workspaces with the Azure SQL Database container and seeded sample database. These are distinct from the app-building prompts.
 
 ## App templates and building blocks
 Build briefs with requirements and validation checks for Azure SQL Database in the cloud. Use the prompts with a coding agent to implement and customize an app:

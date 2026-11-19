@@ -41,6 +41,7 @@ const ORDER = [
   'for-agents.md',
   'container/get-started.md',
   'container/faq.md',
+  'devcontainers/index.md',
 ];
 
 if (!existsSync(SITE)) {
@@ -52,6 +53,7 @@ function findPages(dir, prefix) {
   const out = [];
   for (const name of readdirSync(dir)) {
     if (SKIP_DIRS.has(name) || name.startsWith('.')) continue;
+    if (prefix === 'devcontainers' && ['src', 'test'].includes(name)) continue;
     const p = join(dir, name);
     if (statSync(p).isDirectory()) {
       out.push(...findPages(p, prefix ? `${prefix}/${name}` : name));
@@ -116,7 +118,9 @@ function sentenceList(items) {
 // A link to a page on this site points at that page's markdown twin, so an
 // agent reading a twin stays in markdown. Links elsewhere pass through.
 function twinHref(href) {
-  return /^\//.test(href) ? href.replace(/\.html(?=#|$)/, '.md') : href;
+  return /^\//.test(href)
+    ? `${String(config.baseurl || '')}${href.replace(/\.html(?=#|$)/, '.md')}`
+    : href;
 }
 
 // One way to get a database (Get a database running): its setup dialog, every
@@ -291,7 +295,11 @@ for (const file of pages) {
   writeFileSync(dest, markdown, 'utf8');
   console.log(`  markdown twin  ${dest}`);
 
-  const url = file === 'index.md' ? '/' : `/${file.replace(/\.md$/, '.html')}`;
+  const url = file === 'index.md'
+    ? '/'
+    : file === 'devcontainers/index.md'
+      ? '/devcontainers/'
+      : `/${file.replace(/\.md$/, '.html')}`;
   parts.push(`<!-- source: ${file} | page: ${url} -->\n\n${markdown}`);
 }
 

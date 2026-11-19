@@ -3,11 +3,7 @@
   copies that source into the published site next to the .html. This link tells
   an agent (or a reader with curl) where the source is without having to guess.
 {%- endcomment -%}
-{%- if page.url == '/' -%}
-  {%- assign md_path = '/index.md' -%}
-{%- else -%}
-  {%- assign md_path = page.url | replace: '.html', '.md' -%}
-{%- endif -%}
+{%- assign md_path = page.path | prepend: '/' -%}
 {%- comment -%}
   Canonical URL: the page's address without .html, as the sitemap lists it
   (build-agent-files.mjs). GitHub Pages serves /build/x from build/x.html, and

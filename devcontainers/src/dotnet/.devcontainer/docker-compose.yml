@@ -1,0 +1,49 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+
+    volumes:
+      - ..:/workspace:cached
+
+    # Overrides default command so things don't shut down after the process ends.
+    command: sleep infinity
+
+    # MSSQL_SA_PASSWORD, for your app and the post-create script.
+    env_file:
+      - .env
+
+    # Runs app on the same network as the database container, allows "forwardPorts" in devcontainer.json function.
+    network_mode: service:db
+
+    # Starts once Azure SQL Database accepts logins.
+    depends_on:
+      db:
+        condition: service_healthy
+
+    # Use "forwardPorts" in **devcontainer.json** to forward an app port locally.
+    # (Adding the "ports" property to this file will not forward from a Codespace.)
+
+  db:
+    image: mcr.microsoft.com/mssql/azure-sql-db-server:latest
+    hostname: SQL-Library
+    restart: unless-stopped
+    environment:
+      ACCEPT_EULA: "Y"
+    env_file:
+      - .env
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P \"$$MSSQL_SA_PASSWORD\" -C -b -Q 'SELECT 1' -o /dev/null"]
+      interval: 10s
+      timeout: 10s
+      retries: 10
+      start_period: 120s
+      start_interval: 2s
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 2048M
+    # Add "forwardPorts": ["1433"] to **devcontainer.json** to forward MSSQL locally.
+    # (Adding the "ports" property to this file will not forward from a Codespace.)

@@ -1,0 +1,34 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "1. Verify database schema and data",
+            "type": "shell",
+            "command": "code",
+            "args": [
+                "--goto",
+                "${workspaceFolder}/scripts/verifyDatabase.sql"
+            ],
+            "presentation": {
+                "reveal": "always",
+                "panel": "new"
+            }
+        },
+        {
+            "label": "2. Build SQL Database project",
+            "type": "shell",
+            "command": "dotnet build",
+            "options": {
+                "cwd": "${workspaceFolder}/database/Library"
+            }
+        },
+        {
+            "label": "3. Publish SQL Database project",
+            "type": "shell",
+            "command": "bash",
+            "args": [
+                ".devcontainer/sql/postCreateCommand.sh"
+            ]
+        }
+    ]
+}
