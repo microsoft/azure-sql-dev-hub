@@ -163,7 +163,7 @@ profileAuthenticates() {
         # shellcheck disable=SC2016 # a literal ${ placeholder
         case $field in *'${'*) echo "the LocalDev profile still contains a placeholder: $field" >&2; return 1 ;; esac
     done
-    SQLCMDPASSWORD=$PROFILE_PASSWORD sqlcmd -S "$PROFILE_SERVER" -U "$PROFILE_USER" -C -b -l 5 -d "$PROFILE_DATABASE" -Q "SELECT COUNT(*) FROM dbo.books" | grep -q '^24$'
+    SQLCMDPASSWORD=$PROFILE_PASSWORD sqlcmd -S "$PROFILE_SERVER" -U "$PROFILE_USER" -C -b -h -1 -W -l 5 -d "$PROFILE_DATABASE" -Q "SET NOCOUNT ON; SELECT COUNT(*) FROM dbo.books" | grep -q '^24$'
 }
 
 # Checks against the running Azure SQL Database container.

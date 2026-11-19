@@ -210,8 +210,15 @@ databaseCoverage() {
         grep -qF 'sqlcmd -S localhost -U sa -C -b -h -1 -W -d Library' devcontainers/test/test-utils/test-utils.sh &&
         grep -qF 'checkLibraryCounts S8' devcontainers/test/test-utils/test-utils.sh &&
         grep -qF 'check "S8 task 3 re-publishes"' devcontainers/test/test-utils/test-utils.sh &&
+        grep -qF 'check "S18 the LocalDev profile authenticates" profileAuthenticates' devcontainers/test/test-utils/test-utils.sh &&
+        grep -qF "SQLCMDPASSWORD=\$PROFILE_PASSWORD sqlcmd" devcontainers/test/test-utils/test-utils.sh &&
+        grep -qF -- '-b -h -1 -W -l 5' devcontainers/test/test-utils/test-utils.sh &&
+        grep -qF 'SET NOCOUNT ON; SELECT COUNT(*) FROM dbo.books' devcontainers/test/test-utils/test-utils.sh &&
+        grep -qF "grep -q '^24$'" devcontainers/test/test-utils/test-utils.sh &&
+        grep -qF 'check "S16 a failed build is never published" failedBuildNeverPublishes' devcontainers/test/test-utils/test-utils.sh &&
         grep -qF 'TargetDatabaseName:Library' devcontainers/src/dotnet/.devcontainer/sql/postCreateCommand.sh &&
-        grep -qF -- '-d master -Q "IF DB_ID(N' devcontainers/src/dotnet/.devcontainer/sql/postCreateCommand.sh
+        grep -qF -- '-d master -Q "IF NOT EXISTS (SELECT 1 FROM sys.databases WHERE name = N' devcontainers/src/dotnet/.devcontainer/sql/postCreateCommand.sh &&
+        grep -qF 'CREATE DATABASE [Library];' devcontainers/src/dotnet/.devcontainer/sql/postCreateCommand.sh
 }
 releaseIsManual() {
     jq -e '.true | has("workflow_dispatch") and (has("push") | not) and (has("pull_request") | not)' "$tmp/release.json" >/dev/null &&

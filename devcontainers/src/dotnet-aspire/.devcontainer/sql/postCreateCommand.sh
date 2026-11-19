@@ -23,7 +23,8 @@ done
 
 step="create database/Library if needed"
 echo "==> $step"
-sqlcmd -S localhost -U sa -C -l 5 -b -d master -Q "IF DB_ID(N'Library') IS NULL CREATE DATABASE [Library];"
+# In Azure SQL Database, DB_ID(name) only identifies the current database.
+sqlcmd -S localhost -U sa -C -l 5 -b -d master -Q "IF NOT EXISTS (SELECT 1 FROM sys.databases WHERE name = N'Library') CREATE DATABASE [Library];"
 
 step="build database/Library"
 echo "==> $step"
