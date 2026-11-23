@@ -39,23 +39,19 @@ The following capabilities are not included in the current container experience.
 | Capability not available | What this means for development |
 | --- | --- |
 | Auditing | Test auditing configuration and audit-output workflows in Azure SQL Database. |
-| Backup and restore | The Azure SQL Database backup/restore service and backup/restore engine are not included. Use supported development workflows rather than production backup and restore operations. |
+| Backup and restore | T-SQL BACKUP and RESTORE operations are not supported, and the Azure SQL Database managed backup/restore service is not included. Use supported development workflows rather than production backup and restore operations. |
 | Change Data Capture | Change Data Capture is not included. |
 | Change Event Streaming | Change Event Streaming is not included. |
-| Change Tracking | Change Tracking is not included. |
 | Global Query | Global Query is not included. |
-| Always Encrypted | Always Encrypted is not included. |
-| Cell-level encryption | Cell-level encryption is not included. |
-| SQL Ledger | SQL Ledger is not included. |
-| Transparent Data Encryption and Azure Key Vault integration | These service-managed encryption capabilities are not included in the local container. |
+| Always Encrypted with secure enclaves | Secure enclaves are not included. Validate secure-enclave workflows directly against Azure SQL Database. |
+| Azure Key Vault integration | Azure Key Vault integration for Transparent Data Encryption and Always Encrypted is not included. Validate these key-management workflows directly against Azure SQL Database. |
 
 ### Are any features temporarily unavailable in the initial Public Preview? {#arm64}
 
-Yes, the below is only available on X64. ARM support on the below will follow soon.
+Yes, the following features are currently available on x64 only:
 
 - Full-text search
-- PolyBase
-- Extensibility runtimes
+- PolyBase: Parquet format support for `OPENROWSET`, `CREATE EXTERNAL TABLE`, and `CREATE EXTERNAL TABLE AS SELECT`.
 
 ### Which commonly used database capabilities are included?
 
@@ -67,6 +63,10 @@ The container includes core capabilities used to build and test many Azure SQL D
 - XML and JSON
 - Microsoft Entra authentication
 - Data classification, dynamic data masking, permissions, and row-level security
+- Basic Always Encrypted
+- Cell-level encryption and Transparent Data Encryption (TDE)
+- Change Tracking
+- SQL Ledger
 - Built-in CLR types, such as spatial and hierarchy types
 - AI functions
 
