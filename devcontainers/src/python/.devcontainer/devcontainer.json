@@ -1,0 +1,65 @@
+// For format details, see https://aka.ms/devcontainer.json.
+// For config options, see the README at: https://github.com/microsoft/azure-sql-dev-hub/tree/main/devcontainers/src/python
+{
+	"name": "Python and Azure SQL",
+	"dockerComposeFile": "docker-compose.yml",
+	"service": "app",
+	"workspaceFolder": "/workspace",
+	"customizations": {
+		// Configure properties specific to VS Code.
+		"vscode": {
+			// Set *default* container specific settings.json values on container create.
+			"settings": {
+				"mssql.connections": [
+					{
+						"server": "localhost,1433",
+						"database": "Library",
+						"authenticationType": "SqlLogin",
+						"user": "sa",
+						"password": "${containerEnv:MSSQL_SA_PASSWORD}",
+						"savePassword": true,
+						"profileName": "LocalDev",
+						"trustServerCertificate": true
+					}
+				],
+				"sqlDatabaseProjects.dotnetSDK Location": "/usr/share/dotnet"
+			},
+			// Add the IDs of extensions you want installed when the container is created.
+			"extensions": [
+                "ms-python.python",
+                "ms-python.vscode-pylance",
+				"ms-vscode.vscode-node-azure-pack",
+				"ms-azuretools.vscode-docker",
+				"ms-mssql.mssql",
+				"github.codespaces"
+			]
+		}
+	},
+
+	// Use 'forwardPorts' to make a list of ports inside the container available locally.
+	"forwardPorts": [5000, 1433],
+
+	// SqlPackage, as a .NET tool on PATH, and mssql-python, Microsoft's Python driver for SQL Server.
+	"onCreateCommand": "dotnet tool install --global microsoft.sqlpackage --version 170.5.76 && pip install --user mssql-python==1.14.0",
+
+	// Builds the SQL Database project and publishes it to the Azure SQL Database container.
+	"postCreateCommand": "bash .devcontainer/sql/postCreateCommand.sh",
+
+	// Features to add to the dev container. More info: https://containers.dev/features.
+	"features": {
+		// .NET for the SQL Database project build and SqlPackage. Pinned to 10.0: SqlPackage 170.5 needs the 10.0 (or 8.0) runtime.
+		"ghcr.io/devcontainers/features/dotnet:2": {
+			"version": "10.0"
+		},
+		"ghcr.io/devcontainers/features/azure-cli:1": {
+			"installBicep": true
+		},
+		// Docker CE packages: moby has none for Debian 13 (trixie).
+		"ghcr.io/devcontainers/features/docker-outside-of-docker:1": {
+			"moby": false
+		},
+		"ghcr.io/azure/azure-dev/azd:0": {}
+	}
+	// Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.
+	// "remoteUser": "root"
+}

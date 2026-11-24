@@ -57,6 +57,11 @@ exclude:
   - LICENSE
   - NOTICE.txt
   - docs
+  # Keep the landing page and its screenshots, but not template implementations,
+  # test fixtures, or internal collection notes in the generated site.
+  - devcontainers/src
+  - devcontainers/test
+  - devcontainers/README.md
   - scripts
   - node_modules
   - package.json
