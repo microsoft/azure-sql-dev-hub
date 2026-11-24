@@ -136,8 +136,10 @@ The engine does not create application databases on its own. Create one on a mas
 ```bash
 docker exec sqldb /opt/mssql-tools18/bin/sqlcmd \
   -S localhost -U sa -P "$MSSQL_SA_PASSWORD" -C -b \
-  -Q "IF DB_ID('appdb') IS NULL CREATE DATABASE appdb;"
+  -Q "IF NOT EXISTS (SELECT 1 FROM sys.databases WHERE name = N'appdb') CREATE DATABASE appdb;"
 ```
+
+The check reads `sys.databases` rather than calling `DB_ID('appdb')`. As in Azure SQL Database, `DB_ID` returns NULL on a master connection for any database other than the current one, so a `DB_ID` check would try to create `appdb` again on the next run and fail with Msg 1801.
 
 Then connect to it by name. Select the database in the connection string, `Database=appdb` or `-d appdb` for sqlcmd, rather than switching with `USE`.
 
